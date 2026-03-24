@@ -1,0 +1,17 @@
+target/
+*.so
+*.dylib
+*.dll
+*.a
+build/
+dist/
+__pycache__/
+*.pyc
+.Python
+env/
+venv/
+.venv/
+build/
+*.onnx
+*.zip
+*.tar.gz
