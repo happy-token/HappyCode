@@ -1,10 +1,12 @@
-import { ipcMain, dialog, app } from 'electron'
+import { ipcMain, dialog, app, BrowserWindow } from 'electron'
 import fs from 'fs'
 import path from 'path'
 import os from 'os'
+import { spawn } from 'child_process'
 import type { SessionStore } from './session-store'
 import type { AgentManager } from './agent-manager'
-import { buildCsvContent } from './export-utils'
+import { buildCsvContent, applyRedaction, computeChainHashes, buildVerifierScript } from './export-utils'
+import type { ExportSettings, ClaudeLoginResult } from '../shared/types'
 import { loadApiConfig, saveApiConfig, loadAgentSettings, saveAgentSettings } from './api-config-store'
 import { getClaudeSettings, saveClaudeSettings } from './claude-settings'
 import {
@@ -50,6 +52,75 @@ function listCustomCommandsFromDir(dir: string, source: 'personal' | 'project'):
   return commands.sort((a, b) => a.name.localeCompare(b.name))
 }
 
+// Reads ~/.claude/.credentials.json and returns the claudeAiOauth access token if present
+function readClaudeOAuthToken(): string | null {
+  const credPath = path.join(os.homedir(), '.claude', '.credentials.json')
+  if (!fs.existsSync(credPath)) return null
+  try {
+    const raw = fs.readFileSync(credPath, 'utf-8')
+    const data: unknown = JSON.parse(raw)
+    if (
+      data !== null &&
+      typeof data === 'object' &&
+      'claudeAiOauth' in data &&
+      data.claudeAiOauth !== null &&
+      typeof data.claudeAiOauth === 'object' &&
+      'accessToken' in data.claudeAiOauth &&
+      typeof data.claudeAiOauth.accessToken === 'string' &&
+      data.claudeAiOauth.accessToken.length > 0
+    ) {
+      return data.claudeAiOauth.accessToken
+    }
+  } catch { /* ignore parse errors */ }
+  return null
+}
+
+// Spawns `claude login` (which opens the browser for OAuth) and resolves when done
+function runClaudeLogin(): Promise<ClaudeLoginResult> {
+  return new Promise((resolve) => {
+    // First check if already logged in
+    const existing = readClaudeOAuthToken()
+    if (existing) {
+      resolve({ success: true, authToken: existing })
+      return
+    }
+
+    // Find claude CLI path
+    const claudePath = process.env.PATH
+      ? (() => {
+          for (const dir of process.env.PATH.split(':')) {
+            const candidate = path.join(dir, 'claude')
+            if (fs.existsSync(candidate)) return candidate
+          }
+          return 'claude'
+        })()
+      : 'claude'
+
+    const child = spawn(claudePath, ['login'], {
+      stdio: 'inherit',        // let CLI control the terminal and open browser
+      detached: false,
+      env: { ...process.env },
+    })
+
+    child.on('error', (err) => {
+      resolve({ success: false, error: `Failed to launch claude login: ${err.message}` })
+    })
+
+    child.on('close', (code) => {
+      if (code !== 0) {
+        resolve({ success: false, error: `claude login exited with code ${code}` })
+        return
+      }
+      const token = readClaudeOAuthToken()
+      if (token) {
+        resolve({ success: true, authToken: token })
+      } else {
+        resolve({ success: false, error: 'Login completed but no credentials file found at ~/.claude/.credentials.json' })
+      }
+    })
+  })
+}
+
 export function registerIpcHandlers(store: SessionStore, agentManager: AgentManager): void {
   // Phase 2 — hooks
   ipcMain.handle('hook:list', (_event, { limit }: { limit?: number } = {}) => {
@@ -68,14 +139,22 @@ export function registerIpcHandlers(store: SessionStore, agentManager: AgentMana
 
   ipcMain.handle(
     'export:csv',
-    (_event, { sessionId, cwd }: { sessionId: string; cwd: string }) => {
+    (_event, { sessionId, cwd, settings }: { sessionId: string; cwd: string; settings: ExportSettings }) => {
       const result = store.readHistory(sessionId, cwd)
       if (result.skipped) {
         return { csv: '', error: result.reason }
       }
-      return { csv: buildCsvContent(sessionId, result.entries) }
+      const redacted = applyRedaction(result.entries, settings)
+      const hashed = computeChainHashes(sessionId, redacted)
+      return {
+        csv: buildCsvContent(sessionId, hashed),
+        verifierScript: buildVerifierScript(sessionId),
+      }
     }
   )
+
+  // Auth
+  ipcMain.handle('auth:claude-login', () => runClaudeLogin())
 
   // Phase 1 — agent
   ipcMain.handle('agent:start', (_event, params: AgentStartParams) => {
@@ -139,6 +218,62 @@ export function registerIpcHandlers(store: SessionStore, agentManager: AgentMana
   ipcMain.handle('history:delete-project', (_event, { encodedPath }: { encodedPath: string }) =>
     store.deleteProject(encodedPath)
   )
+
+  // Export conversation as PDF (via hidden BrowserWindow + printToPDF)
+  ipcMain.handle('export:pdf', async (_event, { html, defaultName }: { html: string; defaultName: string }) => {
+    const result = await dialog.showSaveDialog({
+      defaultPath: defaultName,
+      filters: [{ name: 'PDF', extensions: ['pdf'] }],
+    })
+    if (result.canceled || !result.filePath) return { saved: false }
+
+    const win = new BrowserWindow({
+      show: false,
+      width: 900,
+      height: 1200,
+      webPreferences: { nodeIntegration: false, contextIsolation: true },
+    })
+
+    await win.loadURL(`data:text/html;charset=utf-8,${encodeURIComponent(html)}`)
+    await new Promise<void>((resolve) => {
+      win.webContents.once('did-finish-load', () => resolve())
+    })
+
+    const pdfBuffer = await win.webContents.printToPDF({
+      printBackground: true,
+      pageSize: 'A4',
+      margins: { top: 0.75, bottom: 0.75, left: 0.75, right: 0.75 },
+    })
+
+    win.destroy()
+    fs.writeFileSync(result.filePath, pdfBuffer)
+    return { saved: true, filePath: result.filePath }
+  })
+
+  // Export conversation as Markdown
+  ipcMain.handle('export:markdown', async (_event, { content, defaultName }: { content: string; defaultName: string }) => {
+    const result = await dialog.showSaveDialog({
+      defaultPath: defaultName,
+      filters: [{ name: 'Markdown', extensions: ['md'] }],
+    })
+    if (result.canceled || !result.filePath) return { saved: false }
+    fs.writeFileSync(result.filePath, content, 'utf-8')
+    return { saved: true, filePath: result.filePath }
+  })
+
+  // CLAUDE.md read/write
+  ipcMain.handle('file:read-claude-md', (_event, { cwd }: { cwd: string }) => {
+    if (!cwd) return { content: '', exists: false }
+    const filePath = path.join(cwd, 'CLAUDE.md')
+    if (!fs.existsSync(filePath)) return { content: '', exists: false }
+    return { content: fs.readFileSync(filePath, 'utf-8'), exists: true }
+  })
+
+  ipcMain.handle('file:write-claude-md', (_event, { cwd, content }: { cwd: string; content: string }) => {
+    if (!cwd) return
+    const filePath = path.join(cwd, 'CLAUDE.md')
+    fs.writeFileSync(filePath, content, 'utf-8')
+  })
 
   // Custom commands
   ipcMain.handle('commands:list-custom', (_event, { cwd }: { cwd: string }): ListCustomCommandsResult => {

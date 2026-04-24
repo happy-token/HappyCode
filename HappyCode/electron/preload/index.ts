@@ -1,12 +1,15 @@
 import { contextBridge, ipcRenderer } from 'electron'
-import type { ElectronAPI, SDKMessage, PermissionRequest, HookEvent, SubagentEvent, ApiConfig, AgentSettings, ClaudeSettings, SkillsResult, PluginsResult, InstallSkillResult, AllHistoryResult, SessionMessage, ListCustomCommandsResult } from '../shared/types'
+import type { ElectronAPI, SDKMessage, PermissionRequest, HookEvent, SubagentEvent, ApiConfig, AgentSettings, ClaudeSettings, SkillsResult, PluginsResult, InstallSkillResult, AllHistoryResult, SessionMessage, ListCustomCommandsResult, ExportSettings, ClaudeLoginResult } from '../shared/types'
 
 const api: ElectronAPI = {
+  // Auth
+  claudeLogin: (): Promise<ClaudeLoginResult> => ipcRenderer.invoke('auth:claude-login'),
+
   // Phase 0
   listSessions: (cwd) => ipcRenderer.invoke('session:list', { cwd }),
   readSessionHistory: (sessionId, cwd) =>
     ipcRenderer.invoke('session:history', { sessionId, cwd }),
-  exportCsv: (sessionId, cwd) => ipcRenderer.invoke('export:csv', { sessionId, cwd }),
+  exportCsv: (sessionId: string, cwd: string, settings: ExportSettings) => ipcRenderer.invoke('export:csv', { sessionId, cwd, settings }),
 
   // Phase 1
   startSession: (params) => ipcRenderer.invoke('agent:start', params),
@@ -79,6 +82,16 @@ const api: ElectronAPI = {
     ipcRenderer.invoke('plugins:install', { name }),
   removePlugin: (name: string): Promise<InstallSkillResult> =>
     ipcRenderer.invoke('plugins:remove', { name }),
+
+  // Export
+  exportMarkdown: (content: string, defaultName: string) =>
+    ipcRenderer.invoke('export:markdown', { content, defaultName }),
+  exportPdf: (html: string, defaultName: string) =>
+    ipcRenderer.invoke('export:pdf', { html, defaultName }),
+
+  // CLAUDE.md
+  readClaudeMd: (cwd: string) => ipcRenderer.invoke('file:read-claude-md', { cwd }),
+  writeClaudeMd: (cwd: string, content: string) => ipcRenderer.invoke('file:write-claude-md', { cwd, content }),
 
   // Custom commands
   listCustomCommands: (cwd: string): Promise<ListCustomCommandsResult> =>

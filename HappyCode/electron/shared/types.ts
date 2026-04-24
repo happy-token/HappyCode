@@ -21,6 +21,7 @@ export interface AuditEntry {
   outputJson?: string
   model?: string
   costUsd?: number
+  chainHash?: string
 }
 
 export interface ListSessionsResult {
@@ -37,6 +38,21 @@ export interface ReadHistoryResult {
 
 export interface ExportCsvResult {
   csv: string
+  verifierScript?: string
+  error?: string
+}
+
+export interface ClaudeLoginResult {
+  success: boolean
+  authToken?: string  // OAuth access token, ready to use as Bearer token
+  error?: string
+}
+
+export type ExportRedactMode = 'full' | 'tools-only' | 'custom'
+
+export interface ExportSettings {
+  redactMode: ExportRedactMode
+  customPatterns: string[]
 }
 
 // ── Phase 1 ───────────────────────────────────────────────────
@@ -301,7 +317,10 @@ export interface ElectronAPI {
   // Phase 0 — audit
   listSessions: (cwd: string) => Promise<ListSessionsResult>
   readSessionHistory: (sessionId: string, cwd: string) => Promise<ReadHistoryResult>
-  exportCsv: (sessionId: string, cwd: string) => Promise<ExportCsvResult>
+  exportCsv: (sessionId: string, cwd: string, settings: ExportSettings) => Promise<ExportCsvResult>
+
+  // Auth
+  claudeLogin: () => Promise<ClaudeLoginResult>
 
   // Phase 1 — chat
   startSession: (params: AgentStartParams) => Promise<{ sessionId: string }>
@@ -345,6 +364,14 @@ export interface ElectronAPI {
 
   // Custom commands
   listCustomCommands: (cwd: string) => Promise<ListCustomCommandsResult>
+
+  // Export
+  exportMarkdown: (content: string, defaultName: string) => Promise<{ saved: boolean; filePath?: string }>
+  exportPdf: (html: string, defaultName: string) => Promise<{ saved: boolean; filePath?: string }>
+
+  // CLAUDE.md
+  readClaudeMd: (cwd: string) => Promise<{ content: string; exists: boolean }>
+  writeClaudeMd: (cwd: string, content: string) => Promise<void>
 
   // History
   listAllHistory: () => Promise<AllHistoryResult>
