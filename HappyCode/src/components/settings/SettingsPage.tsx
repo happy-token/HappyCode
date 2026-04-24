@@ -1,6 +1,8 @@
 import React, { useState } from 'react'
 import { useApiConfigStore } from '../../store/api-config-store'
-import type { ApiConfig, AgentSettings, PermissionMode, ThinkingMode, EffortLevel } from '../../../electron/shared/types'
+import { useUiStore } from '../../store/ui-store'
+import { useExportSettingsStore, DEFAULT_CUSTOM_PATTERNS } from '../../store/export-settings-store'
+import type { ApiConfig, AgentSettings, PermissionMode, ThinkingMode, EffortLevel, ExportSettings, ExportRedactMode } from '../../../electron/shared/types'
 
 const inputStyle: React.CSSProperties = {
   width: '100%',
@@ -31,12 +33,37 @@ const sectionHeadStyle: React.CSSProperties = {
 
 export function SettingsPage(): React.JSX.Element {
   const { config, agentSettings, save, saveAgentSettings } = useApiConfigStore()
+  const setActivePage = useUiStore((s) => s.setActivePage)
+  const { settings: exportSettings, setSettings: setExportSettings } = useExportSettingsStore()
   const [draftApi, setDraftApi] = useState<ApiConfig>({ ...config })
   const [draftAgent, setDraftAgent] = useState<AgentSettings>({ ...agentSettings })
+  const [draftExport, setDraftExport] = useState<ExportSettings>({ ...exportSettings })
   const [saved, setSaved] = useState(false)
+  const [loginState, setLoginState] = useState<'idle' | 'loading' | 'success' | 'error'>('idle')
+  const [loginError, setLoginError] = useState('')
+
+  async function handleClaudeLogin(): Promise<void> {
+    setLoginState('loading')
+    setLoginError('')
+    try {
+      const result = await window.electron.claudeLogin()
+      if (result.success && result.authToken) {
+        setDraftApi((d) => ({ ...d, authToken: result.authToken! }))
+        setLoginState('success')
+        setTimeout(() => setLoginState('idle'), 2000)
+      } else {
+        setLoginError(result.error ?? 'Unknown error')
+        setLoginState('error')
+      }
+    } catch (err) {
+      setLoginError(err instanceof Error ? err.message : String(err))
+      setLoginState('error')
+    }
+  }
 
   async function handleSave(): Promise<void> {
     await Promise.all([save(draftApi), saveAgentSettings(draftAgent)])
+    setExportSettings(draftExport)
     setSaved(true)
     setTimeout(() => setSaved(false), 1200)
   }
@@ -64,7 +91,7 @@ export function SettingsPage(): React.JSX.Element {
           />
         </label>
 
-        <label style={{ display: 'block', marginBottom: 18 }}>
+        <label style={{ display: 'block', marginBottom: 8 }}>
           <div style={labelStyle}>Auth Token / API Key</div>
           <input
             type="password"
@@ -74,6 +101,37 @@ export function SettingsPage(): React.JSX.Element {
             style={inputStyle}
           />
         </label>
+
+        {/* OAuth login */}
+        <div style={{ marginBottom: 18 }}>
+          <button
+            onClick={() => void handleClaudeLogin()}
+            disabled={loginState === 'loading'}
+            style={{
+              fontSize: 11,
+              padding: '5px 12px',
+              border: '1px solid var(--color-border)',
+              borderRadius: 'var(--radius-sm)',
+              background: loginState === 'success' ? 'var(--color-success)' : 'var(--color-surface-2)',
+              color: loginState === 'success' ? '#fff' : 'var(--color-text-muted)',
+              cursor: loginState === 'loading' ? 'not-allowed' : 'pointer',
+              opacity: loginState === 'loading' ? 0.6 : 1,
+            }}
+          >
+            {loginState === 'loading' ? '⏳ Opening claude login…' :
+             loginState === 'success' ? '✓ Token imported' :
+             '⬇ Import from claude login'}
+          </button>
+          <span style={{ fontSize: 10, color: 'var(--color-text-muted)', marginLeft: 8 }}>
+            Reads OAuth token from ~/.claude/.credentials.json (run{' '}
+            <code style={{ fontFamily: 'var(--font-mono)' }}>claude login</code> first)
+          </span>
+          {loginState === 'error' && (
+            <div style={{ marginTop: 4, fontSize: 11, color: 'var(--color-danger, #f87171)' }}>
+              {loginError}
+            </div>
+          )}
+        </div>
 
         {/* ── Agent Settings ── */}
         <div style={{ ...sectionHeadStyle, borderTop: '1px solid var(--color-border)', paddingTop: 14 }}>
@@ -254,21 +312,83 @@ export function SettingsPage(): React.JSX.Element {
           </label>
         </div>
 
+        {/* ── CSV Export ── */}
+        <div style={{ ...sectionHeadStyle, borderTop: '1px solid var(--color-border)', paddingTop: 14 }}>
+          CSV Export
+        </div>
+
+        <label style={{ display: 'block', marginBottom: 10 }}>
+          <div style={labelStyle}>Redaction Mode</div>
+          <select
+            value={draftExport.redactMode}
+            onChange={(e) => setDraftExport((d) => ({ ...d, redactMode: e.target.value as ExportRedactMode }))}
+            style={{ ...inputStyle, cursor: 'pointer' }}
+          >
+            <option value="full">Full export — include all payload data (default)</option>
+            <option value="tools-only">Tools only — keep tool name + timestamp, clear payloads</option>
+            <option value="custom">Custom — apply regex patterns below</option>
+          </select>
+        </label>
+
+        {draftExport.redactMode === 'custom' && (
+          <label style={{ display: 'block', marginBottom: 10 }}>
+            <div style={labelStyle}>Redaction patterns (one regex per line, applied to input_json / output_json)</div>
+            <textarea
+              value={draftExport.customPatterns.join('\n')}
+              onChange={(e) =>
+                setDraftExport((d) => ({
+                  ...d,
+                  customPatterns: e.target.value.split('\n').map((l) => l.trim()).filter(Boolean),
+                }))
+              }
+              rows={5}
+              spellCheck={false}
+              style={{ ...inputStyle, resize: 'vertical', fontFamily: 'var(--font-mono)', fontSize: 11 }}
+            />
+            <button
+              onClick={() =>
+                setDraftExport((d) => ({ ...d, customPatterns: DEFAULT_CUSTOM_PATTERNS }))
+              }
+              style={{
+                marginTop: 4,
+                fontSize: 11,
+                color: 'var(--color-text-muted)',
+                padding: '2px 8px',
+                border: '1px solid var(--color-border)',
+                borderRadius: 'var(--radius-sm)',
+                background: 'transparent',
+                cursor: 'pointer',
+              }}
+            >
+              Reset to defaults
+            </button>
+          </label>
+        )}
+
         {/* ── MCP Servers ── */}
         <div style={{ ...sectionHeadStyle, borderTop: '1px solid var(--color-border)', paddingTop: 14 }}>
           MCP Servers
         </div>
 
-        <label style={{ display: 'block', marginBottom: 24 }}>
-          <div style={labelStyle}>Server config (JSON object — key = server name)</div>
-          <textarea
-            value={draftAgent.mcpServersJson ?? ''}
-            onChange={(e) => setDraftAgent((d) => ({ ...d, mcpServersJson: e.target.value || undefined }))}
-            placeholder={`{\n  "filesystem": {\n    "type": "stdio",\n    "command": "npx",\n    "args": ["-y", "@modelcontextprotocol/server-filesystem", "."]\n  }\n}`}
-            rows={6}
-            style={{ ...inputStyle, resize: 'vertical', fontFamily: 'var(--font-mono)', fontSize: 11 }}
-          />
-        </label>
+        <div style={{ marginBottom: 24 }}>
+          <button
+            onClick={() => setActivePage('mcp')}
+            style={{
+              fontSize: 12,
+              color: 'var(--color-accent)',
+              padding: '6px 14px',
+              border: '1px solid var(--color-accent)',
+              borderRadius: 'var(--radius-sm)',
+              background: 'var(--color-accent-dim)',
+              cursor: 'pointer',
+            }}
+          >
+            Manage MCP Servers →
+          </button>
+          <div style={{ ...labelStyle, marginTop: 6 }}>
+            Add, remove, and configure MCP server connections
+          </div>
+        </div>
 
         <div style={{ display: 'flex', gap: 8 }}>
           <button
