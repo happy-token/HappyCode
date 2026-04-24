@@ -219,4 +219,30 @@
 
 ---
 
-*最后更新：2026-04-25（OAuth 登录完成，全部 TODOS 项目已完成）*
+---
+
+## Phase 2 — Hooks 可视化（v0.2.0，2026-04-24）
+
+- [x] **Bridge 自动注入** (`bridge-injector.ts`)
+  - 写入 `~/.claude/hooks/gui-bridge.sh`（Windows: `.ps1`），注入 11 种 hook 类型
+  - 幂等：第二次调用不重复注入
+
+- [x] **HookRuleWizard 向导式编辑器** (`HookRuleWizard.tsx`)
+  - 3 步向导：事件选择 → matcher → 命令
+  - Stop hook 警告 + 确认 checkbox
+
+- [x] **HookTestSandbox 命令沙箱** (`HookTestSandbox.tsx`)
+  - 11 种事件的 mock payload，可编辑
+  - 执行命令，展示 stdout/stderr/exitCode/duration
+
+- [x] **HooksPanel 更新** (`HooksPanel.tsx`)
+  - Events tab：Bridge 状态指示 + 清空按钮
+  - Config tab：换用 HookRuleWizard
+
+- [x] **扩展 HookType**（4 → 11 种）
+
+- [x] **新增 IPC** (`hook:clear-events`, `hook:bridge-status`, `hook:inject-bridge`, `hook:test-rule`)
+
+---
+
+*最后更新：2026-04-24（Phase 2 Hooks 可视化发布，v0.2.0）*
