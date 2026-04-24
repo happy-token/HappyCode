@@ -22,7 +22,7 @@ export function AppShell(): React.JSX.Element {
   const cwd = useTabStore((s) => selectActiveTab(s)?.cwd ?? '')
   const runningCostUsd = useTabStore((s) =>
     (selectActiveTab(s)?.messages ?? []).reduce(
-      (sum, m) => (m.type === 'done' ? sum + (m as { costUsd: number }).costUsd : sum),
+      (sum, m) => (m.type === 'done' ? sum + m.costUsd : sum),
       0
     )
   )
@@ -30,7 +30,7 @@ export function AppShell(): React.JSX.Element {
     (selectActiveTab(s)?.messages ?? []).reduce(
       (sum, m) =>
         m.type === 'done'
-          ? sum + (m as { inputTokens: number; outputTokens: number }).inputTokens + (m as { inputTokens: number; outputTokens: number }).outputTokens
+          ? sum + m.inputTokens + m.outputTokens
           : sum,
       0
     )
@@ -102,7 +102,7 @@ export function AppShell(): React.JSX.Element {
               WebkitAppRegion: 'no-drag',
             } as React.CSSProperties}
           >
-            {cwd ? (cwd.split('/').pop() ?? 'HappyCode') : 'HappyCode'}
+            {cwd.split('/').pop() || 'HappyCode'}
           </span>
           <div style={{ flex: 1 }} />
           {(runningCostUsd > 0 || totalTokens > 0) && (
