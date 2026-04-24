@@ -4,7 +4,7 @@ import remarkGfm from 'remark-gfm'
 import hljs from 'highlight.js'
 import 'highlight.js/styles/github-dark.css'
 import type { UIMessage, AskQuestion } from '../../../electron/shared/types'
-import { useChatStore } from '../../store/session-store'
+import { useTabStore } from '../../store/tab-store'
 
 function CodeBlock({ language, code }: { language: string; code: string }): React.JSX.Element {
   const [copied, setCopied] = useState(false)
@@ -322,7 +322,7 @@ function AskBlock({
   questions: AskQuestion[]
   answered?: boolean
 }): React.JSX.Element {
-  const sendToolResult = useChatStore((s) => s.sendToolResult)
+  const sendToolResult = useTabStore((s) => s.sendToolResult)
   const [selections, setSelections] = useState<Record<number, string[]>>({})
   const [others, setOthers] = useState<Record<number, string>>({})
 
@@ -493,17 +493,17 @@ export function MessageBubble({ msg }: { msg: UIMessage }): React.JSX.Element | 
   switch (msg.type) {
     case 'user':
       return (
-        <div style={{ display: 'flex', justifyContent: 'flex-end', padding: '4px 16px', gap: 6, alignItems: 'flex-end' }}>
+        <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 8, padding: '0 16px', gap: 6, alignItems: 'flex-end' }}>
           {msg.text && <CopyButton text={msg.text} light />}
           <div
             style={{
-              maxWidth: '72%',
-              background: 'var(--color-accent)',
-              color: '#fff',
-              borderRadius: 'var(--radius-lg)',
-              padding: '10px 14px',
+              maxWidth: '78%',
+              background: 'var(--color-surface-3)',
+              color: 'var(--color-text)',
+              borderRadius: '16px 16px 3px 16px',
+              padding: '9px 14px',
               fontSize: 13,
-              lineHeight: 1.6,
+              lineHeight: 1.55,
               whiteSpace: 'pre-wrap',
               wordBreak: 'break-word',
             }}
@@ -533,33 +533,42 @@ export function MessageBubble({ msg }: { msg: UIMessage }): React.JSX.Element | 
 
     case 'text':
       return (
-        <div style={{ padding: '4px 16px' }}>
-          <div
-            style={{
-              maxWidth: '84%',
-              fontSize: 13,
-              color: 'var(--color-text)',
-              wordBreak: 'break-word',
-            }}
-          >
-            <ReactMarkdown remarkPlugins={[remarkGfm]} components={mdComponents}>
-              {msg.text}
-            </ReactMarkdown>
-            {msg.streaming && (
-              <span
-                style={{
-                  display: 'inline-block',
-                  width: 8,
-                  height: 14,
-                  background: 'var(--color-accent)',
-                  marginLeft: 2,
-                  verticalAlign: 'text-bottom',
-                  animation: 'blink 1s step-end infinite',
-                }}
-              />
-            )}
+        <div style={{ display: 'flex', gap: 8, marginBottom: 8, alignItems: 'flex-start', padding: '0 16px' }}>
+          <div style={{ width: 22, height: 22, borderRadius: '50%', background: 'var(--color-accent)', flexShrink: 0, marginTop: 2 }} />
+          <div>
+            <div
+              style={{
+                maxWidth: '82%',
+                background: 'var(--color-surface)',
+                border: '1px solid var(--color-border)',
+                borderRadius: '3px 16px 16px 16px',
+                padding: '9px 14px',
+                boxShadow: '0 1px 3px rgba(0,0,0,0.06)',
+                fontSize: 13,
+                color: 'var(--color-text)',
+                lineHeight: 1.55,
+                wordBreak: 'break-word',
+              }}
+            >
+              <ReactMarkdown remarkPlugins={[remarkGfm]} components={mdComponents}>
+                {msg.text}
+              </ReactMarkdown>
+              {msg.streaming && (
+                <span
+                  style={{
+                    display: 'inline-block',
+                    width: 8,
+                    height: 14,
+                    background: 'var(--color-accent)',
+                    marginLeft: 2,
+                    verticalAlign: 'text-bottom',
+                    animation: 'blink 1s step-end infinite',
+                  }}
+                />
+              )}
+            </div>
+            {!msg.streaming && <div style={{ marginTop: 4 }}><CopyButton text={msg.text} /></div>}
           </div>
-          {!msg.streaming && <div style={{ marginTop: 4 }}><CopyButton text={msg.text} /></div>}
         </div>
       )
 
@@ -572,17 +581,20 @@ export function MessageBubble({ msg }: { msg: UIMessage }): React.JSX.Element | 
 
     case 'tool_call':
       return (
-        <div style={{ padding: '4px 16px' }}>
+        <div style={{ padding: '2px 16px' }}>
           <div
             style={{
               display: 'inline-flex',
               alignItems: 'center',
-              gap: 8,
+              gap: 6,
+              padding: '4px 10px',
               background: 'var(--color-surface-2)',
               border: '1px solid var(--color-border)',
               borderRadius: 'var(--radius-md)',
-              padding: '6px 12px',
-              fontSize: 12,
+              marginBottom: 4,
+              marginLeft: 30,
+              fontSize: 11,
+              color: 'var(--color-text-muted)',
             }}
           >
             <span style={{ color: 'var(--color-accent)', fontWeight: 700, fontFamily: 'var(--font-mono)' }}>
