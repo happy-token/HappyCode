@@ -151,7 +151,7 @@ const mdComponents: React.ComponentProps<typeof ReactMarkdown>['components'] = {
     <a
       href={href}
       style={{ color: 'var(--color-accent)', textDecoration: 'underline' }}
-      onClick={(e) => { e.preventDefault(); if (href) window.open(href) }}
+      onClick={(e) => { e.preventDefault(); if (href && /^https?:\/\//.test(href)) window.open(href) }}
     >
       {children}
     </a>
@@ -336,9 +336,13 @@ function AskBlock({
     })
   }
 
-  function submit(): void {
+  async function submit(): Promise<void> {
     const content = buildAnswerContent(questions, selections, others)
-    sendToolResult(toolUseId, content)
+    try {
+      await sendToolResult(toolUseId, content)
+    } catch (err) {
+      console.error('[AskBlock] Failed to submit tool result:', err)
+    }
   }
 
   const allAnswered = questions.every((_, i) => (selections[i]?.length ?? 0) > 0)
@@ -411,7 +415,7 @@ function AskBlock({
                       autoFocus
                       value={others[i] ?? ''}
                       onChange={(e) => setOthers((prev) => ({ ...prev, [i]: e.target.value }))}
-                      onKeyDown={(e) => { if (e.key === 'Enter' && allAnswered) submit() }}
+                      onKeyDown={(e) => { if (e.key === 'Enter' && allAnswered) void submit() }}
                       placeholder="Type your answer…"
                       style={{
                         flex: 1,
@@ -437,7 +441,7 @@ function AskBlock({
         })}
         {!answered && (
           <button
-            onClick={submit}
+            onClick={() => void submit()}
             disabled={!allAnswered}
             style={{
               marginTop: 10,
