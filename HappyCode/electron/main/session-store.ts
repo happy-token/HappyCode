@@ -239,6 +239,10 @@ export class SessionStore {
       .all(limit) as HookEvent[]
   }
 
+  clearHookEvents(): void {
+    this.db.prepare('DELETE FROM hook_events').run()
+  }
+
   listAllHistory(): AllHistoryResult {
     const projectsBase = path.join(os.homedir(), '.claude', 'projects')
     if (!fs.existsSync(projectsBase)) return { projects: [] }

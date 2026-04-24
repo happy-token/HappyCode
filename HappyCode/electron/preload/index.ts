@@ -1,5 +1,5 @@
 import { contextBridge, ipcRenderer } from 'electron'
-import type { ElectronAPI, SDKMessage, PermissionRequest, HookEvent, SubagentEvent, ApiConfig, AgentSettings, ClaudeSettings, SkillsResult, PluginsResult, InstallSkillResult, AllHistoryResult, SessionMessage, ListCustomCommandsResult, ExportSettings, ClaudeLoginResult } from '../shared/types'
+import type { ElectronAPI, SDKMessage, PermissionRequest, HookEvent, SubagentEvent, ApiConfig, AgentSettings, ClaudeSettings, SkillsResult, PluginsResult, InstallSkillResult, AllHistoryResult, SessionMessage, ListCustomCommandsResult, ExportSettings, ClaudeLoginResult, HookBridgeStatus, HookTestResult } from '../shared/types'
 
 const api: ElectronAPI = {
   // Auth
@@ -56,6 +56,12 @@ const api: ElectronAPI = {
     ipcRenderer.on('hook:event', handler)
     return () => ipcRenderer.removeListener('hook:event', handler)
   },
+
+  clearHookEvents: (): Promise<void> => ipcRenderer.invoke('hook:clear-events'),
+  getBridgeStatus: (): Promise<HookBridgeStatus> => ipcRenderer.invoke('hook:bridge-status'),
+  injectBridge: (): Promise<HookBridgeStatus> => ipcRenderer.invoke('hook:inject-bridge'),
+  testHookRule: (p: { command: string; eventName: string; payload: unknown }): Promise<HookTestResult> =>
+    ipcRenderer.invoke('hook:test-rule', p),
 
   onSubagentEvent: (cb) => {
     const handler = (_: Electron.IpcRendererEvent, event: SubagentEvent) => cb(event)

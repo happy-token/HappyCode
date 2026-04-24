@@ -9,6 +9,7 @@ import { SessionStore } from './session-store'
 import { AgentManager } from './agent-manager'
 import { HookServer } from './hook-server'
 import { registerIpcHandlers } from './ipc-handlers'
+import { injectBridgeHook } from './bridge-injector'
 
 function createWindow(): BrowserWindow {
   const win = new BrowserWindow({
@@ -52,6 +53,11 @@ app.whenReady().then(() => {
   const agentManager = new AgentManager(win)
   const hookServer = new HookServer(store, win)
   hookServer.start()
+  try {
+    injectBridgeHook()
+  } catch (err) {
+    console.warn('[Main] Bridge hook injection failed (non-fatal):', err)
+  }
   registerIpcHandlers(store, agentManager)
 
   app.on('activate', () => {

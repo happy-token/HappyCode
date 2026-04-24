@@ -120,7 +120,7 @@ export interface PermissionRequest {
 export interface HookEvent {
   id?: number
   ts: number
-  hook_type: 'PreToolUse' | 'PostToolUse' | 'Stop' | 'Notification' | string
+  hook_type: HookType | string
   tool_name?: string
   cwd?: string
   session_id?: string
@@ -133,12 +133,36 @@ export interface ListHookEventsResult {
   events: HookEvent[]
 }
 
+export interface HookBridgeStatus {
+  injected: boolean
+  scriptExists: boolean
+  scriptPath: string
+}
+
+export interface HookTestResult {
+  stdout: string
+  stderr: string
+  exitCode: number | null
+  durationMs: number
+}
+
 // ── Claude Settings (hooks config) ────────────────────────────
 
-export type HookType = 'PreToolUse' | 'PostToolUse' | 'Stop' | 'Notification'
+export type HookType =
+  | 'PreToolUse'
+  | 'PostToolUse'
+  | 'PostToolUseFailure'
+  | 'UserPromptSubmit'
+  | 'Stop'
+  | 'SubagentStart'
+  | 'SubagentStop'
+  | 'SessionStart'
+  | 'SessionEnd'
+  | 'Notification'
+  | 'PreCompact'
 
 export interface ClaudeHookRule {
-  matcher: string
+  matcher?: string
   command: string
   description?: string
 }
@@ -341,6 +365,10 @@ export interface ElectronAPI {
   // Phase 2 — hooks
   listHookEvents: (limit?: number) => Promise<ListHookEventsResult>
   onHookEvent: (cb: (event: HookEvent) => void) => () => void
+  clearHookEvents: () => Promise<void>
+  getBridgeStatus: () => Promise<HookBridgeStatus>
+  injectBridge: () => Promise<HookBridgeStatus>
+  testHookRule: (p: { command: string; eventName: string; payload: unknown }) => Promise<HookTestResult>
 
   // Phase 2 — subagent tree
   onSubagentEvent: (cb: (event: SubagentEvent) => void) => () => void
