@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect, vi, beforeEach } from 'vitest'
 import {
   encodeCwd,
   deduplicateByUuid,
@@ -168,7 +168,54 @@ describe('extractTimestamp', () => {
   })
 })
 
-// ── 6. MAX_JSONL_SIZE 检查 ────────────────────────────────────
+// ── 6. clearHookEvents SQL ────────────────────────────────────
+import { vi } from 'vitest'
+
+vi.mock('electron', () => ({
+  app: { getPath: () => '/tmp/test-happycode' },
+}))
+
+const mockRun = vi.fn()
+const mockPrepare = vi.fn(() => ({ run: mockRun, get: vi.fn(() => ({ n: 0 })), all: vi.fn(() => []) }))
+const mockExec = vi.fn()
+
+vi.mock('better-sqlite3', () => ({
+  default: vi.fn(() => ({
+    prepare: mockPrepare,
+    exec: mockExec,
+    pragma: vi.fn(),
+    close: vi.fn(),
+  })),
+}))
+
+describe('clearHookEvents', () => {
+  beforeEach(() => {
+    mockRun.mockClear()
+    mockPrepare.mockClear()
+  })
+
+  it('calls DELETE FROM hook_events', async () => {
+    const { SessionStore } = await import('../electron/main/session-store')
+    const store = new SessionStore()
+    store.clearHookEvents()
+    const deleteCalls = mockPrepare.mock.calls.filter(
+      (args) => String(args[0]).includes('DELETE FROM hook_events')
+    )
+    expect(deleteCalls).toHaveLength(1)
+    expect(mockRun).toHaveBeenCalled()
+  })
+
+  it('is safe to call multiple times without throwing', async () => {
+    const { SessionStore } = await import('../electron/main/session-store')
+    const store = new SessionStore()
+    expect(() => {
+      store.clearHookEvents()
+      store.clearHookEvents()
+    }).not.toThrow()
+  })
+})
+
+// ── 7. MAX_JSONL_SIZE 检查 ────────────────────────────────────
 describe('checkFileSizeLimit', () => {
   const MAX = 10 * 1024 * 1024 // 10MB
 
