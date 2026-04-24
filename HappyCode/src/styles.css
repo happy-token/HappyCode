@@ -5,19 +5,19 @@
   --color-surface-2: #242429;
   --color-surface-3: #2e2e35;
 
-  /* Borders */
-  --color-border:       #2e2e35;
-  --color-border-focus: #818cf8;
+  /* Borders — 略加暖调 */
+  --color-border:       #2e2a26;
+  --color-border-focus: #a0866a;
 
   /* Text */
   --color-text:       #e8e8ec;
   --color-text-muted: #8b8b9e;
   --color-text-faint: #5a5a6e;
 
-  /* Accent — Indigo 400 */
-  --color-accent:       #818cf8;
-  --color-accent-dim:   rgba(129, 140, 248, 0.12);
-  --color-accent-hover: #6366f1;
+  /* Accent — 暖棕金（替换 Indigo） */
+  --color-accent:       #c9a882;
+  --color-accent-dim:   rgba(201, 168, 130, 0.12);
+  --color-accent-hover: #b8946e;
 
   /* Status */
   --color-success: #3dd68c;
@@ -35,6 +35,30 @@
   /* Typography */
   --font-sans: 'Geist', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   --font-mono: 'Geist Mono', 'SF Mono', 'Fira Code', 'Cascadia Code', monospace;
+}
+
+/* ── Light theme ─────────────────────────────────────────────── */
+[data-theme="light"] {
+  --color-bg:        #faf8f4;
+  --color-surface:   #f5f1eb;
+  --color-surface-2: #ede8df;
+  --color-surface-3: #e6e0d6;
+
+  --color-border:       #e2ddd5;
+  --color-border-focus: #a0866a;
+
+  --color-text:       #1c1612;
+  --color-text-muted: #6b5e52;
+  --color-text-faint: #a8998a;
+
+  --color-accent:       #a0866a;
+  --color-accent-dim:   rgba(160, 134, 106, 0.12);
+  --color-accent-hover: #8c7055;
+
+  --color-success: #16a34a;
+  --color-warning: #d97706;
+  --color-danger:  #dc2626;
+  --color-info:    #2563eb;
 }
 
 * {
