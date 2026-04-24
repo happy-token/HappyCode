@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react'
 import { Sun, Moon } from 'lucide-react'
 import { Sidebar } from './components/nav/Sidebar'
 import { PanelZone } from './components/nav/PanelZone'
-import { TabBar } from './components/nav/TabBar'
 import { ChatPanel } from './components/chat/ChatPanel'
 import { HooksPanel } from './components/hooks/HooksPanel'
 import { SkillsPanel } from './components/skills/SkillsPanel'
@@ -17,14 +16,25 @@ import { useApiConfigStore } from './store/api-config-store'
 
 export function AppShell(): React.JSX.Element {
   const activePage = useUiStore((s) => s.activePage)
-  const setActivePage = useUiStore((s) => s.setActivePage)
   const theme = useUiStore((s) => s.theme)
   const toggleTheme = useUiStore((s) => s.toggleTheme)
 
   const cwd = useTabStore((s) => selectActiveTab(s)?.cwd ?? '')
-  const setCwd = useTabStore((s) => s.setCwd)
-  const chatStatus = useTabStore((s) => selectActiveTab(s)?.status ?? 'idle')
-  const startChatSession = useTabStore((s) => s.startSession)
+  const runningCostUsd = useTabStore((s) =>
+    (selectActiveTab(s)?.messages ?? []).reduce(
+      (sum, m) => (m.type === 'done' ? sum + (m as { costUsd: number }).costUsd : sum),
+      0
+    )
+  )
+  const totalTokens = useTabStore((s) =>
+    (selectActiveTab(s)?.messages ?? []).reduce(
+      (sum, m) =>
+        m.type === 'done'
+          ? sum + (m as { inputTokens: number; outputTokens: number }).inputTokens + (m as { inputTokens: number; outputTokens: number }).outputTokens
+          : sum,
+      0
+    )
+  )
 
   const handleAgentEvent = useTabStore((s) => s.handleAgentEvent)
   const handleAgentDone = useTabStore((s) => s.handleAgentDone)
@@ -70,14 +80,14 @@ export function AppShell(): React.JSX.Element {
       <Sidebar />
 
       <div style={{ display: 'flex', flexDirection: 'column', flex: 1, overflow: 'hidden' }}>
-        {/* TopBar */}
+        {/* SessionBar */}
         <header
           style={{
             display: 'flex',
             alignItems: 'center',
-            gap: 12,
+            gap: 10,
             padding: '0 16px',
-            height: 44,
+            height: 38,
             borderBottom: '1px solid var(--color-border)',
             background: 'var(--color-surface)',
             flexShrink: 0,
@@ -86,16 +96,29 @@ export function AppShell(): React.JSX.Element {
         >
           <span
             style={{
-              fontWeight: 700,
-              fontSize: 14,
-              letterSpacing: '-0.01em',
+              fontSize: 12,
+              fontWeight: 600,
               color: 'var(--color-text)',
               WebkitAppRegion: 'no-drag',
             } as React.CSSProperties}
           >
-            HappyCode
+            {cwd ? (cwd.split('/').pop() ?? 'HappyCode') : 'HappyCode'}
           </span>
           <div style={{ flex: 1 }} />
+          {(runningCostUsd > 0 || totalTokens > 0) && (
+            <span
+              style={{
+                fontSize: 10,
+                color: 'var(--color-text-faint)',
+                fontFamily: 'var(--font-mono)',
+                WebkitAppRegion: 'no-drag',
+              } as React.CSSProperties}
+            >
+              {runningCostUsd > 0
+                ? `$${runningCostUsd.toFixed(4)}`
+                : `${totalTokens.toLocaleString()} tok`}
+            </span>
+          )}
           <button
             onClick={toggleTheme}
             title={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
@@ -103,8 +126,8 @@ export function AppShell(): React.JSX.Element {
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              width: 28,
-              height: 28,
+              width: 26,
+              height: 26,
               border: '1px solid var(--color-border)',
               borderRadius: 'var(--radius-sm)',
               background: 'transparent',
@@ -113,13 +136,9 @@ export function AppShell(): React.JSX.Element {
               WebkitAppRegion: 'no-drag',
             } as React.CSSProperties}
           >
-            {theme === 'dark' ? <Sun size={13} /> : <Moon size={13} />}
+            {theme === 'dark' ? <Sun size={12} /> : <Moon size={12} />}
           </button>
-          <span style={{ fontSize: 11, color: 'var(--color-text-muted)' }}>v0.1</span>
         </header>
-
-        {/* Tab bar — only shown on chat page */}
-        {activePage === 'chat' && <TabBar />}
 
         {/* Page content — all pages mounted; inactive hidden via display:none to preserve scroll + drafts */}
         <div style={{ flex: 1, overflow: 'hidden', display: 'flex' }}>
