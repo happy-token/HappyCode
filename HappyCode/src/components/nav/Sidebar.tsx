@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useCallback } from 'react'
 import { MessageSquare, History, Plug, Zap, Webhook, Settings, Plus } from 'lucide-react'
-import { shallow } from 'zustand/shallow'
+import { useShallow } from 'zustand/react/shallow'
 import { useUiStore, type ActivePage } from '../../store/ui-store'
 import { useTabStore, selectActiveTab } from '../../store/tab-store'
 import { CwdPicker } from './CwdPicker'
@@ -42,8 +42,7 @@ export function Sidebar(): React.JSX.Element {
   const addTab = useTabStore((s) => s.addTab)
   const setSessionForResume = useTabStore((s) => s.setSessionForResume)
   const tabStatuses = useTabStore(
-    (s) => s.tabs.map((t) => ({ sessionId: t.sessionId, status: t.status })),
-    shallow
+    useShallow((s) => s.tabs.map((t) => ({ sessionId: t.sessionId, status: t.status })))
   )
 
   const [sessions, setSessions] = useState<SessionInfo[]>([])

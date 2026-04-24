@@ -112,7 +112,6 @@ export class AgentManager {
             allowedTools: allowedList,
             disallowedTools: disallowedList,
             systemPrompt: agentSettings?.systemPrompt || undefined,
-            appendSystemPrompt: agentSettings?.appendSystemPrompt || undefined,
             additionalDirectories: addDirs,
             thinking: thinkingConfig,
             effort: agentSettings?.effort || undefined,
@@ -224,7 +223,7 @@ export class AgentManager {
     return tempId
   }
 
-  sendToolResult(sessionId: string, toolUseId: string, content: string): void {
+  sendToolResult(sessionId: string, _toolUseId: string, content: string): void {
     const session = this.sessions.get(sessionId)
     if (!session) return
     // Resolve canUseTool with deny to prevent headless AskUserQuestion execution.

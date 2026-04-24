@@ -121,14 +121,6 @@ export function SkillsPanel(): React.JSX.Element {
     !searchQuery || s.name.toLowerCase().includes(searchQuery.toLowerCase())
   )
 
-  const labelStyle: React.CSSProperties = {
-    fontSize: 10,
-    fontWeight: 700,
-    color: 'var(--color-text-muted)',
-    textTransform: 'uppercase',
-    letterSpacing: '0.06em',
-  }
-
   return (
     <div style={PANEL_STYLE}>
       {/* Left: list */}

@@ -11,7 +11,7 @@ interface HistoryState {
   deleteProject: (encodedPath: string) => Promise<void>
 }
 
-export const useHistoryStore = create<HistoryState>((set, get) => ({
+export const useHistoryStore = create<HistoryState>((set) => ({
   projects: [],
   loading: false,
   error: null,

@@ -10,7 +10,7 @@ import type {
   Attachment,
 } from '../../electron/shared/types'
 import { useApiConfigStore } from './api-config-store'
-import { useUiStore } from './ui-store'
+import { useTabStore, selectActiveTab } from './tab-store'
 
 interface ChatState {
   // Active session
@@ -231,7 +231,7 @@ export const useChatStore = create<ChatState>()(
       }),
 
     loadAndResumeSession: async (encodedPath, sessionId, cwd) => {
-      useUiStore.getState().setCwd(cwd)
+      useTabStore.getState().setCwd(cwd)
       set((s) => {
         s.sessionId = sessionId
         s.status = 'done'
@@ -292,7 +292,7 @@ export const useChatStore = create<ChatState>()(
         const { config: apiConfig, agentSettings } = useApiConfigStore.getState()
         const { sessionId: tempId } = await window.electron.startSession({
           prompt,
-          cwd: useUiStore.getState().cwd,
+          cwd: selectActiveTab(useTabStore.getState())?.cwd ?? '',
           model: get().model || undefined,
           apiConfig: apiConfig.baseUrl ? apiConfig : undefined,
           agentSettings: Object.keys(agentSettings).length > 0 ? agentSettings : undefined,
@@ -325,7 +325,7 @@ export const useChatStore = create<ChatState>()(
       try {
         await window.electron.startSession({
           prompt: '/compact',
-          cwd: useUiStore.getState().cwd,
+          cwd: selectActiveTab(useTabStore.getState())?.cwd ?? '',
           model: model || undefined,
           apiConfig: apiConfig.baseUrl ? apiConfig : undefined,
           agentSettings: Object.keys(agentSettings).length > 0 ? agentSettings : undefined,
