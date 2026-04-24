@@ -1,13 +1,27 @@
 import React, { useEffect, useState, useCallback } from 'react'
-import type { HookEvent, ClaudeSettings, ClaudeHookRule, HookType } from '../../../electron/shared/types'
+import type { HookEvent, ClaudeSettings, ClaudeHookRule, HookType, HookBridgeStatus } from '../../../electron/shared/types'
+import { HookRuleWizard } from './HookRuleWizard'
 
-const HOOK_TYPES: HookType[] = ['PreToolUse', 'PostToolUse', 'Stop', 'Notification']
+const HOOK_TYPES: HookType[] = [
+  'PreToolUse', 'PostToolUse', 'PostToolUseFailure',
+  'UserPromptSubmit', 'Stop',
+  'SubagentStart', 'SubagentStop',
+  'SessionStart', 'SessionEnd',
+  'Notification', 'PreCompact',
+]
 
 const HOOK_TYPE_COLOR: Record<string, string> = {
-  PreToolUse: '#7c6af7',
-  PostToolUse: '#3dd68c',
-  Stop: '#f59e0b',
-  Notification: '#60a5fa',
+  PreToolUse:         '#7c6af7',
+  PostToolUse:        '#3dd68c',
+  PostToolUseFailure: '#ef4444',
+  UserPromptSubmit:   '#a78bfa',
+  Stop:               '#f59e0b',
+  SubagentStart:      '#34d399',
+  SubagentStop:       '#6ee7b7',
+  SessionStart:       '#60a5fa',
+  SessionEnd:         '#93c5fd',
+  Notification:       '#f472b6',
+  PreCompact:         '#fb923c',
 }
 
 function hookColor(type: string): string {
@@ -140,17 +154,6 @@ function HookRow({ event }: { event: HookEvent }): React.JSX.Element {
   )
 }
 
-const inputSt: React.CSSProperties = {
-  width: '100%',
-  fontFamily: 'var(--font-mono)',
-  fontSize: 11,
-  padding: '4px 6px',
-  border: '1px solid var(--color-border)',
-  borderRadius: 'var(--radius-sm)',
-  background: 'var(--color-surface-2)',
-  color: 'var(--color-text)',
-  boxSizing: 'border-box',
-}
 
 function normalizeRules(raw: ClaudeHookRule[] | undefined): ClaudeHookRule[] {
   if (!Array.isArray(raw)) return []
@@ -182,11 +185,7 @@ function ConfigTab(): React.JSX.Element {
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
   const [error, setError] = useState<string | null>(null)
-
-  const [newType, setNewType] = useState<HookType>('PostToolUse')
-  const [newMatcher, setNewMatcher] = useState('')
-  const [newCommand, setNewCommand] = useState('')
-  const [newDescription, setNewDescription] = useState('')
+  const [showWizard, setShowWizard] = useState(false)
 
   useEffect(() => {
     const doLoad = async (): Promise<void> => {
@@ -230,17 +229,9 @@ function ConfigTab(): React.JSX.Element {
     setRules(type, rules)
   }
 
-  function addRule(): void {
-    if (!newMatcher.trim() || !newCommand.trim()) return
-    const rule: ClaudeHookRule = {
-      matcher: newMatcher.trim(),
-      command: newCommand.trim(),
-      ...(newDescription.trim() ? { description: newDescription.trim() } : {}),
-    }
-    setRules(newType, [...getRules(newType), rule])
-    setNewMatcher('')
-    setNewCommand('')
-    setNewDescription('')
+  function addRule(hookType: HookType, rule: ClaudeHookRule): void {
+    setRules(hookType, [...getRules(hookType), rule])
+    setShowWizard(false)
   }
 
   async function save(): Promise<void> {
@@ -332,66 +323,30 @@ function ConfigTab(): React.JSX.Element {
         )
       })}
 
-      {/* Add rule form */}
+      {/* Add rule */}
       <div style={{ borderTop: '1px solid var(--color-border)', paddingTop: 14, marginTop: 4 }}>
-        <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--color-text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 10 }}>
-          Add Rule
-        </div>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginBottom: 8 }}>
-          <label style={{ display: 'block' }}>
-            <div style={{ fontSize: 10, color: 'var(--color-text-muted)', marginBottom: 3 }}>Hook Type</div>
-            <select
-              value={newType}
-              onChange={(e) => setNewType(e.target.value as HookType)}
-              style={inputSt}
-            >
-              {HOOK_TYPES.map((t) => <option key={t} value={t}>{t}</option>)}
-            </select>
-          </label>
-          <label style={{ display: 'block' }}>
-            <div style={{ fontSize: 10, color: 'var(--color-text-muted)', marginBottom: 3 }}>Matcher (tool name or pattern)</div>
-            <input
-              value={newMatcher}
-              onChange={(e) => setNewMatcher(e.target.value)}
-              placeholder="e.g. Write|Edit"
-              style={inputSt}
-            />
-          </label>
-        </div>
-        <label style={{ display: 'block', marginBottom: 8 }}>
-          <div style={{ fontSize: 10, color: 'var(--color-text-muted)', marginBottom: 3 }}>Command</div>
-          <input
-            value={newCommand}
-            onChange={(e) => setNewCommand(e.target.value)}
-            placeholder='e.g. pnpm prettier --write "$FILE_PATH"'
-            style={inputSt}
+        {showWizard ? (
+          <HookRuleWizard
+            onSave={addRule}
+            onCancel={() => setShowWizard(false)}
           />
-        </label>
-        <label style={{ display: 'block', marginBottom: 10 }}>
-          <div style={{ fontSize: 10, color: 'var(--color-text-muted)', marginBottom: 3 }}>Description (optional)</div>
-          <input
-            value={newDescription}
-            onChange={(e) => setNewDescription(e.target.value)}
-            placeholder="e.g. Format edited files"
-            style={inputSt}
-          />
-        </label>
-        <button
-          onClick={addRule}
-          disabled={!newMatcher.trim() || !newCommand.trim()}
-          style={{
-            fontSize: 11,
-            padding: '4px 14px',
-            border: '1px solid var(--color-accent)',
-            borderRadius: 'var(--radius-sm)',
-            background: 'var(--color-accent-dim)',
-            color: 'var(--color-accent)',
-            cursor: !newMatcher.trim() || !newCommand.trim() ? 'default' : 'pointer',
-            opacity: !newMatcher.trim() || !newCommand.trim() ? 0.5 : 1,
-          }}
-        >
-          + Add Rule
-        </button>
+        ) : (
+          <button
+            onClick={() => setShowWizard(true)}
+            style={{
+              fontSize: 11,
+              padding: '6px 16px',
+              border: '1px solid var(--color-accent)',
+              borderRadius: 'var(--radius-md)',
+              background: 'var(--color-accent-dim)',
+              color: 'var(--color-accent)',
+              cursor: 'pointer',
+              fontWeight: 600,
+            }}
+          >
+            + 添加规则
+          </button>
+        )}
       </div>
 
       {/* Save */}
@@ -420,6 +375,7 @@ export function HooksPanel(): React.JSX.Element {
   const [activeTab, setActiveTab] = useState<'events' | 'config'>('events')
   const [events, setEvents] = useState<HookEvent[]>([])
   const [loading, setLoading] = useState(true)
+  const [bridgeStatus, setBridgeStatus] = useState<HookBridgeStatus | null>(null)
 
   const load = useCallback(async () => {
     try {
@@ -432,12 +388,23 @@ export function HooksPanel(): React.JSX.Element {
 
   useEffect(() => {
     void load()
+    void window.electron.getBridgeStatus().then(setBridgeStatus)
 
     const unsub = window.electron.onHookEvent((event) => {
       setEvents((prev) => [event, ...prev].slice(0, 500))
     })
     return unsub
   }, [load])
+
+  async function handleEnableBridge(): Promise<void> {
+    const status = await window.electron.injectBridge()
+    setBridgeStatus(status)
+  }
+
+  async function handleClear(): Promise<void> {
+    await window.electron.clearHookEvents()
+    setEvents([])
+  }
 
   function tabStyle(active: boolean): React.CSSProperties {
     return {
@@ -483,14 +450,52 @@ export function HooksPanel(): React.JSX.Element {
               {events.length}
             </span>
             <div style={{ flex: 1 }} />
-            <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-              {Object.entries(HOOK_TYPE_COLOR).map(([type, color]) => (
-                <span key={type} style={{ fontSize: 10, color, display: 'flex', alignItems: 'center', gap: 4 }}>
-                  <span style={{ width: 6, height: 6, borderRadius: '50%', background: color, display: 'inline-block' }} />
-                  {type}
+
+            {/* Bridge status indicator */}
+            {bridgeStatus !== null && (
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                <span style={{
+                  width: 6,
+                  height: 6,
+                  borderRadius: '50%',
+                  background: bridgeStatus.injected ? 'var(--color-success, #22c55e)' : 'var(--color-text-faint, #888)',
+                  flexShrink: 0,
+                }} />
+                <span style={{ fontSize: 10, color: bridgeStatus.injected ? 'var(--color-success, #22c55e)' : 'var(--color-text-faint, #888)' }}>
+                  {bridgeStatus.injected ? 'Bridge 已连接' : '未连接'}
                 </span>
-              ))}
-            </div>
+                {!bridgeStatus.injected && (
+                  <button
+                    onClick={() => void handleEnableBridge()}
+                    style={{
+                      fontSize: 10,
+                      color: 'var(--color-accent)',
+                      background: 'none',
+                      border: '1px solid var(--color-accent)',
+                      borderRadius: 'var(--radius-sm)',
+                      padding: '2px 6px',
+                      cursor: 'pointer',
+                    }}
+                  >
+                    启用
+                  </button>
+                )}
+              </div>
+            )}
+
+            <button
+              onClick={() => void handleClear()}
+              style={{
+                fontSize: 11,
+                color: 'var(--color-text-muted)',
+                padding: '3px 10px',
+                border: '1px solid var(--color-border)',
+                borderRadius: 'var(--radius-sm)',
+                cursor: 'pointer',
+              }}
+            >
+              清空
+            </button>
             <button
               onClick={() => void load()}
               style={{
@@ -499,6 +504,7 @@ export function HooksPanel(): React.JSX.Element {
                 padding: '3px 10px',
                 border: '1px solid var(--color-border)',
                 borderRadius: 'var(--radius-sm)',
+                cursor: 'pointer',
               }}
             >
               ↺ Refresh
