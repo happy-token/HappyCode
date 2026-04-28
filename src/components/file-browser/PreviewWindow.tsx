@@ -227,7 +227,7 @@ export function PreviewWindow(): React.JSX.Element {
       )}
 
       {viewMode === 'edit' ? (
-        <div className="fp-scroll" style={{ padding: 0 }}>
+        <div className="fp-edit-wrap">
           <Editor
             height="100%"
             language={data.language || 'plaintext'}
