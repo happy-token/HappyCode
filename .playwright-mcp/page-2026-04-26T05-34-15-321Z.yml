@@ -1,0 +1,28 @@
+- generic [ref=e2]:
+  - heading "HappyCode — Final Icon" [level=2] [ref=e3]
+  - generic [ref=e4]:
+    - generic [ref=e5]:
+      - img [ref=e6]
+      - generic [ref=e13]: 128px
+    - generic [ref=e14]:
+      - img [ref=e15]
+      - generic [ref=e22]: 64px
+    - generic [ref=e23]:
+      - img [ref=e24]
+      - generic [ref=e31]: 40px
+    - generic [ref=e32]:
+      - img [ref=e33]
+      - generic [ref=e38]: 24px
+    - generic [ref=e39]:
+      - img [ref=e40]
+      - generic [ref=e45]: 16px
+  - generic [ref=e46]:
+    - generic [ref=e47]:
+      - img [ref=e48]
+      - text: dark sidebar
+    - generic [ref=e53]:
+      - img [ref=e54]
+      - text: light background
+    - generic [ref=e59]:
+      - img [ref=e60]
+      - text: app dock / taskbar

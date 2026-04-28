@@ -1,0 +1,131 @@
+<h2>第一层：色彩 Token 设计</h2>
+<p class="subtitle">新旧配色对比——同样支持深色/浅色切换，浅色主题从冷灰蓝改为暖米色</p>
+
+<div class="split">
+
+  <!-- Current -->
+  <div class="mockup">
+    <div class="mockup-header">当前（冷色系）</div>
+    <div class="mockup-body" style="padding:16px; background:#0f0f11; border-radius:0 0 6px 6px;">
+      <!-- Swatches -->
+      <div style="display:flex; flex-direction:column; gap:8px; font-family:-apple-system,sans-serif; font-size:11px;">
+        <div style="display:flex; gap:8px; align-items:center;">
+          <div style="width:36px;height:36px;background:#0f0f11;border-radius:5px;border:1px solid #2e2e35;flex-shrink:0;"></div>
+          <div style="width:36px;height:36px;background:#1a1a1f;border-radius:5px;flex-shrink:0;"></div>
+          <div style="width:36px;height:36px;background:#242429;border-radius:5px;flex-shrink:0;"></div>
+          <div style="width:36px;height:36px;background:#2e2e35;border-radius:5px;flex-shrink:0;"></div>
+          <span style="color:#8b8b9e;">背景层</span>
+        </div>
+        <div style="display:flex; gap:8px; align-items:center;">
+          <div style="width:36px;height:36px;background:#818cf8;border-radius:5px;flex-shrink:0;"></div>
+          <div style="width:36px;height:36px;background:#6366f1;border-radius:5px;flex-shrink:0;"></div>
+          <span style="color:#8b8b9e;">Accent — Indigo 400/500</span>
+        </div>
+        <div style="display:flex; gap:8px; align-items:center;">
+          <div style="width:36px;height:36px;background:#e8e8ec;border-radius:5px;flex-shrink:0;"></div>
+          <div style="width:36px;height:36px;background:#8b8b9e;border-radius:5px;flex-shrink:0;"></div>
+          <span style="color:#8b8b9e;">文字主/辅</span>
+        </div>
+        <!-- Mini UI preview -->
+        <div style="margin-top:8px; background:#1a1a1f; border:1px solid #2e2e35; border-radius:8px; padding:12px;">
+          <div style="color:#e8e8ec; font-weight:600; margin-bottom:4px;">当前导航按钮</div>
+          <div style="display:flex; gap:6px; margin-top:8px;">
+            <div style="padding:5px 12px; background:rgba(129,140,248,0.12); border-radius:4px; color:#818cf8; font-size:11px; border-left:2px solid #6366f1;">Chat</div>
+            <div style="padding:5px 12px; border-radius:4px; color:#8b8b9e; font-size:11px;">Sessions</div>
+          </div>
+          <div style="margin-top:8px; display:flex; justify-content:flex-end;">
+            <div style="background:#1e1e2e; border:1px solid #3a3a4e; border-radius:12px 12px 2px 12px; padding:6px 10px; color:#e8e8ec; font-size:11px;">重构 AppShell</div>
+          </div>
+          <div style="margin-top:6px; display:flex; gap:6px;">
+            <div style="width:20px;height:20px;background:#6366f1;border-radius:50%;flex-shrink:0;"></div>
+            <div style="background:#242429; border-radius:2px 10px 10px 10px; padding:6px 10px; color:#c9c9e0; font-size:11px;">好的，我来分析...</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- New warm -->
+  <div class="mockup">
+    <div class="mockup-header">新版（暖米色系）</div>
+    <div class="mockup-body" style="padding:16px; background:#faf8f4; border-radius:0 0 6px 6px;">
+      <div style="display:flex; flex-direction:column; gap:8px; font-family:-apple-system,sans-serif; font-size:11px;">
+        <div style="display:flex; gap:8px; align-items:center;">
+          <div style="width:36px;height:36px;background:#faf8f4;border-radius:5px;border:1px solid #e2ddd5;flex-shrink:0;"></div>
+          <div style="width:36px;height:36px;background:#f0ece5;border-radius:5px;flex-shrink:0;"></div>
+          <div style="width:36px;height:36px;background:#e8e3da;border-radius:5px;flex-shrink:0;"></div>
+          <div style="width:36px;height:36px;background:#e0d9ce;border-radius:5px;flex-shrink:0;"></div>
+          <span style="color:#8c7d6e;">背景层</span>
+        </div>
+        <div style="display:flex; gap:8px; align-items:center;">
+          <div style="width:36px;height:36px;background:#a0866a;border-radius:5px;flex-shrink:0;"></div>
+          <div style="width:36px;height:36px;background:#8c7055;border-radius:5px;flex-shrink:0;"></div>
+          <span style="color:#8c7d6e;">Accent — 暖棕 / 赭石</span>
+        </div>
+        <div style="display:flex; gap:8px; align-items:center;">
+          <div style="width:36px;height:36px;background:#1c1612;border-radius:5px;flex-shrink:0;"></div>
+          <div style="width:36px;height:36px;background:#6b5e52;border-radius:5px;flex-shrink:0;"></div>
+          <span style="color:#8c7d6e;">文字主/辅</span>
+        </div>
+        <!-- Mini UI preview -->
+        <div style="margin-top:8px; background:#f5f1eb; border:1px solid #e2ddd5; border-radius:8px; padding:12px;">
+          <div style="color:#1c1612; font-weight:600; margin-bottom:4px;">新导航按钮</div>
+          <div style="display:flex; gap:6px; margin-top:8px;">
+            <div style="padding:5px 12px; background:#e6e0d6; border-radius:4px; color:#4d3d30; font-size:11px; font-weight:500; border-left:2px solid #a0866a;">Chat</div>
+            <div style="padding:5px 12px; border-radius:4px; color:#8c7d6e; font-size:11px;">Sessions</div>
+          </div>
+          <div style="margin-top:8px; display:flex; justify-content:flex-end;">
+            <div style="background:#ede8df; border-radius:12px 12px 2px 12px; padding:6px 10px; color:#2d2520; font-size:11px;">重构 AppShell</div>
+          </div>
+          <div style="margin-top:6px; display:flex; gap:6px;">
+            <div style="width:20px;height:20px;background:#c9a882;border-radius:50%;flex-shrink:0;"></div>
+            <div style="background:#fff; border-radius:2px 10px 10px 10px; padding:6px 10px; color:#2d2520; font-size:11px; box-shadow:0 1px 3px rgba(0,0,0,0.06);">好的，我来分析...</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div class="section" style="margin-top:20px;">
+  <h3>新 CSS Token 映射</h3>
+  <table style="width:100%; border-collapse:collapse; font-size:11px; margin-top:8px;">
+    <tr style="border-bottom:1px solid rgba(160,134,106,0.2);">
+      <th style="text-align:left; padding:6px 8px; color:#a8998a; font-weight:500;">Token</th>
+      <th style="text-align:left; padding:6px 8px; color:#a8998a; font-weight:500;">当前值</th>
+      <th style="text-align:left; padding:6px 8px; color:#a8998a; font-weight:500;">新值（浅色主题）</th>
+    </tr>
+    <tr style="border-bottom:1px solid rgba(160,134,106,0.1);">
+      <td style="padding:6px 8px; font-family:monospace; color:#4d3d30;">--color-bg</td>
+      <td style="padding:6px 8px; color:#8c7d6e;">#f5f5f7</td>
+      <td style="padding:6px 8px; color:#a0866a; font-weight:500;">#faf8f4</td>
+    </tr>
+    <tr style="border-bottom:1px solid rgba(160,134,106,0.1);">
+      <td style="padding:6px 8px; font-family:monospace; color:#4d3d30;">--color-surface</td>
+      <td style="padding:6px 8px; color:#8c7d6e;">#ffffff</td>
+      <td style="padding:6px 8px; color:#a0866a; font-weight:500;">#f5f1eb</td>
+    </tr>
+    <tr style="border-bottom:1px solid rgba(160,134,106,0.1);">
+      <td style="padding:6px 8px; font-family:monospace; color:#4d3d30;">--color-surface-2</td>
+      <td style="padding:6px 8px; color:#8c7d6e;">#f0f0f5</td>
+      <td style="padding:6px 8px; color:#a0866a; font-weight:500;">#ede8df</td>
+    </tr>
+    <tr style="border-bottom:1px solid rgba(160,134,106,0.1);">
+      <td style="padding:6px 8px; font-family:monospace; color:#4d3d30;">--color-accent</td>
+      <td style="padding:6px 8px; color:#8c7d6e;">#6366f1 (Indigo)</td>
+      <td style="padding:6px 8px; color:#a0866a; font-weight:500;">#a0866a (暖棕)</td>
+    </tr>
+    <tr style="border-bottom:1px solid rgba(160,134,106,0.1);">
+      <td style="padding:6px 8px; font-family:monospace; color:#4d3d30;">--color-text</td>
+      <td style="padding:6px 8px; color:#8c7d6e;">#18181b</td>
+      <td style="padding:6px 8px; color:#a0866a; font-weight:500;">#1c1612</td>
+    </tr>
+    <tr>
+      <td style="padding:6px 8px; font-family:monospace; color:#4d3d30;">--color-border</td>
+      <td style="padding:6px 8px; color:#8c7d6e;">#d8d8e0</td>
+      <td style="padding:6px 8px; color:#a0866a; font-weight:500;">#e2ddd5</td>
+    </tr>
+  </table>
+  <p style="margin-top:10px; font-size:11px; color:#8c7d6e;">深色主题保持现有黑色基调，仅把 Accent 从 Indigo 换为暖棕，border/surface 加一点棕调。</p>
+</div>

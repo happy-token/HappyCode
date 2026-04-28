@@ -1,0 +1,129 @@
+<h2>保留深色，还是改成暖色调？</h2>
+<p class="subtitle">Claude Desktop 最标志性的就是奶油色/暖米色的配色——但你的用户主要是开发者，深色也是合理选择</p>
+
+<div class="cards">
+
+  <!-- Option A: Warm like Claude Desktop -->
+  <div class="card" data-choice="warm" onclick="toggleSelect(this)">
+    <div class="card-image" style="background:#faf8f4; border-radius:6px 6px 0 0; overflow:hidden; height:200px;">
+      <div style="display:flex; height:100%; font-family:-apple-system,sans-serif; font-size:11px;">
+        <!-- Sidebar -->
+        <div style="width:200px; background:#f0ece5; border-right:1px solid #e2ddd5; padding:0; display:flex; flex-direction:column;">
+          <div style="padding:14px 14px 8px; font-size:13px; font-weight:700; color:#1c1612;">HappyCode</div>
+          <div style="padding:4px 10px 4px 10px;">
+            <div style="padding:6px 10px; background:#e6e0d6; border-radius:6px; color:#2d2520; font-weight:500; margin-bottom:2px;">Chat</div>
+            <div style="padding:6px 10px; color:#8c7d6e; margin-bottom:2px;">Sessions</div>
+            <div style="padding:6px 10px; color:#8c7d6e;">Settings</div>
+          </div>
+          <div style="margin-top:12px; padding:0 10px;">
+            <div style="font-size:10px; color:#a8998a; letter-spacing:0.06em; padding:0 4px; margin-bottom:4px;">RECENT</div>
+            <div style="padding:5px 8px; color:#6b5e52; font-size:11px;">AppShell 重构</div>
+            <div style="padding:5px 8px; color:#6b5e52; font-size:11px;">NavRail P0</div>
+          </div>
+        </div>
+        <!-- Chat area -->
+        <div style="flex:1; display:flex; flex-direction:column; background:#faf8f4;">
+          <div style="flex:1; padding:14px 16px; display:flex; flex-direction:column; gap:10px; justify-content:flex-end;">
+            <div style="display:flex; justify-content:flex-end;">
+              <div style="background:#ede8df; border-radius:14px 14px 2px 14px; padding:8px 12px; color:#2d2520; max-width:75%;">帮我重构 AppShell</div>
+            </div>
+            <div style="display:flex; gap:8px; align-items:flex-start;">
+              <div style="width:22px;height:22px;background:#c9a882;border-radius:50%;flex-shrink:0;margin-top:1px;"></div>
+              <div style="background:#fff; border-radius:2px 14px 14px 14px; padding:8px 12px; color:#2d2520; box-shadow:0 1px 4px rgba(0,0,0,0.06);">好的，我来分析一下当前结构...</div>
+            </div>
+          </div>
+          <div style="padding:10px 14px; border-top:1px solid #e8e2d8;">
+            <div style="background:#fff; border:1px solid #dcd6ce; border-radius:10px; padding:7px 12px; color:#c0b8ae;">发送消息...</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>A · 暖米色（纯 Claude Desktop）</h3>
+      <p>米白 + 奶油棕 + 深棕文字，和 Claude Desktop 几乎一致。有温度感，适合长时间使用不疲惫。需要同时维护浅色/深色两套主题。</p>
+    </div>
+  </div>
+
+  <!-- Option B: Dark + warm accents -->
+  <div class="card" data-choice="dark-warm" onclick="toggleSelect(this)">
+    <div class="card-image" style="background:#141210; border-radius:6px 6px 0 0; overflow:hidden; height:200px;">
+      <div style="display:flex; height:100%; font-family:-apple-system,sans-serif; font-size:11px;">
+        <!-- Sidebar -->
+        <div style="width:200px; background:#1a1714; border-right:1px solid #2e2a26; padding:0; display:flex; flex-direction:column;">
+          <div style="padding:14px 14px 8px; font-size:13px; font-weight:700; color:#ede8e1;">HappyCode</div>
+          <div style="padding:4px 10px 4px 10px;">
+            <div style="padding:6px 10px; background:rgba(206,178,145,0.12); border-radius:6px; color:#ceb291; font-weight:500; border-left:2px solid #ceb291; margin-bottom:2px;">Chat</div>
+            <div style="padding:6px 10px; color:#7a7065; margin-bottom:2px;">Sessions</div>
+            <div style="padding:6px 10px; color:#7a7065;">Settings</div>
+          </div>
+          <div style="margin-top:12px; padding:0 10px;">
+            <div style="font-size:10px; color:#5a5248; letter-spacing:0.06em; padding:0 4px; margin-bottom:4px;">RECENT</div>
+            <div style="padding:5px 8px; color:#7a7065; font-size:11px;">AppShell 重构</div>
+            <div style="padding:5px 8px; color:#7a7065; font-size:11px;">NavRail P0</div>
+          </div>
+        </div>
+        <!-- Chat area -->
+        <div style="flex:1; display:flex; flex-direction:column; background:#141210;">
+          <div style="flex:1; padding:14px 16px; display:flex; flex-direction:column; gap:10px; justify-content:flex-end;">
+            <div style="display:flex; justify-content:flex-end;">
+              <div style="background:#242018; border:1px solid #3a3428; border-radius:14px 14px 2px 14px; padding:8px 12px; color:#ede8e1; max-width:75%;">帮我重构 AppShell</div>
+            </div>
+            <div style="display:flex; gap:8px; align-items:flex-start;">
+              <div style="width:22px;height:22px;background:#ceb291;border-radius:50%;flex-shrink:0;margin-top:1px;"></div>
+              <div style="background:#1c1a17; border-radius:2px 14px 14px 14px; padding:8px 12px; color:#d4cfc8;">好的，我来分析一下当前结构...</div>
+            </div>
+          </div>
+          <div style="padding:10px 14px; border-top:1px solid #2a2622;">
+            <div style="background:#1c1a17; border:1px solid #2e2a26; border-radius:10px; padding:7px 12px; color:#4a4540;">发送消息...</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>B · 深色 + 暖调 Accent（推荐）</h3>
+      <p>把当前 Indigo 蓝换成暖沙金/棕色 Accent，背景从冷黑变为暖黑（带一点棕调）。既保留开发者习惯的深色模式，又有 Claude Desktop 的温暖气质。改动量适中。</p>
+    </div>
+  </div>
+
+  <!-- Option C: Keep dark + Claude layout only -->
+  <div class="card" data-choice="dark-keep" onclick="toggleSelect(this)">
+    <div class="card-image" style="background:#0f0f11; border-radius:6px 6px 0 0; overflow:hidden; height:200px;">
+      <div style="display:flex; height:100%; font-family:-apple-system,sans-serif; font-size:11px;">
+        <!-- Sidebar -->
+        <div style="width:200px; background:#131316; border-right:1px solid #2a2a32; padding:0; display:flex; flex-direction:column;">
+          <div style="padding:14px 14px 8px; font-size:13px; font-weight:700; color:#e8e8ec;">HappyCode</div>
+          <div style="padding:4px 10px 4px 10px;">
+            <div style="padding:6px 10px; background:rgba(99,102,241,0.12); border-radius:6px; color:#818cf8; font-weight:500; border-left:2px solid #6366f1; margin-bottom:2px;">Chat</div>
+            <div style="padding:6px 10px; color:#8b8b9e; margin-bottom:2px;">Sessions</div>
+            <div style="padding:6px 10px; color:#8b8b9e;">Settings</div>
+          </div>
+          <div style="margin-top:12px; padding:0 10px;">
+            <div style="font-size:10px; color:#4a4a5e; letter-spacing:0.06em; padding:0 4px; margin-bottom:4px;">RECENT</div>
+            <div style="padding:5px 8px; color:#8b8b9e; font-size:11px;">AppShell 重构</div>
+            <div style="padding:5px 8px; color:#8b8b9e; font-size:11px;">NavRail P0</div>
+          </div>
+        </div>
+        <!-- Chat area -->
+        <div style="flex:1; display:flex; flex-direction:column; background:#0f0f11;">
+          <div style="flex:1; padding:14px 16px; display:flex; flex-direction:column; gap:10px; justify-content:flex-end;">
+            <div style="display:flex; justify-content:flex-end;">
+              <div style="background:#1e1e2e; border:1px solid #3a3a4e; border-radius:14px 14px 2px 14px; padding:8px 12px; color:#e8e8ec; max-width:75%;">帮我重构 AppShell</div>
+            </div>
+            <div style="display:flex; gap:8px; align-items:flex-start;">
+              <div style="width:22px;height:22px;background:#6366f1;border-radius:50%;flex-shrink:0;margin-top:1px;"></div>
+              <div style="background:#1a1a22; border-radius:2px 14px 14px 14px; padding:8px 12px; color:#c9c9e0;">好的，我来分析一下当前结构...</div>
+            </div>
+          </div>
+          <div style="padding:10px 14px; border-top:1px solid #2a2a32;">
+            <div style="background:#1a1a22; border:1px solid #2a2a32; border-radius:10px; padding:7px 12px; color:#3a3a4e;">发送消息...</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>C · 保留当前深色调，只借鉴布局</h3>
+      <p>颜色不变（Indigo 深色），只把 NavRail 图标栏换成宽侧边栏，加入会话列表和项目信息。视觉改动最小，布局感觉像 Claude Desktop。</p>
+    </div>
+  </div>
+
+</div>

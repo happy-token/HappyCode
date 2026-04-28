@@ -1,0 +1,57 @@
+import React, { useEffect } from 'react'
+import { useSettingsStore } from '../../store/settings-store'
+import { GeneralSettings } from './GeneralSettings'
+import { PermissionSettings } from './PermissionSettings'
+import { ProviderSettings } from './ProviderSettings'
+import { AgentSettings } from './AgentSettings'
+import { SkillSettings } from './SkillSettings'
+import { PluginSettings } from './PluginSettings'
+import { ComputerUseSettings } from './ComputerUseSettings'
+import { ExportSettings } from './ExportSettings'
+import { AboutSettings } from './AboutSettings'
+import { McpSettings } from '../mcp/McpPage'
+import { HooksPanel } from '../hooks/HooksPanel'
+import { ClaudeCodeSettings } from './ClaudeCodeSettings'
+import { AnimatedGridPattern } from '@renderer/components/ui/animated-grid-pattern'
+
+export function SettingsLayout(): React.JSX.Element {
+  const activeTab = useSettingsStore((s) => s.activeTab)
+  const pendingTab = useSettingsStore((s) => s.pendingTab)
+  const setPendingTab = useSettingsStore((s) => s.setPendingTab)
+
+  useEffect(() => {
+    if (!pendingTab) return
+    setPendingTab(null)
+  }, [pendingTab, setPendingTab])
+
+  return (
+    <div className="flex flex-1 flex-col overflow-hidden">
+      {activeTab === 'hooks' ? (
+        <HooksPanel />
+      ) : (
+        <div className="relative flex-1 overflow-y-auto px-8 py-6">
+          <AnimatedGridPattern
+            numSquares={18}
+            maxOpacity={0.035}
+            duration={5}
+            className="[mask-image:radial-gradient(600px_circle_at_50%_0%,white,transparent)]"
+          />
+          <div className="mb-2 text-[11px] uppercase tracking-[0.1em] text-[var(--color-text-faint)]">
+            设置
+          </div>
+          {activeTab === 'general' && <GeneralSettings />}
+          {activeTab === 'permissions' && <PermissionSettings />}
+          {activeTab === 'providers' && <ProviderSettings />}
+          {activeTab === 'mcp' && <McpSettings />}
+          {activeTab === 'agents' && <AgentSettings />}
+          {activeTab === 'skills' && <SkillSettings />}
+          {activeTab === 'plugins' && <PluginSettings />}
+          {activeTab === 'computerUse' && <ComputerUseSettings />}
+          {activeTab === 'claudeCode' && <ClaudeCodeSettings />}
+          {activeTab === 'export' && <ExportSettings />}
+          {activeTab === 'about' && <AboutSettings />}
+        </div>
+      )}
+    </div>
+  )
+}

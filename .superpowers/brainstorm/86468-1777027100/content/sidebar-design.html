@@ -1,0 +1,136 @@
+<h2>第二层：侧边栏结构设计</h2>
+<p class="subtitle">NavRail（48px 图标栏）→ Sidebar（220px 宽侧边栏），三个区域</p>
+
+<div class="split">
+
+  <!-- Before -->
+  <div class="mockup">
+    <div class="mockup-header">改前 — NavRail（48px）</div>
+    <div class="mockup-body" style="background:#0f0f11; padding:0; height:340px; overflow:hidden;">
+      <div style="display:flex; height:100%; font-family:-apple-system,sans-serif; font-size:11px;">
+        <!-- Current NavRail -->
+        <div style="width:48px; background:#1a1a1f; border-right:1px solid #2e2e35; display:flex; flex-direction:column; align-items:center; padding:8px 0; gap:2px;">
+          <div style="position:relative; width:40px; height:40px; display:flex; align-items:center; justify-content:center; background:rgba(129,140,248,0.12); border-radius:4px; color:#818cf8;">
+            <span style="position:absolute;left:0;top:8px;bottom:8px;width:2px;background:#6366f1;border-radius:0 2px 2px 0;"></span>
+            💬
+          </div>
+          <div style="width:40px; height:40px; display:flex; align-items:center; justify-content:center; color:#5a5a6e;">📋</div>
+          <div style="width:40px; height:40px; display:flex; align-items:center; justify-content:center; color:#5a5a6e;">🔌</div>
+          <div style="width:40px; height:40px; display:flex; align-items:center; justify-content:center; color:#5a5a6e;">⚡</div>
+          <div style="width:40px; height:40px; display:flex; align-items:center; justify-content:center; color:#5a5a6e;">🔗</div>
+          <div style="flex:1;"></div>
+          <div style="width:40px; height:40px; display:flex; align-items:center; justify-content:center; color:#5a5a6e;">⚙</div>
+        </div>
+        <!-- Content placeholder -->
+        <div style="flex:1; background:#0f0f11; padding:12px; display:flex; flex-direction:column; gap:8px;">
+          <div style="height:14px; background:#1a1a1f; border-radius:3px; width:60%;"></div>
+          <div style="height:14px; background:#1a1a1f; border-radius:3px; width:80%;"></div>
+          <div style="height:14px; background:#1a1a1f; border-radius:3px; width:50%;"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- After -->
+  <div class="mockup">
+    <div class="mockup-header">改后 — Sidebar（220px）</div>
+    <div class="mockup-body" style="background:#faf8f4; padding:0; height:340px; overflow:hidden;">
+      <div style="display:flex; height:100%; font-family:-apple-system,sans-serif; font-size:11px;">
+        <!-- New Sidebar -->
+        <div style="width:220px; background:#f0ece5; border-right:1px solid #e2ddd5; display:flex; flex-direction:column;">
+
+          <!-- Zone 1: App header -->
+          <div style="padding:14px 14px 10px; border-bottom:1px solid #e2ddd5; flex-shrink:0;">
+            <div style="font-size:14px; font-weight:700; color:#1c1612; letter-spacing:-0.01em;">HappyCode</div>
+          </div>
+
+          <!-- Zone 2: Navigation -->
+          <div style="padding:8px 8px 6px; border-bottom:1px solid #e2ddd5; flex-shrink:0;">
+            <div style="display:flex; align-items:center; gap:8px; padding:6px 10px; background:#e6e0d6; border-radius:7px; margin-bottom:2px; border-left:2px solid #a0866a;">
+              <span style="font-size:13px;">💬</span>
+              <span style="color:#2d2520; font-weight:600; font-size:12px;">Chat</span>
+            </div>
+            <div style="display:flex; align-items:center; gap:8px; padding:6px 10px; border-radius:7px; margin-bottom:2px;">
+              <span style="font-size:13px; opacity:0.6;">📋</span>
+              <span style="color:#6b5e52; font-size:12px;">Sessions</span>
+            </div>
+            <div style="display:flex; align-items:center; gap:8px; padding:6px 10px; border-radius:7px; margin-bottom:2px;">
+              <span style="font-size:13px; opacity:0.6;">🔌</span>
+              <span style="color:#6b5e52; font-size:12px;">MCP</span>
+            </div>
+            <div style="display:flex; align-items:center; gap:8px; padding:6px 10px; border-radius:7px; margin-bottom:2px;">
+              <span style="font-size:13px; opacity:0.6;">⚡</span>
+              <span style="color:#6b5e52; font-size:12px;">Skills</span>
+            </div>
+            <div style="display:flex; align-items:center; gap:8px; padding:6px 10px; border-radius:7px;">
+              <span style="font-size:13px; opacity:0.6;">🔗</span>
+              <span style="color:#6b5e52; font-size:12px;">Hooks</span>
+            </div>
+          </div>
+
+          <!-- Zone 3: Project + Recent sessions -->
+          <div style="flex:1; overflow:hidden; display:flex; flex-direction:column; padding:8px 8px 0;">
+            <!-- Project path -->
+            <div style="padding:5px 10px; background:#e6e0d6; border-radius:6px; margin-bottom:10px; display:flex; align-items:center; gap:6px;">
+              <span style="color:#a8998a; font-size:11px;">📁</span>
+              <span style="font-family:monospace; font-size:10px; color:#6b5e52; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">~/HappyCode</span>
+            </div>
+            <!-- Recent -->
+            <div style="font-size:10px; color:#a8998a; letter-spacing:0.07em; text-transform:uppercase; padding:0 4px; margin-bottom:5px; flex-shrink:0;">Recent</div>
+            <div style="flex:1; overflow:hidden; display:flex; flex-direction:column; gap:1px;">
+              <div style="padding:7px 10px; background:#e6e0d6; border-radius:7px;">
+                <div style="color:#2d2520; font-weight:500; margin-bottom:2px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">AppShell 重构</div>
+                <div style="color:#a8998a; font-size:10px;">~/HappyCode · 刚刚</div>
+              </div>
+              <div style="padding:7px 10px; border-radius:7px;">
+                <div style="color:#4d3d30; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">NavRail 布局调整</div>
+                <div style="color:#a8998a; font-size:10px;">~/HappyCode · 1小时前</div>
+              </div>
+              <div style="padding:7px 10px; border-radius:7px;">
+                <div style="color:#4d3d30; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">Voice Input 集成</div>
+                <div style="color:#a8998a; font-size:10px;">~/HappyCode · 昨天</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Bottom: New chat + Settings -->
+          <div style="border-top:1px solid #e2ddd5; padding:8px; display:flex; align-items:center; gap:6px; flex-shrink:0;">
+            <button style="flex:1; padding:6px 10px; background:#e6e0d6; border:none; border-radius:7px; color:#4d3d30; font-size:12px; cursor:pointer; text-align:left;">＋ 新对话</button>
+            <div style="width:30px; height:30px; background:#e6e0d6; border-radius:7px; display:flex; align-items:center; justify-content:center; color:#8c7d6e;">⚙</div>
+          </div>
+        </div>
+
+        <!-- Content placeholder -->
+        <div style="flex:1; background:#faf8f4; padding:14px; display:flex; flex-direction:column; gap:8px;">
+          <div style="height:13px; background:#ede8df; border-radius:3px; width:65%;"></div>
+          <div style="height:13px; background:#ede8df; border-radius:3px; width:80%;"></div>
+          <div style="height:13px; background:#ede8df; border-radius:3px; width:50%;"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div class="section" style="margin-top:20px;">
+  <h3>组件改动说明</h3>
+  <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:10px; font-size:12px;">
+    <div style="padding:12px; background:rgba(160,134,106,0.06); border-radius:8px; border:1px solid rgba(160,134,106,0.15);">
+      <div style="font-weight:600; color:#4d3d30; margin-bottom:6px;">改动文件</div>
+      <div style="color:#6b5e52; line-height:1.8;">
+        • <code style="background:rgba(160,134,106,0.1);padding:1px 4px;border-radius:3px;">NavRail.tsx</code> → 重命名为 <code style="background:rgba(160,134,106,0.1);padding:1px 4px;border-radius:3px;">Sidebar.tsx</code><br>
+        • <code style="background:rgba(160,134,106,0.1);padding:1px 4px;border-radius:3px;">AppShell.tsx</code> 更新引用<br>
+        • <code style="background:rgba(160,134,106,0.1);padding:1px 4px;border-radius:3px;">CwdPicker.tsx</code> 移入 Sidebar
+      </div>
+    </div>
+    <div style="padding:12px; background:rgba(160,134,106,0.06); border-radius:8px; border:1px solid rgba(160,134,106,0.15);">
+      <div style="font-weight:600; color:#4d3d30; margin-bottom:6px;">新增功能</div>
+      <div style="color:#6b5e52; line-height:1.8;">
+        • 读取 Sessions 历史显示在侧边栏<br>
+        • 点击历史会话恢复到对应 Chat<br>
+        • "＋ 新对话" 按钮<br>
+        • Settings 移到底部角落图标
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,146 @@
+- generic [ref=e1]:
+  - generic [ref=e2]:
+    - generic [ref=e6]:
+      - complementary [ref=e8]:
+        - link "Skip to content" [ref=e9]:
+          - /url: "#dframe-main"
+        - separator "Resize sidebar" [ref=e11]
+        - generic:
+          - generic: Click to collapse⌘B
+          - generic: Drag to resize
+        - generic [ref=e13]:
+          - generic [ref=e14]:
+            - link "Claude Code" [ref=e15]:
+              - /url: /code
+              - img "Claude Code" [ref=e16]
+            - generic [ref=e27]: Research preview
+          - button "Collapse sidebar" [ref=e30]:
+            - generic [ref=e31]: 
+          - button "Search" [ref=e34]:
+            - generic [ref=e35]: 
+        - generic [ref=e36]:
+          - generic [ref=e37]:
+            - generic [ref=e38]:
+              - button "New session ⇧⌘O" [ref=e39]:
+                - generic [ref=e41]: 
+                - text: New session
+                - generic [ref=e42]: ⇧⌘O
+              - button "Routines" [ref=e43]:
+                - generic [ref=e45]: 
+                - generic [ref=e46]: Routines
+              - button "Customize" [ref=e47]:
+                - generic [ref=e49]: 
+                - generic [ref=e50]: Customize
+              - button "More navigation items" [ref=e51]:
+                - generic [ref=e53]: 
+                - generic [ref=e54]: More
+            - generic [ref=e58]:
+              - generic [ref=e59]:
+                - button "Pinned" [expanded] [ref=e62]:
+                  - generic [ref=e63]: Pinned
+                  - generic [ref=e64]: 
+                - generic [ref=e65]:
+                  - img [ref=e68]
+                  - generic [ref=e70]: Drag to pin
+              - generic [ref=e72]:
+                - generic [ref=e74]:
+                  - button "Recents" [expanded] [ref=e75]:
+                    - generic [ref=e76]: Recents
+                    - generic [ref=e77]: 
+                  - button "Filter" [ref=e78]:
+                    - generic [ref=e79]: 
+                - generic [ref=e80]:
+                  - generic [ref=e83]:
+                    - button "Awaiting input General coding session" [ref=e84]:
+                      - status "Awaiting input" [ref=e86]
+                      - generic [ref=e89]: General coding session
+                    - generic:
+                      - button "More options for General coding session":
+                        - generic:
+                          - img
+                  - generic [ref=e92]:
+                    - button "Ready Dispatch background conversation" [ref=e93]:
+                      - status "Ready" [ref=e95]
+                      - generic [ref=e98]: Dispatch background conversation
+                    - generic:
+                      - button "More options for Dispatch background conversation":
+                        - generic:
+                          - img
+          - generic [ref=e99]:
+            - button "Thinkre" [ref=e101]:
+              - generic [ref=e103]: 
+              - generic [ref=e104]: Thinkre
+            - generic [ref=e105]:
+              - button "Appearance" [ref=e106]:
+                - generic [ref=e109]: 
+              - button "Exit beta — back to classic Code" [ref=e110]:
+                - generic [ref=e111]: 
+      - main [ref=e112]:
+        - region "Primary pane" [ref=e115]:
+          - generic [ref=e120]:
+            - generic [ref=e126]:
+              - generic [ref=e130]:
+                - img [ref=e131]
+                - heading "Welcome back, Thinkre" [level=1] [ref=e133]
+              - generic [ref=e134]:
+                - generic [ref=e139]:
+                  - heading "Sessions" [level=2] [ref=e141]
+                  - list [ref=e142]:
+                    - listitem [ref=e143]:
+                      - button "Open session General coding session" [ref=e144]:
+                        - generic [ref=e145]:
+                          - generic [ref=e149]: Needs input
+                          - generic [ref=e151]: General coding session
+                        - generic [ref=e152]:
+                          - generic [ref=e153]: Thinkre/RimeWubi
+                          - generic [ref=e154]: 1h
+                          - img [ref=e155]
+                    - listitem [ref=e157]:
+                      - button "Open session Dispatch background conversation" [ref=e158]:
+                        - generic [ref=e159]:
+                          - generic [ref=e163]: Unread
+                          - generic [ref=e165]: Dispatch background conversation
+                        - generic [ref=e166]:
+                          - generic [ref=e167]: 1w
+                          - img [ref=e168]
+                - generic [ref=e170]:
+                  - button:
+                    - img
+                  - generic [ref=e171]:
+                    - button "test" [ref=e172]:
+                      - img [ref=e173]
+                      - generic [ref=e175]: test
+                    - button "Select repo…" [ref=e176]:
+                      - img [ref=e177]
+                      - generic [ref=e179]: Select repo…
+                    - textbox [ref=e180]
+                  - button [ref=e181]:
+                    - img [ref=e183]
+                  - generic [ref=e278]:
+                    - generic "Prompt" [active] [ref=e280]:
+                      - paragraph [ref=e281]: Describe a task or ask a question
+                    - button "Send" [disabled] [ref=e283]:
+                      - img [ref=e285]
+                  - generic [ref=e287]:
+                    - generic [ref=e288]:
+                      - button "Accept edits" [ref=e289]:
+                        - generic [ref=e290]: Accept edits
+                      - button "Transcript view mode" [ref=e291]:
+                        - img [ref=e293]
+                      - button "Add" [ref=e295]:
+                        - img [ref=e297]
+                      - group "Dictation" [ref=e299]:
+                        - button "Press and hold to record" [ref=e300]:
+                          - img [ref=e301]
+                        - button "Dictation settings" [ref=e303]:
+                          - img [ref=e304]
+                    - generic [ref=e306]:
+                      - button "Sonnet 4.6" [ref=e307]:
+                        - generic [ref=e308]: Sonnet 4.6
+                      - 'button "Usage: plan 93%" [ref=e309]':
+                        - img [ref=e311]
+            - generic [ref=e314]: Arrow keys move the tile. Perpendicular arrows preview a split; press Enter to commit or Escape to cancel.
+            - status [ref=e315]
+    - region "Notifications (F8)":
+      - list
+  - generic "flow-ai-assistant"

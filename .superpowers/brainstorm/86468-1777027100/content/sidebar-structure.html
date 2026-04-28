@@ -1,0 +1,142 @@
+<h2>侧边栏主要放什么？</h2>
+<p class="subtitle">Claude Desktop 的侧边栏以会话列表为核心——但你的 App 有 6 个功能区。导航怎么和会话列表共存？</p>
+
+<div class="cards">
+
+  <!-- Option A: Sessions-first like Claude Desktop -->
+  <div class="card" data-choice="sessions-first" onclick="toggleSelect(this)">
+    <div class="card-image" style="background:#faf8f4; border-radius:6px 6px 0 0; overflow:hidden; height:240px;">
+      <div style="display:flex; height:100%; font-family:-apple-system,sans-serif; font-size:11px;">
+        <div style="width:210px; background:#f0ece5; border-right:1px solid #e2ddd5; display:flex; flex-direction:column;">
+          <!-- Top: app title + new chat button -->
+          <div style="padding:12px 12px 8px; display:flex; align-items:center; gap:8px; border-bottom:1px solid #e2ddd5;">
+            <span style="font-size:13px; font-weight:700; color:#1c1612; flex:1;">HappyCode</span>
+            <div style="width:22px;height:22px;background:#d6cfc4;border-radius:5px;display:flex;align-items:center;justify-content:center;color:#6b5e52;font-size:14px;">+</div>
+          </div>
+          <!-- Sessions list fills the sidebar -->
+          <div style="flex:1; padding:6px 8px; overflow:hidden;">
+            <div style="font-size:10px; color:#a8998a; letter-spacing:0.06em; padding:4px 6px; margin-bottom:2px;">今天</div>
+            <div style="padding:7px 8px; background:#e6e0d6; border-radius:7px; margin-bottom:2px;">
+              <div style="color:#2d2520; font-weight:500; margin-bottom:2px;">AppShell 重构</div>
+              <div style="color:#a8998a; font-size:10px;">~/HappyCode · 刚刚</div>
+            </div>
+            <div style="padding:7px 8px; border-radius:7px; margin-bottom:2px;">
+              <div style="color:#4d3d30;">NavRail 布局调整</div>
+              <div style="color:#a8998a; font-size:10px;">~/HappyCode · 1小时前</div>
+            </div>
+            <div style="font-size:10px; color:#a8998a; letter-spacing:0.06em; padding:4px 6px; margin:6px 0 2px;">昨天</div>
+            <div style="padding:7px 8px; border-radius:7px; margin-bottom:2px;">
+              <div style="color:#4d3d30;">Voice Input 集成</div>
+              <div style="color:#a8998a; font-size:10px;">~/HappyCode · 昨天</div>
+            </div>
+            <div style="padding:7px 8px; border-radius:7px;">
+              <div style="color:#4d3d30;">Export CSV 修复</div>
+              <div style="color:#a8998a; font-size:10px;">~/HappyCode · 昨天</div>
+            </div>
+          </div>
+          <!-- Bottom nav: Settings etc as bottom icons -->
+          <div style="border-top:1px solid #e2ddd5; padding:6px 8px; display:flex; gap:4px;">
+            <div style="width:28px;height:28px;background:#e6e0d6;border-radius:6px;display:flex;align-items:center;justify-content:center;color:#8c7d6e;font-size:12px;">⚙</div>
+            <div style="width:28px;height:28px;border-radius:6px;display:flex;align-items:center;justify-content:center;color:#a8998a;font-size:12px;">🔌</div>
+            <div style="width:28px;height:28px;border-radius:6px;display:flex;align-items:center;justify-content:center;color:#a8998a;font-size:12px;">⚡</div>
+            <div style="width:28px;height:28px;border-radius:6px;display:flex;align-items:center;justify-content:center;color:#a8998a;font-size:12px;">🔗</div>
+          </div>
+        </div>
+        <!-- Main chat -->
+        <div style="flex:1; display:flex; flex-direction:column; background:#faf8f4; padding:12px 14px;">
+          <div style="flex:1; display:flex;flex-direction:column;justify-content:flex-end;gap:8px;">
+            <div style="text-align:right;"><div style="display:inline-block;background:#ede8df;border-radius:14px 14px 2px 14px;padding:7px 12px;color:#2d2520;">帮我重构 AppShell</div></div>
+            <div style="display:flex;gap:7px;align-items:flex-start;"><div style="width:20px;height:20px;background:#c9a882;border-radius:50%;flex-shrink:0;margin-top:1px;"></div><div style="background:#fff;border-radius:2px 14px 14px 14px;padding:7px 11px;color:#2d2520;box-shadow:0 1px 3px rgba(0,0,0,0.06);">好的，我来看看...</div></div>
+          </div>
+          <div style="margin-top:10px;background:#fff;border:1px solid #dcd6ce;border-radius:10px;padding:7px 10px;color:#c0b8ae;">发送消息...</div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>A · 会话列表为主（最像 Claude Desktop）</h3>
+      <p>侧边栏 90% 空间是会话历史。Settings / MCP / Skills / Hooks 缩为底部小图标，点击展开独立页面。强调"对话即产品"的设计理念。</p>
+    </div>
+  </div>
+
+  <!-- Option B: Nav sections + sessions -->
+  <div class="card" data-choice="nav-sections" onclick="toggleSelect(this)">
+    <div class="card-image" style="background:#faf8f4; border-radius:6px 6px 0 0; overflow:hidden; height:240px;">
+      <div style="display:flex; height:100%; font-family:-apple-system,sans-serif; font-size:11px;">
+        <div style="width:210px; background:#f0ece5; border-right:1px solid #e2ddd5; display:flex; flex-direction:column;">
+          <div style="padding:12px 12px 8px; font-size:13px; font-weight:700; color:#1c1612; border-bottom:1px solid #e2ddd5;">HappyCode</div>
+          <!-- Navigation sections at top -->
+          <div style="padding:6px 8px; border-bottom:1px solid #e2ddd5;">
+            <div style="padding:6px 8px; background:#e6e0d6; border-radius:6px; color:#2d2520; font-weight:500; margin-bottom:1px;">💬 Chat</div>
+            <div style="padding:6px 8px; color:#6b5e52; margin-bottom:1px;">📋 Sessions</div>
+            <div style="padding:6px 8px; color:#6b5e52; margin-bottom:1px;">🔌 MCP</div>
+            <div style="padding:6px 8px; color:#6b5e52;">⚙ Settings</div>
+          </div>
+          <!-- Sessions below nav -->
+          <div style="flex:1; padding:6px 8px; overflow:hidden;">
+            <div style="font-size:10px; color:#a8998a; letter-spacing:0.06em; padding:4px 6px; margin-bottom:2px;">RECENT CHATS</div>
+            <div style="padding:6px 8px; background:#e6e0d6; border-radius:6px; margin-bottom:2px;">
+              <div style="color:#2d2520; font-weight:500;">AppShell 重构</div>
+            </div>
+            <div style="padding:6px 8px; border-radius:6px; margin-bottom:2px;"><div style="color:#4d3d30;">NavRail 布局</div></div>
+            <div style="padding:6px 8px; border-radius:6px;"><div style="color:#4d3d30;">Voice Input</div></div>
+          </div>
+        </div>
+        <!-- Main chat -->
+        <div style="flex:1; display:flex; flex-direction:column; background:#faf8f4; padding:12px 14px;">
+          <div style="flex:1; display:flex;flex-direction:column;justify-content:flex-end;gap:8px;">
+            <div style="text-align:right;"><div style="display:inline-block;background:#ede8df;border-radius:14px 14px 2px 14px;padding:7px 12px;color:#2d2520;">帮我重构 AppShell</div></div>
+            <div style="display:flex;gap:7px;align-items:flex-start;"><div style="width:20px;height:20px;background:#c9a882;border-radius:50%;flex-shrink:0;margin-top:1px;"></div><div style="background:#fff;border-radius:2px 14px 14px 14px;padding:7px 11px;color:#2d2520;box-shadow:0 1px 3px rgba(0,0,0,0.06);">好的，我来看看...</div></div>
+          </div>
+          <div style="margin-top:10px;background:#fff;border:1px solid #dcd6ce;border-radius:10px;padding:7px 10px;color:#c0b8ae;">发送消息...</div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>B · 导航 + 会话列表两段式</h3>
+      <p>上半部是 6 个功能区导航，下半部是最近会话列表。两个功能都可见，但侧边栏会稍显拥挤，需要精心设计分组。</p>
+    </div>
+  </div>
+
+  <!-- Option C: Context-aware sidebar -->
+  <div class="card" data-choice="context-aware" onclick="toggleSelect(this)">
+    <div class="card-image" style="background:#faf8f4; border-radius:6px 6px 0 0; overflow:hidden; height:240px;">
+      <div style="display:flex; height:100%; font-family:-apple-system,sans-serif; font-size:11px;">
+        <!-- Narrow icon rail -->
+        <div style="width:48px; background:#ede8e0; border-right:1px solid #e2ddd5; display:flex;flex-direction:column;align-items:center;padding:10px 0;gap:4px;">
+          <div style="width:32px;height:32px;background:#d6cfc4;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px;border-bottom:2px solid #a0866a;">💬</div>
+          <div style="width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px;color:#a8998a;">📋</div>
+          <div style="width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px;color:#a8998a;">🔌</div>
+          <div style="width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px;color:#a8998a;">⚡</div>
+          <div style="flex:1;"></div>
+          <div style="width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px;color:#a8998a;">⚙</div>
+        </div>
+        <!-- Context panel: shows sessions when on Chat -->
+        <div style="width:160px; background:#f5f1eb; border-right:1px solid #e2ddd5; display:flex;flex-direction:column;">
+          <div style="padding:10px 10px 6px; font-size:10px; color:#a8998a; letter-spacing:0.06em;">CHAT HISTORY</div>
+          <div style="flex:1; padding:0 6px; overflow:hidden;">
+            <div style="padding:6px 8px; background:#e6e0d6; border-radius:6px; margin-bottom:2px;">
+              <div style="color:#2d2520; font-weight:500; margin-bottom:1px;">AppShell 重构</div>
+              <div style="color:#a8998a; font-size:10px;">刚刚</div>
+            </div>
+            <div style="padding:6px 8px; border-radius:6px; margin-bottom:2px;"><div style="color:#4d3d30;">NavRail 布局</div><div style="color:#a8998a;font-size:10px;">1小时前</div></div>
+            <div style="padding:6px 8px; border-radius:6px;"><div style="color:#4d3d30;">Voice Input</div><div style="color:#a8998a;font-size:10px;">昨天</div></div>
+          </div>
+          <div style="padding:6px 8px; border-top:1px solid #e2ddd5; font-size:10px; color:#a8998a;">+ 新对话</div>
+        </div>
+        <!-- Main chat -->
+        <div style="flex:1; display:flex; flex-direction:column; background:#faf8f4; padding:12px 12px;">
+          <div style="flex:1; display:flex;flex-direction:column;justify-content:flex-end;gap:8px;">
+            <div style="text-align:right;"><div style="display:inline-block;background:#ede8df;border-radius:14px 14px 2px 14px;padding:6px 10px;color:#2d2520;">帮我重构 AppShell</div></div>
+            <div style="display:flex;gap:6px;align-items:flex-start;"><div style="width:18px;height:18px;background:#c9a882;border-radius:50%;flex-shrink:0;margin-top:1px;"></div><div style="background:#fff;border-radius:2px 12px 12px 12px;padding:6px 10px;color:#2d2520;box-shadow:0 1px 3px rgba(0,0,0,0.06);">好的，我来看看...</div></div>
+          </div>
+          <div style="margin-top:8px;background:#fff;border:1px solid #dcd6ce;border-radius:8px;padding:6px 10px;color:#c0b8ae;">发送消息...</div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>C · 图标栏 + 上下文面板（两列侧边栏）</h3>
+      <p>保留现有 NavRail 图标栏，右边加一个"上下文面板"——在 Chat 页显示会话列表，在 MCP 页显示服务列表，根据当前页动态切换内容。VS Code 的经典模式。</p>
+    </div>
+  </div>
+
+</div>
