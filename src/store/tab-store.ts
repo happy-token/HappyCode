@@ -351,7 +351,7 @@ export const useTabStore = create<TabStoreState>()(
         // Never reload the session whose history is already loaded while a follow-up is
         // active — reloading the origin session would change tab.sessionId and break
         // in-flight event routing for the running follow-up.
-        if (existing.loadedFromSessionId === sessionId) return
+        if (existing.loadedFromSessionId === sessionId && existing.messages.length > 0) return
       }
       if (existing && existing.status === 'done') {
         // When a follow-up has completed, protect it from reloading too.  Its JSONL only
@@ -373,7 +373,8 @@ export const useTabStore = create<TabStoreState>()(
         tab.pendingPermission = null
       })
       try {
-        const { messages: rawMessages, usage } = await window.electron.loadSessionMessages(encodedPath, sessionId)
+        const result = await window.electron.loadSessionMessages(encodedPath, sessionId)
+        const { messages: rawMessages, usage } = result
         const uiMessages: UIMessage[] = []
         for (const m of rawMessages) {
           if (m.role === 'user') {
@@ -400,7 +401,8 @@ export const useTabStore = create<TabStoreState>()(
           const tab = s.tabs.find((t) => t.tabId === tabId)
           if (tab) tab.messages = uiMessages
         })
-      } catch {
+      } catch (err) {
+        console.error('[tab-store] loadAndResumeSession failed:', err)
         // keep session ready without history
       }
     },
