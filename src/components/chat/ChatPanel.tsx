@@ -1,9 +1,10 @@
-import React, { useEffect, useRef, useState, useCallback } from 'react'
+import React, { useEffect, useRef, useState, useCallback, useMemo } from 'react'
 import type { UIMessage, Attachment } from '../../../electron/shared/types'
 import { useTabStore, selectActiveTab } from '../../store/tab-store'
 import type { PermissionMode } from '../../store/tab-store'
 import { useSubagentStore } from '../../store/subagent-store'
 import { useUiStore } from '../../store/ui-store'
+import { useProviderStore } from '../../store/provider-store'
 import { MessageBubble } from './MessageBubble'
 import { PromptInput } from './PromptInput'
 import { PermissionDialog } from './PermissionDialog'
@@ -11,8 +12,7 @@ import { PermissionSelector } from './PermissionSelector'
 import { HelpPanel } from './HelpPanel'
 import { ChatEmptyState } from './ChatEmptyState'
 import { ClaudemdPanel } from './ClaudemdPanel'
-import { ContextHUD } from './ContextHUD'
-import { X, Database, ArrowUp, ArrowDown } from 'lucide-react'
+import { X, Database, ArrowUp, ArrowDown, Brain } from 'lucide-react'
 import { cn } from '@renderer/lib/utils'
 
 export function ChatPanel(): React.JSX.Element {
@@ -28,7 +28,6 @@ export function ChatPanel(): React.JSX.Element {
   const setModel = useTabStore((s) => s.setModel)
   const setPermissionMode = useTabStore((s) => s.setPermissionMode)
   const startSession = useTabStore((s) => s.startSession)
-  const triggerCompact = useTabStore((s) => s.triggerCompact)
   const abortSession = useTabStore((s) => s.abortSession)
   const respondPermission = useTabStore((s) => s.respondPermission)
   const resetSession = useTabStore((s) => s.resetSession)
@@ -50,15 +49,40 @@ export function ChatPanel(): React.JSX.Element {
   const totalCacheCreationTokens = useTabStore((s) =>
     (selectActiveTab(s)?.messages ?? []).reduce((sum, m) => (m.type === 'done' ? sum + (m.cacheCreationTokens ?? 0) : sum), 0)
   )
-  const lastInputTokens = useTabStore((s) => {
+
+  // Dynamic model options from configured providers
+  const { providers, activeId, fetchProviders } = useProviderStore()
+  useEffect(() => { void fetchProviders() }, [fetchProviders])
+
+  const modelOptions = useMemo(() => {
+    const opts: Array<{ label: string; value: string }> = []
+    const activeProvider = providers.find((p) => p.id === activeId)
+
+    if (activeProvider) {
+      const m = activeProvider.models
+      if (m.main) opts.push({ label: m.main, value: m.main })
+      if (m.haiku && m.haiku !== m.main) opts.push({ label: m.haiku, value: m.haiku })
+      if (m.sonnet && m.sonnet !== m.main) opts.push({ label: m.sonnet, value: m.sonnet })
+      if (m.opus && m.opus !== m.main) opts.push({ label: m.opus, value: m.opus })
+    } else {
+      // Official Anthropic defaults
+      opts.push({ label: 'Claude Opus 4.7', value: 'claude-opus-4-7' })
+      opts.push({ label: 'Claude Sonnet 4.6', value: 'claude-sonnet-4-6' })
+      opts.push({ label: 'Claude Haiku 4.5', value: 'claude-haiku-4-5-20251001' })
+    }
+    return opts
+  }, [providers, activeId])
+
+  const CONTEXT_WINDOW = 200_000
+  const contextPct = useTabStore((s) => {
     const msgs = selectActiveTab(s)?.messages ?? []
-    const last = [...msgs].reverse().find((m) => m.type === 'done')
-    return last?.type === 'done' ? last.inputTokens : 0
-  })
-  const lastOutputTokens = useTabStore((s) => {
-    const msgs = selectActiveTab(s)?.messages ?? []
-    const last = [...msgs].reverse().find((m) => m.type === 'done')
-    return last?.type === 'done' ? last.outputTokens : 0
+    let totalInput = 0
+    for (const m of msgs) {
+      if (m.type === 'done') {
+        totalInput += m.inputTokens + (m.cacheReadTokens ?? 0) + (m.cacheCreationTokens ?? 0)
+      }
+    }
+    return totalInput > 0 ? Math.round((totalInput / CONTEXT_WINDOW) * 100) : 0
   })
 
   const subagentNodes = useSubagentStore((s) => s.nodes)
@@ -77,7 +101,6 @@ export function ChatPanel(): React.JSX.Element {
   const lastAskIdRef = useRef<string | null>(null)
   const [searchQuery, setSearchQuery] = useState('')
   const [showHelp, setShowHelp] = useState(false)
-  const [isHoveringMessages, setIsHoveringMessages] = useState(false)
 
   const projectName = cwd ? (cwd.split('/').pop() ?? 'Task') : 'Task'
 
@@ -167,7 +190,6 @@ export function ChatPanel(): React.JSX.Element {
   function handleSend(prompt: string, attachments?: Attachment[]): void {
     const cmd = prompt.trim().split(/\s+/)[0]?.toLowerCase()
     if (cmd === '/clear') { resetSession(); return }
-    if (cmd === '/compact') { void triggerCompact(); return }
     if (cmd === '/help') { setShowHelp(true); return }
     void startSession(prompt, undefined, attachments)
   }
@@ -204,15 +226,8 @@ export function ChatPanel(): React.JSX.Element {
       {/* Main area */}
       <div className="flex flex-1 overflow-hidden">
         {/* Message list + input column */}
-        <div
-          className={cn('flex flex-1 flex-col overflow-hidden transition-[padding-right] duration-150', sidebarCollapsed ? 'pr-28' : 'pr-0')}
-          onMouseEnter={() => setIsHoveringMessages(true)}
-          onMouseLeave={() => setIsHoveringMessages(false)}
-        >
+        <div className={cn('flex flex-1 flex-col overflow-hidden transition-[padding-right] duration-150', sidebarCollapsed ? 'pr-28' : 'pr-0')}>
           <div className="relative flex-1 overflow-y-auto py-6">
-            {isHoveringMessages && lastInputTokens > 0 && (
-              <ContextHUD inputTokens={lastInputTokens} outputTokens={lastOutputTokens} />
-            )}
             <div className="flex flex-col gap-1" style={{ width: '100%', maxWidth: 720, marginLeft: 'auto', marginRight: 'auto', paddingLeft: 32, paddingRight: 32 }}>
               {messages.length === 0 && (
                 <ChatEmptyState
@@ -251,7 +266,7 @@ export function ChatPanel(): React.JSX.Element {
             </div>
           </div>
 
-          {/* Input + bottom action bar */}
+          {/* Input + session stats bar */}
           <div className="flex-shrink-0 border-t border-[var(--color-border)] bg-[var(--color-surface)]">
             <div style={{ width: '100%', maxWidth: 720, marginLeft: 'auto', marginRight: 'auto', paddingLeft: 32, paddingRight: 32, paddingTop: 10 }}>
               <PromptInput
@@ -262,23 +277,14 @@ export function ChatPanel(): React.JSX.Element {
               />
             </div>
 
-            {/* Bottom action bar */}
-            <div className="flex items-center gap-1" style={{ width: '100%', maxWidth: 720, marginLeft: 'auto', marginRight: 'auto', paddingLeft: 32, paddingRight: 32, paddingTop: 6, paddingBottom: 10 }}>
+            {/* Bottom action bar + token stats */}
+            <div className="flex items-center gap-2" style={{ width: '100%', maxWidth: 720, marginLeft: 'auto', marginRight: 'auto', paddingLeft: 32, paddingRight: 32, paddingTop: 6, paddingBottom: 10 }}>
               {/* Left actions */}
-              <div className="flex flex-1 items-center gap-2">
+              <div className="flex items-center gap-2">
                 <PermissionSelector
                   value={permissionMode}
                   onChange={(mode: PermissionMode) => setPermissionMode(mode)}
                 />
-                {status === 'done' && messages.length > 0 && (
-                  <button
-                    onClick={() => void triggerCompact()}
-                    className="cursor-pointer whitespace-nowrap rounded-[var(--radius-sm)] border-0 bg-transparent px-2 py-[3px] text-[11px] text-[var(--color-text-muted)] transition-[background,color] duration-100 hover:bg-[var(--color-surface-2)] hover:text-[var(--color-text)]"
-                    title="Compact context"
-                  >
-                    Compact
-                  </button>
-                )}
                 {hasSubagents && (
                   <button
                     onClick={togglePanel}
@@ -294,23 +300,55 @@ export function ChatPanel(): React.JSX.Element {
                 )}
               </div>
 
-              {/* Right: tokens + model */}
-              <div className="flex flex-shrink-0 items-center gap-2">
-                {isHoveringMessages && totalInputTokens > 0 && totalOutputTokens > 0 && (() => {
-                  const totalInput = totalInputTokens + (totalCacheReadTokens ?? 0) + (totalCacheCreationTokens ?? 0)
-                  const cacheHitRate = totalInput > 0 ? ((totalCacheReadTokens ?? 0) / totalInput * 100) : 0
-                  return (
-                    <span className="flex items-center gap-1 font-mono text-[10px] text-[var(--color-text-faint)] transition-opacity duration-150">
-                      <span className="inline-flex items-center gap-[2px] text-[var(--color-text-muted)]"><ArrowUp size={9} />{fmtTok(totalInputTokens)}</span>
-                      <span className="inline-flex items-center gap-[2px] text-[var(--color-info)]"><ArrowDown size={9} />{fmtTok(totalOutputTokens)}</span>
-                      {(totalCacheReadTokens ?? 0) > 0 && (
-                        <span className="text-[var(--color-success)]" title={`Cache read: ${totalCacheReadTokens?.toLocaleString()} tokens`}>
-                          <Database size={9} className="inline" />{cacheHitRate.toFixed(0)}%
+              {/* Right spacer + stats */}
+              <div className="ml-auto flex items-center gap-2">
+                {messages.length > 0 && (totalInputTokens > 0 || totalOutputTokens > 0) && (
+                  <>
+                    {/* Input */}
+                    <div className="flex items-center gap-1">
+                      <ArrowUp size={11} className="text-[var(--color-accent)]" />
+                      <span className="font-mono text-[11px] font-semibold text-[var(--color-text)]">{fmtTok(totalInputTokens)}</span>
+                    </div>
+                    {/* Output */}
+                    <div className="flex items-center gap-1">
+                      <ArrowDown size={11} className="text-[var(--color-info)]" />
+                      <span className="font-mono text-[11px] font-semibold text-[var(--color-text)]">{fmtTok(totalOutputTokens)}</span>
+                    </div>
+                    {/* Cache hit */}
+                    {(totalCacheReadTokens ?? 0) > 0 && (
+                      <div className="flex items-center gap-1">
+                        <Database size={11} className="text-[var(--color-success)]" />
+                        <span className="font-mono text-[11px] font-semibold text-[var(--color-success)]">
+                          {(() => {
+                            const totalInput = totalInputTokens + (totalCacheReadTokens ?? 0) + (totalCacheCreationTokens ?? 0)
+                            return totalInput > 0 ? `${Math.round((totalCacheReadTokens ?? 0) / totalInput * 100)}%` : '—'
+                          })()}
                         </span>
-                      )}
-                    </span>
-                  )
-                })()}
+                      </div>
+                    )}
+                    {/* Context bar */}
+                    <div className="flex items-center gap-1.5">
+                      <Brain size={11} className="text-[var(--color-warning)]" />
+                      <div className="h-1.5 w-16 bg-[var(--color-surface-3)] rounded-[2px] overflow-hidden">
+                        <div
+                          className={cn(
+                            'h-full rounded-[2px] transition-[width]',
+                            contextPct >= 90 ? 'bg-[var(--color-danger)]' : contextPct >= 70 ? 'bg-[var(--color-warning)]' : 'bg-[var(--color-success)]'
+                          )}
+                          style={{ width: `${Math.min(contextPct, 100)}%` }}
+                        />
+                      </div>
+                      <span className={cn(
+                        'font-mono text-[11px] font-bold min-w-[24px] text-right',
+                        contextPct >= 90 ? 'text-[var(--color-danger)]' : contextPct >= 70 ? 'text-[var(--color-warning)]' : 'text-[var(--color-text)]'
+                      )}>
+                        {contextPct}%
+                      </span>
+                    </div>
+                  </>
+                )}
+
+                {/* Model selector */}
                 <select
                   value={model}
                   onChange={(e) => setModel(e.target.value)}
@@ -321,18 +359,9 @@ export function ChatPanel(): React.JSX.Element {
                     running ? 'cursor-default' : 'cursor-pointer'
                   )}
                 >
-                  <option value="">Default</option>
-                  <optgroup label="Anthropic">
-                    <option value="claude-opus-4-7">Opus 4.7</option>
-                    <option value="claude-sonnet-4-6">Sonnet 4.6</option>
-                    <option value="claude-haiku-4-5-20251001">Haiku 4.5</option>
-                  </optgroup>
-                  <optgroup label="Bella proxy">
-                    <option value="claude-4.6-sonnet">claude-4.6-sonnet</option>
-                    <option value="claude-4.6-opus">claude-4.6-opus</option>
-                    <option value="qwen3.6-plus">qwen3.6-plus</option>
-                    <option value="glm-5.1">glm-5.1</option>
-                  </optgroup>
+                  {modelOptions.map((opt) => (
+                    <option key={opt.value} value={opt.value}>{opt.label}</option>
+                  ))}
                 </select>
               </div>
             </div>

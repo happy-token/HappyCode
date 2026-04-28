@@ -13,6 +13,14 @@ import {
   checkFileSizeLimit,
 } from './session-store-utils'
 
+export interface SessionUsage {
+  inputTokens: number
+  outputTokens: number
+  cacheReadTokens: number
+  cacheCreationTokens: number
+  costUsd: number
+}
+
 export class SessionStore {
   private db: Database.Database
 
@@ -344,9 +352,10 @@ export class SessionStore {
     return { projects }
   }
 
-  loadSessionMessages(encodedPath: string, sessionId: string): { messages: Array<{ role: 'user' | 'assistant'; text: string; isToolCall?: boolean; toolName?: string; fullInput?: string }> } {
+  loadSessionMessages(encodedPath: string, sessionId: string): { messages: Array<{ role: 'user' | 'assistant'; text: string; isToolCall?: boolean; toolName?: string; fullInput?: string }>; usage: SessionUsage } {
     const filePath = path.join(os.homedir(), '.claude', 'projects', encodedPath, `${sessionId}.jsonl`)
-    if (!fs.existsSync(filePath)) return { messages: [] }
+    const emptyUsage: SessionUsage = { inputTokens: 0, outputTokens: 0, cacheReadTokens: 0, cacheCreationTokens: 0, costUsd: 0 }
+    if (!fs.existsSync(filePath)) return { messages: [], usage: emptyUsage }
 
     const stat = fs.statSync(filePath)
     const MAX_READ = 2 * 1024 * 1024 // 2MB
@@ -356,10 +365,11 @@ export class SessionStore {
         ? fs.readFileSync(filePath).slice(0, MAX_READ).toString('utf-8')
         : fs.readFileSync(filePath, 'utf-8')
     } catch {
-      return { messages: [] }
+      return { messages: [], usage: emptyUsage }
     }
 
     const messages: Array<{ role: 'user' | 'assistant'; text: string; isToolCall?: boolean; toolName?: string; fullInput?: string }> = []
+    let usage: SessionUsage = { ...emptyUsage }
 
     for (const line of raw.split('\n')) {
       if (!line.trim()) continue
@@ -400,13 +410,27 @@ export class SessionStore {
               messages.push({ role: 'assistant', text: summary, isToolCall: true, toolName: toolName ?? 'Tool', fullInput })
             }
           }
+        } else if (entryType === 'result') {
+          const subtype = entry['subtype'] as string | undefined
+          if (subtype === 'success') {
+            const u = entry['usage'] as Record<string, unknown> | undefined
+            if (u) {
+              usage = {
+                inputTokens: (u['input_tokens'] as number) ?? 0,
+                outputTokens: (u['output_tokens'] as number) ?? 0,
+                cacheReadTokens: (u['cache_read_input_tokens'] as number) ?? 0,
+                cacheCreationTokens: (u['cache_creation_input_tokens'] as number) ?? 0,
+                costUsd: (entry['cost_usd'] as number) ?? 0,
+              }
+            }
+          }
         }
       } catch {
         // skip malformed line
       }
     }
 
-    return { messages }
+    return { messages, usage }
   }
 
   deleteSession(encodedPath: string, sessionId: string): void {

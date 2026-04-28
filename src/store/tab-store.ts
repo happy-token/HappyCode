@@ -373,7 +373,7 @@ export const useTabStore = create<TabStoreState>()(
         tab.pendingPermission = null
       })
       try {
-        const { messages: rawMessages } = await window.electron.loadSessionMessages(encodedPath, sessionId)
+        const { messages: rawMessages, usage } = await window.electron.loadSessionMessages(encodedPath, sessionId)
         const uiMessages: UIMessage[] = []
         for (const m of rawMessages) {
           if (m.role === 'user') {
@@ -388,7 +388,14 @@ export const useTabStore = create<TabStoreState>()(
             uiMessages.push({ id: makeId(), type: 'text', text: m.text })
           }
         }
-        uiMessages.push({ id: makeId(), type: 'done', costUsd: 0, inputTokens: 0, outputTokens: 0 })
+        uiMessages.push({
+          id: makeId(), type: 'done',
+          costUsd: usage.costUsd,
+          inputTokens: usage.inputTokens,
+          outputTokens: usage.outputTokens,
+          cacheReadTokens: usage.cacheReadTokens,
+          cacheCreationTokens: usage.cacheCreationTokens,
+        })
         set((s) => {
           const tab = s.tabs.find((t) => t.tabId === tabId)
           if (tab) tab.messages = uiMessages

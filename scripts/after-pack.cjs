@@ -1,3 +1,4 @@
+require('dotenv').config()
 const { execSync } = require('child_process')
 const path = require('path')
 const fs = require('fs')
@@ -5,8 +6,19 @@ const fs = require('fs')
 module.exports = async function afterPack(context) {
   const platform = context.electronPlatformName
 
-  console.log('[afterPack] Rebuilding native modules...')
-  execSync('npx electron-rebuild', { stdio: 'inherit' })
+  // electron-rebuild is needed because electron-builder may not rebuild
+  // native modules against the correct Electron node version.
+  console.log('[afterPack] Rebuilding native modules for Electron...')
+  try {
+    execSync('npx electron-rebuild', { stdio: 'inherit' })
+  } catch (err) {
+    // npx may fail to find electron-rebuild; fall back to npm/pnpm exec
+    try {
+      execSync('npm exec electron-rebuild || pnpm exec electron-rebuild', { stdio: 'inherit' })
+    } catch (err2) {
+      console.warn('[afterPack] electron-rebuild failed, skipping:', err2.message || err.message)
+    }
+  }
 
   if (platform !== 'darwin') return
 

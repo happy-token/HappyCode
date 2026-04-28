@@ -12,7 +12,6 @@ import { AboutSettings } from './AboutSettings'
 import { McpSettings } from '../mcp/McpPage'
 import { HooksPanel } from '../hooks/HooksPanel'
 import { ClaudeCodeSettings } from './ClaudeCodeSettings'
-import { AnimatedGridPattern } from '@renderer/components/ui/animated-grid-pattern'
 
 export function SettingsLayout(): React.JSX.Element {
   const activeTab = useSettingsStore((s) => s.activeTab)
@@ -30,15 +29,6 @@ export function SettingsLayout(): React.JSX.Element {
         <HooksPanel />
       ) : (
         <div className="relative flex-1 overflow-y-auto px-8 py-6">
-          <AnimatedGridPattern
-            numSquares={18}
-            maxOpacity={0.035}
-            duration={5}
-            className="[mask-image:radial-gradient(600px_circle_at_50%_0%,white,transparent)]"
-          />
-          <div className="mb-2 text-[11px] uppercase tracking-[0.1em] text-[var(--color-text-faint)]">
-            设置
-          </div>
           {activeTab === 'general' && <GeneralSettings />}
           {activeTab === 'permissions' && <PermissionSettings />}
           {activeTab === 'providers' && <ProviderSettings />}

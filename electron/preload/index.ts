@@ -114,7 +114,7 @@ const api: ElectronAPI = {
 
   // History
   listAllHistory: (): Promise<AllHistoryResult> => ipcRenderer.invoke('history:list-all'),
-  loadSessionMessages: (encodedPath: string, sessionId: string): Promise<{ messages: SessionMessage[] }> =>
+  loadSessionMessages: (encodedPath: string, sessionId: string): Promise<{ messages: SessionMessage[]; usage: { inputTokens: number; outputTokens: number; cacheReadTokens: number; cacheCreationTokens: number; costUsd: number } }> =>
     ipcRenderer.invoke('history:load-session-messages', { encodedPath, sessionId }),
   deleteSession: (encodedPath: string, sessionId: string): Promise<void> =>
     ipcRenderer.invoke('history:delete-session', { encodedPath, sessionId }),
