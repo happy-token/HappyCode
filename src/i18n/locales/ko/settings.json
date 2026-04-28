@@ -1,0 +1,43 @@
+{
+  "header": {
+    "settings": "설정",
+    "sessions": "기록",
+    "mcp": "MCP 서버",
+    "hooks": "Hooks",
+    "skills": "스킬"
+  },
+  "tabs": {
+    "general": "일반",
+    "permissions": "권한",
+    "providers": "제공자",
+    "mcp": "MCP",
+    "agents": "에이전트",
+    "skills": "스킬",
+    "plugins": "플러그인",
+    "hooks": "Hooks",
+    "computerUse": "Computer Use",
+    "claudeCode": "Claude Code",
+    "export": "내보내기",
+    "about": "정보"
+  },
+  "general": {
+    "title": "일반",
+    "appearance": "모양",
+    "appearanceDescription": "라이트 또는 다크 테마 선택",
+    "language": "언어",
+    "languageDescription": "표시 언어 선택",
+    "effort": "노력 수준",
+    "effortDescription": "AI 가 작업에 투입할 수준을 제어",
+    "languages": {
+      "en": "English",
+      "zh": "简体中文",
+      "es": "Español",
+      "ja": "日本語",
+      "ko": "한국어",
+      "fr": "Français",
+      "pt": "Português",
+      "de": "Deutsch",
+      "ar": "العربية"
+    }
+  }
+}

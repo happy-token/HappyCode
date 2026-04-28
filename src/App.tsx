@@ -1,4 +1,5 @@
 import React from 'react'
+import './i18n/i18n'
 import { AppShell } from './AppShell'
 import { PreviewWindow } from './components/file-browser/PreviewWindow'
 

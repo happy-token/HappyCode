@@ -1,0 +1,43 @@
+{
+  "header": {
+    "settings": "設定",
+    "sessions": "履歴",
+    "mcp": "MCP サーバー",
+    "hooks": "Hooks",
+    "skills": "スキル"
+  },
+  "tabs": {
+    "general": "一般",
+    "permissions": "権限",
+    "providers": "プロバイダー",
+    "mcp": "MCP",
+    "agents": "エージェント",
+    "skills": "スキル",
+    "plugins": "プラグイン",
+    "hooks": "Hooks",
+    "computerUse": "Computer Use",
+    "claudeCode": "Claude Code",
+    "export": "エクスポート",
+    "about": "このアプリについて"
+  },
+  "general": {
+    "title": "一般",
+    "appearance": "外観",
+    "appearanceDescription": "ライトまたはダークテーマを選択",
+    "language": "言語",
+    "languageDescription": "表示言語を選択",
+    "effort": "努力レベル",
+    "effortDescription": "AI のタスクへの投入レベルを制御",
+    "languages": {
+      "en": "English",
+      "zh": "简体中文",
+      "es": "Español",
+      "ja": "日本語",
+      "ko": "한국어",
+      "fr": "Français",
+      "pt": "Português",
+      "de": "Deutsch",
+      "ar": "العربية"
+    }
+  }
+}

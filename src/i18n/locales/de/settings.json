@@ -1,0 +1,43 @@
+{
+  "header": {
+    "settings": "Einstellungen",
+    "sessions": "Verlauf",
+    "mcp": "MCP-Server",
+    "hooks": "Hooks",
+    "skills": "Skills"
+  },
+  "tabs": {
+    "general": "Allgemein",
+    "permissions": "Berechtigungen",
+    "providers": "Anbieter",
+    "mcp": "MCP",
+    "agents": "Agenten",
+    "skills": "Skills",
+    "plugins": "Plugins",
+    "hooks": "Hooks",
+    "computerUse": "Computer Use",
+    "claudeCode": "Claude Code",
+    "export": "Exportieren",
+    "about": "Über"
+  },
+  "general": {
+    "title": "Allgemein",
+    "appearance": "Erscheinungsbild",
+    "appearanceDescription": "Wählen Sie helles oder dunkles Design",
+    "language": "Sprache",
+    "languageDescription": "Anzeigesprache auswählen",
+    "effort": "Aufwandstufe",
+    "effortDescription": "Steuert, wie intensiv die KI Aufgaben bearbeitet",
+    "languages": {
+      "en": "English",
+      "zh": "简体中文",
+      "es": "Español",
+      "ja": "日本語",
+      "ko": "한국어",
+      "fr": "Français",
+      "pt": "Português",
+      "de": "Deutsch",
+      "ar": "العربية"
+    }
+  }
+}

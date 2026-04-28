@@ -7,7 +7,7 @@ import {
 import { useUiStore } from '../../store/ui-store'
 import { useTabStore, selectActiveTab, getDisplayStatus } from '../../store/tab-store'
 import { useHistoryStore, buildSessionTitle } from '../../store/history-store'
-import { SettingsTabButton, SETTINGS_TABS, SETTINGS_BOTTOM_TABS } from '../settings/SettingsTabs'
+import { SettingsTabList } from '../settings/SettingsTabs'
 import type { ProjectHistory, SessionSummary } from '../../../electron/shared/types'
 import { cn } from '@renderer/lib/utils'
 
@@ -511,10 +511,7 @@ export function Sidebar(): React.JSX.Element {
           {activePage === 'settings' ? (
             <>
               <div className="flex-1 overflow-y-auto py-1">
-                {SETTINGS_TABS.map((tab) => <SettingsTabButton key={tab.id} {...tab} />)}
-                <div className="mt-3 border-t border-[var(--color-border)] pt-2">
-                  {SETTINGS_BOTTOM_TABS.map((tab) => <SettingsTabButton key={tab.id} {...tab} />)}
-                </div>
+                <SettingsTabList />
               </div>
             </>
           ) : (

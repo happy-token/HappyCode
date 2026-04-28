@@ -1,5 +1,6 @@
 import React from 'react'
-import { useUiStore, type Theme } from '../../store/ui-store'
+import { useTranslation } from 'react-i18next'
+import { useUiStore, type Theme, type Locale } from '../../store/ui-store'
 import { useApiConfigStore } from '../../store/api-config-store'
 import type { EffortLevel } from '../../../electron/shared/types'
 import { cn } from '@renderer/lib/utils'
@@ -16,9 +17,24 @@ const THEMES: Array<{ value: Theme; label: string }> = [
   { value: 'dark', label: 'Dark' },
 ]
 
+const LOCALES: Array<{ value: Locale; labelKey: string }> = [
+  { value: 'en', labelKey: 'general.languages.en' },
+  { value: 'zh', labelKey: 'general.languages.zh' },
+  { value: 'ja', labelKey: 'general.languages.ja' },
+  { value: 'ko', labelKey: 'general.languages.ko' },
+  { value: 'es', labelKey: 'general.languages.es' },
+  { value: 'fr', labelKey: 'general.languages.fr' },
+  { value: 'de', labelKey: 'general.languages.de' },
+  { value: 'pt', labelKey: 'general.languages.pt' },
+  { value: 'ar', labelKey: 'general.languages.ar' },
+]
+
 export function GeneralSettings(): React.JSX.Element {
+  const { t } = useTranslation()
   const theme = useUiStore((s) => s.theme)
   const setTheme = useUiStore((s) => s.setTheme)
+  const locale = useUiStore((s) => s.locale)
+  const setLocale = useUiStore((s) => s.setLocale)
   const { agentSettings, saveAgentSettings } = useApiConfigStore()
 
   function handleEffort(level: EffortLevel): void {
@@ -29,8 +45,8 @@ export function GeneralSettings(): React.JSX.Element {
     <div className="max-w-[480px]">
       {/* Theme */}
       <div className="mb-6">
-        <div className="mb-1 text-[14px] font-bold text-[var(--color-text)]">外观</div>
-        <div className="mb-3 text-[12px] text-[var(--color-text-muted)]">选择浅色或深色主题</div>
+        <div className="mb-1 text-[14px] font-bold text-[var(--color-text)]">{t('general.appearance')}</div>
+        <div className="mb-3 text-[12px] text-[var(--color-text-muted)]">{t('general.appearanceDescription')}</div>
         <div className="flex gap-2">
           {THEMES.map(({ value, label }) => (
             <button
@@ -49,10 +65,27 @@ export function GeneralSettings(): React.JSX.Element {
         </div>
       </div>
 
+      {/* Language */}
+      <div className="mb-6">
+        <div className="mb-1 text-[14px] font-bold text-[var(--color-text)]">{t('general.language')}</div>
+        <div className="mb-3 text-[12px] text-[var(--color-text-muted)]">{t('general.languageDescription')}</div>
+        <select
+          value={locale}
+          onChange={(e) => setLocale(e.target.value as Locale)}
+          className="w-full cursor-pointer rounded-[var(--radius-sm)] border border-[var(--color-border)] bg-[var(--color-surface-2)] px-3 py-2 text-[13px] text-[var(--color-text)]"
+        >
+          {LOCALES.map(({ value, labelKey }) => (
+            <option key={value} value={value}>
+              {t(labelKey)}
+            </option>
+          ))}
+        </select>
+      </div>
+
       {/* Effort Level */}
       <div className="mb-6">
-        <div className="mb-1 text-[14px] font-bold text-[var(--color-text)]">努力程度</div>
-        <div className="mb-3 text-[12px] text-[var(--color-text-muted)]">控制 AI 在任务上的投入程度</div>
+        <div className="mb-1 text-[14px] font-bold text-[var(--color-text)]">{t('general.effort')}</div>
+        <div className="mb-3 text-[12px] text-[var(--color-text-muted)]">{t('general.effortDescription')}</div>
         <div className="flex gap-1.5">
           {(['low', 'medium', 'high', 'xhigh'] as EffortLevel[]).map((level) => (
             <button

@@ -1,0 +1,43 @@
+{
+  "header": {
+    "settings": "Paramètres",
+    "sessions": "Historique",
+    "mcp": "Serveurs MCP",
+    "hooks": "Hooks",
+    "skills": "Compétences"
+  },
+  "tabs": {
+    "general": "Général",
+    "permissions": "Autorisations",
+    "providers": "Fournisseurs",
+    "mcp": "MCP",
+    "agents": "Agents",
+    "skills": "Compétences",
+    "plugins": "Plugins",
+    "hooks": "Hooks",
+    "computerUse": "Computer Use",
+    "claudeCode": "Claude Code",
+    "export": "Exporter",
+    "about": "À propos"
+  },
+  "general": {
+    "title": "Général",
+    "appearance": "Apparence",
+    "appearanceDescription": "Choisissez le thème clair ou sombre",
+    "language": "Langue",
+    "languageDescription": "Sélectionnez la langue d'affichage",
+    "effort": "Niveau d'effort",
+    "effortDescription": "Contrôle le niveau d'investissement de l'IA",
+    "languages": {
+      "en": "English",
+      "zh": "简体中文",
+      "es": "Español",
+      "ja": "日本語",
+      "ko": "한국어",
+      "fr": "Français",
+      "pt": "Português",
+      "de": "Deutsch",
+      "ar": "العربية"
+    }
+  }
+}

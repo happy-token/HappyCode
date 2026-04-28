@@ -1,4 +1,5 @@
 import React from 'react'
+import { useTranslation } from 'react-i18next'
 import {
   Settings2, ShieldCheck, Globe, Plug, Bot, Zap, Puzzle,
   Webhook, Monitor, Terminal, Download, Info,
@@ -7,28 +8,35 @@ import {
 import { useSettingsStore, type SettingsTab } from '../../store/settings-store'
 import { cn } from '@renderer/lib/utils'
 
-export const SETTINGS_TABS: Array<{ id: SettingsTab; Icon: LucideIcon; label: string }> = [
-  { id: 'general',       Icon: Settings2,    label: '通用' },
-  { id: 'permissions',   Icon: ShieldCheck,  label: '权限' },
-  { id: 'providers',     Icon: Globe,        label: '服务商' },
-  { id: 'mcp',           Icon: Plug,         label: 'MCP' },
-  { id: 'agents',        Icon: Bot,          label: 'Agents' },
-  { id: 'skills',        Icon: Zap,          label: '技能' },
-  { id: 'plugins',       Icon: Puzzle,       label: '插件' },
-  { id: 'hooks',         Icon: Webhook,      label: 'Hooks' },
-  { id: 'computerUse',   Icon: Monitor,      label: 'Computer Use' },
-  { id: 'claudeCode',    Icon: Terminal,     label: 'Claude Code' },
+const TAB_ICONS: Record<SettingsTab, LucideIcon> = {
+  general: Settings2,
+  permissions: ShieldCheck,
+  providers: Globe,
+  mcp: Plug,
+  agents: Bot,
+  skills: Zap,
+  plugins: Puzzle,
+  hooks: Webhook,
+  computerUse: Monitor,
+  claudeCode: Terminal,
+  export: Download,
+  about: Info,
+}
+
+const SETTINGS_TAB_IDS: SettingsTab[] = [
+  'general', 'permissions', 'providers', 'mcp',
+  'agents', 'skills', 'plugins', 'hooks',
+  'computerUse', 'claudeCode',
 ]
 
-export const SETTINGS_BOTTOM_TABS: Array<{ id: SettingsTab; Icon: LucideIcon; label: string }> = [
-  { id: 'export',  Icon: Download, label: '导出' },
-  { id: 'about',   Icon: Info,     label: '关于' },
-]
+const SETTINGS_BOTTOM_TAB_IDS: SettingsTab[] = ['export', 'about']
 
-export function SettingsTabButton({ id, Icon, label }: { id: SettingsTab; Icon: LucideIcon; label: string }) {
+export function SettingsTabButton({ id }: { id: SettingsTab }) {
+  const { t } = useTranslation()
   const activeTab = useSettingsStore((s) => s.activeTab)
   const setActiveTab = useSettingsStore((s) => s.setActiveTab)
   const isActive = activeTab === id
+  const Icon = TAB_ICONS[id]
 
   return (
     <button
@@ -42,7 +50,18 @@ export function SettingsTabButton({ id, Icon, label }: { id: SettingsTab; Icon: 
       )}
     >
       <Icon size={14} className="flex-shrink-0" />
-      {label}
+      {t(`tabs.${id}`)}
     </button>
+  )
+}
+
+export function SettingsTabList() {
+  return (
+    <>
+      {SETTINGS_TAB_IDS.map((id) => <SettingsTabButton key={id} id={id} />)}
+      <div className="mt-3 border-t border-[var(--color-border)] pt-2">
+        {SETTINGS_BOTTOM_TAB_IDS.map((id) => <SettingsTabButton key={id} id={id} />)}
+      </div>
+    </>
   )
 }

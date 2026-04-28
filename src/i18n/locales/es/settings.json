@@ -1,0 +1,43 @@
+{
+  "header": {
+    "settings": "Ajustes",
+    "sessions": "Historial",
+    "mcp": "Servidores MCP",
+    "hooks": "Hooks",
+    "skills": "Habilidades"
+  },
+  "tabs": {
+    "general": "General",
+    "permissions": "Permisos",
+    "providers": "Proveedores",
+    "mcp": "MCP",
+    "agents": "Agentes",
+    "skills": "Habilidades",
+    "plugins": "Plugins",
+    "hooks": "Hooks",
+    "computerUse": "Computer Use",
+    "claudeCode": "Claude Code",
+    "export": "Exportar",
+    "about": "Acerca de"
+  },
+  "general": {
+    "title": "General",
+    "appearance": "Apariencia",
+    "appearanceDescription": "Elige tema claro u oscuro",
+    "language": "Idioma",
+    "languageDescription": "Selecciona el idioma de la interfaz",
+    "effort": "Nivel de esfuerzo",
+    "effortDescription": "Controla cuánto invierte la IA en las tareas",
+    "languages": {
+      "en": "English",
+      "zh": "简体中文",
+      "es": "Español",
+      "ja": "日本語",
+      "ko": "한국어",
+      "fr": "Français",
+      "pt": "Português",
+      "de": "Deutsch",
+      "ar": "العربية"
+    }
+  }
+}

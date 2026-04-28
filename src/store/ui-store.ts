@@ -3,6 +3,7 @@ import { immer } from 'zustand/middleware/immer'
 
 export type ActivePage = 'chat' | 'sessions' | 'settings' | 'hooks' | 'skills' | 'mcp'
 export type Theme = 'dark' | 'light'
+export type Locale = 'en' | 'zh' | 'es' | 'ja' | 'ko' | 'fr' | 'pt' | 'de' | 'ar'
 
 function applyTheme(theme: Theme): void {
   document.documentElement.setAttribute('data-theme', theme)
@@ -21,10 +22,18 @@ function loadJson<T>(key: string, fallback: T): T {
   catch { return fallback }
 }
 
+function loadLocale(): Locale {
+  const saved = localStorage.getItem('happycode:locale')
+  const valid: Locale[] = ['en', 'zh', 'es', 'ja', 'ko', 'fr', 'pt', 'de', 'ar']
+  if (valid.includes(saved as Locale)) return saved as Locale
+  return 'en'
+}
+
 interface UiState {
   activePage: ActivePage
   showPanel: boolean
   theme: Theme
+  locale: Locale
   pinnedProjects: string[]
   projectOrder: string[]
   showGit: boolean
@@ -38,6 +47,7 @@ interface UiState {
   togglePanel: () => void
   setTheme: (theme: Theme) => void
   toggleTheme: () => void
+  setLocale: (locale: Locale) => void
   togglePin: (encodedPath: string) => void
   setPinnedOrder: (order: string[]) => void
   setProjectOrder: (order: string[]) => void
@@ -55,6 +65,7 @@ export const useUiStore = create<UiState>()(
     activePage: 'chat',
     showPanel: false,
     theme: loadTheme(),
+    locale: loadLocale(),
     pinnedProjects: loadJson<string[]>('happycode:pinnedProjects', []),
     projectOrder: loadJson<string[]>('happycode:projectOrder', []),
     showGit: false,
@@ -85,6 +96,13 @@ export const useUiStore = create<UiState>()(
         s.theme = next
         localStorage.setItem('happycode:theme', next)
         applyTheme(next)
+      }),
+
+    setLocale: (locale) =>
+      set((s) => {
+        s.locale = locale
+        localStorage.setItem('happycode:locale', locale)
+        void import('i18next').then((m) => { m.default.changeLanguage(locale) })
       }),
 
     togglePin: (encodedPath) =>

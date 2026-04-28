@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useMemo, useCallback } from 'react'
+import { useTranslation } from 'react-i18next'
 import { FolderOpen, GitBranch, Files, Search, Plus } from 'lucide-react'
 import { Sidebar } from './components/nav/Sidebar'
 import { PanelZone } from './components/nav/PanelZone'
@@ -66,6 +67,7 @@ function ResizablePanel({ storageKey, children }: { storageKey: string; children
 }
 
 export function AppShell(): React.JSX.Element {
+  const { t } = useTranslation()
   const activePage = useUiStore((s) => s.activePage)
   const showGit = useUiStore((s) => s.showGit)
   const showFiles = useUiStore((s) => s.showFiles)
@@ -227,11 +229,11 @@ export function AppShell(): React.JSX.Element {
               className="flex-1 text-[13px] font-semibold text-[var(--color-text-muted)]"
               style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}
             >
-              {activePage === 'settings' ? '设置' :
-               activePage === 'sessions' ? '历史会话' :
-               activePage === 'mcp' ? 'MCP 服务器' :
-               activePage === 'hooks' ? 'Hooks' :
-               activePage === 'skills' ? '技能' :
+              {activePage === 'settings' ? t('header.settings') :
+               activePage === 'sessions' ? t('header.sessions') :
+               activePage === 'mcp' ? t('header.mcp') :
+               activePage === 'hooks' ? t('header.hooks') :
+               activePage === 'skills' ? t('header.skills') :
                'HappyCode'}
             </span>
           )}

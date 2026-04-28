@@ -1,0 +1,43 @@
+{
+  "header": {
+    "settings": "الإعدادات",
+    "sessions": "السجل",
+    "mcp": "خوادم MCP",
+    "hooks": "Hooks",
+    "skills": "المهارات"
+  },
+  "tabs": {
+    "general": "عام",
+    "permissions": "الأذونات",
+    "providers": "المزودون",
+    "mcp": "MCP",
+    "agents": "الوكلاء",
+    "skills": "المهارات",
+    "plugins": "الإضافات",
+    "hooks": "Hooks",
+    "computerUse": "Computer Use",
+    "claudeCode": "Claude Code",
+    "export": "تصدير",
+    "about": "حول"
+  },
+  "general": {
+    "title": "عام",
+    "appearance": "المظهر",
+    "appearanceDescription": "اختر السمة الفاتحة أو الداكنة",
+    "language": "اللغة",
+    "languageDescription": "اختر لغة العرض",
+    "effort": "مستوى الجهد",
+    "effortDescription": "يتحكم في مستوى投入 الذكاء الاصطناعي في المهام",
+    "languages": {
+      "en": "English",
+      "zh": "简体中文",
+      "es": "Español",
+      "ja": "日本語",
+      "ko": "한국어",
+      "fr": "Français",
+      "pt": "Português",
+      "de": "Deutsch",
+      "ar": "العربية"
+    }
+  }
+}
