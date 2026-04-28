@@ -1,6 +1,21 @@
+# Dependencies
 node_modules
+
+# Build output
 dist
 out
+
+# OS
 .DS_Store
+
+# Logs
 *.log
+
+# Secrets
 .env
+
+# TypeScript incremental build info
+*.tsbuildinfo
+
+# Playwright MCP test artifacts
+.playwright-mcp/
