@@ -10,11 +10,16 @@ module.exports = async function afterPack(context) {
 
   if (platform !== 'darwin') return
 
+  const identity = process.env.CSC_NAME
+  if (!identity) {
+    console.warn('[afterPack] CSC_NAME not set, skipping re-sign')
+    return
+  }
+
   const appOutDir = context.appOutDir
   const appName = context.packager.appInfo.productFilename
   const appPath = path.join(appOutDir, `${appName}.app`)
   const unpackedPath = path.join(appPath, 'Contents', 'Resources', 'app.asar.unpacked')
-  const identity = process.env.CSC_NAME || 'Wenjing Zhu (BL67GP4S58)'
 
   if (fs.existsSync(unpackedPath)) {
     console.log('[afterPack] Re-signing native modules in app.asar.unpacked...')
