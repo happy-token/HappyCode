@@ -124,6 +124,8 @@ const api: ElectronAPI = {
   // File system / git
   listDir: (params: { dirPath: string; depth?: number; cwd: string }): Promise<FileTreeNode[]> =>
     ipcRenderer.invoke('fs:list-dir', params),
+  writeFile: (params: { path: string; content: string; cwd: string }): Promise<FileOperationResult> =>
+    ipcRenderer.invoke('fs:write-file', params),
   readFile: (params: { path: string; maxLines?: number; cwd: string }): Promise<FilePreviewResult> =>
     ipcRenderer.invoke('fs:read-file', params),
   searchFiles: (params: { dirPath: string; query: string; cwd: string }): Promise<string[]> =>

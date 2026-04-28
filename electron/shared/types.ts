@@ -528,6 +528,7 @@ export interface ElectronAPI {
 
   // File system / git
   listDir: (params: { dirPath: string; depth?: number; cwd: string }) => Promise<FileTreeNode[]>
+  writeFile: (params: { path: string; content: string; cwd: string }) => Promise<FileOperationResult>
   readFile: (params: { path: string; maxLines?: number; cwd: string }) => Promise<FilePreviewResult>
   searchFiles: (params: { dirPath: string; query: string; cwd: string }) => Promise<string[]>
   createFile: (params: { path: string; isDir?: boolean; cwd: string }) => Promise<FileOperationResult>

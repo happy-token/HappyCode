@@ -456,6 +456,19 @@ export function registerIpcHandlers(store: SessionStore, agentManager: AgentMana
     }
   })
 
+  // File system — write file content
+  ipcMain.handle('fs:write-file', async (_event, { path: filePath, content, cwd }: { path: string; content: string; cwd: string }) => {
+    if (!filePath || !cwd) return { success: false, error: 'Missing path or cwd' }
+    const resolved = path.resolve(cwd, filePath)
+    if (!isPathSafe(resolved, cwd)) return { success: false, error: 'Path is outside the working directory' }
+    try {
+      fs.writeFileSync(resolved, content, 'utf-8')
+      return { success: true }
+    } catch (err: unknown) {
+      return { success: false, error: err instanceof Error ? err.message : String(err) }
+    }
+  })
+
   // File preview in new window
   ipcMain.handle('preview:open', async (_event, { filePath, cwd, theme }: { filePath: string; cwd: string; theme?: string }) => {
     if (!filePath || !cwd) return
@@ -464,7 +477,7 @@ export function registerIpcHandlers(store: SessionStore, agentManager: AgentMana
     const result = await previewFile(resolved, cwd)
     const win = createPreviewWindow(resolved, theme ?? 'dark')
     win.webContents.once('did-finish-load', () => {
-      win.webContents.send('preview:data', { filePath: resolved, theme, ...result })
+      win.webContents.send('preview:data', { filePath: resolved, cwd, theme, ...result })
     })
   })
 
