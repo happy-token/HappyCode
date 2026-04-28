@@ -10,7 +10,7 @@ enableMapSet()
 
 // Apply theme before first paint — URL param (preview window) takes priority over localStorage
 const urlTheme = new URLSearchParams(window.location.search).get('theme')
-const savedTheme = urlTheme ?? localStorage.getItem('happycode:theme') ?? 'dark'
+const savedTheme = urlTheme ?? localStorage.getItem('happycode:theme') ?? 'light'
 document.documentElement.setAttribute('data-theme', savedTheme)
 document.documentElement.classList.toggle('dark', savedTheme === 'dark')
 
