@@ -1,6 +1,6 @@
 {
   "name": "happycode",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Auditable open-source Claude Code GUI",
   "main": "./out/main/index.js",
   "author": "HappyCode Contributors",
