@@ -31,6 +31,8 @@ Wraps the `@anthropic-ai/claude-agent-sdk` to give Claude Code a graphical inter
 - PDF export
 - Team audit (server-based)
 
+For the full roadmap including IM remote support (WeChat, Feishu, Telegram), menu bar tray actions, session notifications, and TokenUsage integration, see [ROADMAP.md](./ROADMAP.md).
+
 ## Getting Started
 
 ```bash
