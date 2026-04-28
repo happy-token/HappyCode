@@ -42,6 +42,7 @@
     "immer": "^10.1.1",
     "lucide-react": "^1.8.0",
     "mathjs": "^15.2.0",
+    "monaco-editor": "^0.55.1",
     "motion": "^12.38.0",
     "react-i18next": "^17.0.6",
     "react-markdown": "^10.1.0",

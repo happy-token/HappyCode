@@ -1,7 +1,8 @@
 import React, { useEffect, useState, useMemo, useCallback, useRef } from 'react'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
-import Editor from '@monaco-editor/react'
+import Editor, { loader } from '@monaco-editor/react'
+import * as monaco from 'monaco-editor'
 import hljs from 'highlight.js/lib/core'
 import typescript from 'highlight.js/lib/languages/typescript'
 import javascript from 'highlight.js/lib/languages/javascript'
@@ -29,6 +30,8 @@ hljs.registerLanguage('xml', xml)
 hljs.registerLanguage('html', xml)
 hljs.registerLanguage('rust', rust)
 hljs.registerLanguage('go', go)
+
+loader.config({ monaco })
 
 type PreviewData = FilePreviewResult & { filePath: string; cwd?: string; theme?: string }
 type ViewMode = 'preview' | 'raw' | 'edit'

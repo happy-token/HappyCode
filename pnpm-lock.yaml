@@ -77,6 +77,9 @@ importers:
       mathjs:
         specifier: ^15.2.0
         version: 15.2.0
+      monaco-editor:
+        specifier: ^0.55.1
+        version: 0.55.1
       motion:
         specifier: ^12.38.0
         version: 12.38.0(react-dom@19.2.5(react@19.2.5))(react@19.2.5)
