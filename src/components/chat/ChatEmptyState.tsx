@@ -1,14 +1,10 @@
-import { useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Sparkles, History, Zap, CornerDownLeft } from 'lucide-react'
-import { motion } from 'motion/react'
 import { cn } from '@renderer/lib/utils'
 import { TypingAnimation } from '@renderer/components/ui/typing-animation'
 import { WordRotate } from '@renderer/components/ui/word-rotate'
 import { BlurFade } from '@renderer/components/ui/blur-fade'
 import { ShimmerButton } from '@renderer/components/ui/shimmer-button'
-import { SpotlightBg } from '@renderer/components/ui/spotlight-bg'
-import { AnimatedBeam } from '@renderer/components/ui/animated-beam'
 
 interface ChatEmptyStateProps {
   cwd: string
@@ -17,28 +13,6 @@ interface ChatEmptyStateProps {
   onResumeLastSession: () => void
   onPickFolder: () => void
   onSendPrompt: (prompt: string) => void
-}
-
-function AuroraBackground(): React.JSX.Element {
-  return (
-    <div className="pointer-events-none absolute inset-0 overflow-hidden">
-      <motion.div
-        className="absolute left-[15%] top-[5%] h-[60%] w-[60%] rounded-full bg-[radial-gradient(circle,var(--color-accent),transparent_70%)] opacity-25 blur-[56px]"
-        animate={{ x: [0, 40, -20, 0], y: [0, -30, 20, 0], scale: [1, 1.15, 0.9, 1] }}
-        transition={{ duration: 18, repeat: Infinity, ease: 'easeInOut' }}
-      />
-      <motion.div
-        className="absolute right-[8%] top-[40%] h-[50%] w-[50%] rounded-full bg-[radial-gradient(circle,rgba(100,80,180,1),transparent_70%)] opacity-[0.12] blur-[64px]"
-        animate={{ x: [0, -50, 20, 0], y: [0, 40, -30, 0], scale: [1, 0.9, 1.1, 1] }}
-        transition={{ duration: 22, repeat: Infinity, ease: 'easeInOut', delay: 2 }}
-      />
-      <motion.div
-        className="absolute bottom-[15%] left-[40%] h-[40%] w-[40%] rounded-full bg-[radial-gradient(circle,rgba(50,180,180,1),transparent_70%)] opacity-[0.08] blur-[72px]"
-        animate={{ x: [0, 30, -40, 0], y: [0, -20, 30, 0], scale: [1, 1.1, 0.85, 1] }}
-        transition={{ duration: 26, repeat: Infinity, ease: 'easeInOut', delay: 4 }}
-      />
-    </div>
-  )
 }
 
 export function ChatEmptyState({
@@ -50,9 +24,6 @@ export function ChatEmptyState({
   onSendPrompt,
 }: ChatEmptyStateProps): React.JSX.Element {
   const { t } = useTranslation()
-  const containerRef = useRef<HTMLDivElement>(null)
-  const iconRef = useRef<HTMLDivElement>(null)
-  const commandsRef = useRef<HTMLDivElement>(null)
 
   const quickCommands = [
     { label: '/init', desc: t('chatEmpty.quickInit') },
@@ -63,7 +34,7 @@ export function ChatEmptyState({
 
   if (sessionId) {
     return (
-      <div className="relative flex min-h-[60vh] flex-col items-center justify-center gap-2 overflow-hidden p-8 text-[var(--color-text-muted)]">
+      <div className="relative flex h-full w-full flex-col items-center justify-center gap-2 overflow-hidden p-8 text-[var(--color-text-muted)]">
         <AuroraBackground />
         <div className="relative z-10 flex flex-col items-center gap-2">
           <CornerDownLeft size={28} className="text-[var(--color-text-muted)]" />
@@ -76,28 +47,11 @@ export function ChatEmptyState({
   }
 
   return (
-    <div ref={containerRef} className="relative flex min-h-[60vh] flex-col items-center justify-center overflow-hidden px-6 py-8">
-      <AuroraBackground />
-      <SpotlightBg className="z-0" />
+    <div className="flex h-full w-full flex-col items-center justify-center">
 
-      {cwd && (
-        <AnimatedBeam
-          containerRef={containerRef}
-          fromRef={iconRef}
-          toRef={commandsRef}
-          gradientStartColor="var(--color-accent)"
-          gradientStopColor="#7c6af7"
-          pathColor="var(--color-border)"
-          pathOpacity={0.12}
-          pathWidth={1.5}
-          duration={5}
-          curvature={-40}
-        />
-      )}
-
-      <BlurFade delay={0.1} className="relative z-10 flex flex-col items-center">
+      <BlurFade delay={0.1} className="flex flex-col items-center">
         {/* Icon */}
-        <div ref={iconRef} className="mb-4 flex h-[52px] w-[52px] items-center justify-center rounded-full bg-[var(--color-accent-dim)]">
+        <div className="mb-4 flex h-[52px] w-[52px] items-center justify-center rounded-full bg-[var(--color-accent-dim)]">
           <Sparkles size={24} color="var(--color-accent)" />
         </div>
 
@@ -107,7 +61,7 @@ export function ChatEmptyState({
         </div>
 
         {/* Sub */}
-        <div className="mb-7 max-w-[340px] text-center text-[13px] leading-[1.6] text-[var(--color-text-muted)]">
+        <div className="mb-7 max-w-[480px] text-center text-[13px] leading-[1.6] text-[var(--color-text-muted)]">
           {cwd ? (
             <WordRotate
               words={[
@@ -148,18 +102,18 @@ export function ChatEmptyState({
 
         {/* Quick commands */}
         {cwd && (
-          <div ref={commandsRef} className="w-full max-w-[360px]">
-            <div className="mb-2 flex items-center gap-[5px] text-[10px] font-bold uppercase tracking-[0.07em] text-[var(--color-text-faint)]">
+          <div className="w-full max-w-[640px]">
+            <div className="mb-3 flex items-center gap-[5px] text-[10px] font-bold uppercase tracking-[0.07em] text-[var(--color-text-faint)]">
               <Zap size={10} />
               {t('chatEmpty.quickCommands')}
             </div>
-            <div className="grid grid-cols-2 gap-[6px]">
+            <div className="grid grid-cols-2 gap-[10px] sm:grid-cols-4">
               {quickCommands.map((cmd) => (
                 <button
                   key={cmd.label}
                   onClick={() => onSendPrompt(cmd.label)}
                   className={cn(
-                    'group cursor-pointer rounded-[var(--radius-sm)] border border-[var(--color-border)] bg-[var(--color-surface-2)] p-[10px] text-left',
+                    'group cursor-pointer rounded-[var(--radius-sm)] border border-[var(--color-border)] bg-[var(--color-surface-2)] p-[12px] text-left',
                     'transition-all duration-[120ms] hover:border-[var(--color-accent)] hover:bg-[var(--color-surface)]',
                     'hover:shadow-[0_2px_8px_rgba(0,0,0,0.06)]'
                   )}

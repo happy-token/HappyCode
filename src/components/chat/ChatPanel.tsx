@@ -230,18 +230,18 @@ export function ChatPanel(): React.JSX.Element {
         {/* Message list + input column */}
         <div className={cn('flex flex-1 flex-col overflow-hidden transition-[padding-right] duration-150', sidebarCollapsed ? 'pr-28' : 'pr-0')}>
           <div className="relative flex-1 overflow-y-auto py-6">
-            <div className="flex flex-col gap-1" style={{ width: '100%', maxWidth: 720, marginLeft: 'auto', marginRight: 'auto', paddingLeft: 32, paddingRight: 32 }}>
-              {messages.length === 0 && (
-                <ChatEmptyState
-                  cwd={cwd}
-                  sessionId={sessionId ?? ''}
-                  lastSessionId={lastSessionId}
-                  onResumeLastSession={() => lastSessionId && setSessionForResume(lastSessionId)}
-                  onPickFolder={() => void window.electron.selectFolder().then((p) => { if (p) setCwd(p) })}
-                  onSendPrompt={(prompt) => handleSend(prompt)}
-                />
-              )}
-              {filteredMessages.map((msg, idx) => {
+            {messages.length === 0 ? (
+              <ChatEmptyState
+                cwd={cwd}
+                sessionId={sessionId ?? ''}
+                lastSessionId={lastSessionId}
+                onResumeLastSession={() => lastSessionId && setSessionForResume(lastSessionId)}
+                onPickFolder={() => void window.electron.selectFolder().then((p) => { if (p) setCwd(p) })}
+                onSendPrompt={(prompt) => handleSend(prompt)}
+              />
+            ) : (
+              <div className="flex flex-col gap-1" style={{ width: '100%', maxWidth: 720, marginLeft: 'auto', marginRight: 'auto', paddingLeft: 32, paddingRight: 32 }}>
+                {filteredMessages.map((msg, idx) => {
                 let doneInfo: { inputTokens: number; outputTokens: number; costUsd: number; cacheReadTokens?: number } | undefined
                 if (msg.type === 'text') {
                   for (let i = idx + 1; i < filteredMessages.length; i++) {
@@ -266,10 +266,11 @@ export function ChatPanel(): React.JSX.Element {
               })}
               <div ref={bottomRef} />
             </div>
+            )}
           </div>
 
           {/* Input + session stats bar */}
-          <div className="flex-shrink-0 border-t border-[var(--color-border)] bg-[var(--color-surface)]">
+          <div className="flex-shrink-0 bg-transparent px-4 pb-4 pt-2">
             <div style={{ width: '100%', maxWidth: 720, marginLeft: 'auto', marginRight: 'auto', paddingLeft: 32, paddingRight: 32, paddingTop: 10 }}>
               <PromptInput
                 onSend={handleSend}
@@ -280,7 +281,7 @@ export function ChatPanel(): React.JSX.Element {
             </div>
 
             {/* Bottom action bar + token stats */}
-            <div className="flex items-center gap-2" style={{ width: '100%', maxWidth: 720, marginLeft: 'auto', marginRight: 'auto', paddingLeft: 32, paddingRight: 32, paddingTop: 6, paddingBottom: 10 }}>
+            <div className="flex items-center gap-2" style={{ width: '100%', maxWidth: 720, marginLeft: 'auto', marginRight: 'auto', paddingLeft: 32, paddingRight: 32, paddingTop: 2 }}>
               {/* Left actions */}
               <div className="flex items-center gap-2">
                 <PermissionSelector
