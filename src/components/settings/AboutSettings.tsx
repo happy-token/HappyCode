@@ -1,18 +1,19 @@
 import React from 'react'
+import { useTranslation } from 'react-i18next'
 
-// Version is injected at build time via Vite define
 declare const __APP_VERSION__: string
 
 const VERSION = typeof __APP_VERSION__ !== 'undefined' ? __APP_VERSION__ : '0.2.0'
 
 export function AboutSettings(): React.JSX.Element {
+  const { t } = useTranslation()
   const version = VERSION
   const repo = 'https://github.com/HappyToken/HappyCode'
 
   return (
     <div className="max-w-[640px]">
       <div className="mb-4">
-        <div className="text-[16px] font-bold text-[var(--color-text)]">关于</div>
+        <div className="text-[16px] font-bold text-[var(--color-text)]">{t('about.title')}</div>
       </div>
 
       <div className="flex flex-col items-center gap-4 py-10">
@@ -26,20 +27,20 @@ export function AboutSettings(): React.JSX.Element {
         </div>
 
         <div className="max-w-[400px] text-center text-[13px] leading-[1.6] text-[var(--color-text)]">
-          Claude Code GUI 桌面应用，提供图形化的 AI 编码助手体验。
+          {t('about.description')}
         </div>
 
         <div className="mt-2 flex w-full max-w-[320px] flex-col gap-2">
           <div className="flex justify-between border-b border-[var(--color-border)] py-2">
-            <span className="text-[12px] text-[var(--color-text-muted)]">作者</span>
+            <span className="text-[12px] text-[var(--color-text-muted)]">{t('about.author')}</span>
             <span className="text-[12px] font-semibold text-[var(--color-text)]">HappyToken</span>
           </div>
           <div className="flex justify-between border-b border-[var(--color-border)] py-2">
-            <span className="text-[12px] text-[var(--color-text-muted)]">版本</span>
+            <span className="text-[12px] text-[var(--color-text-muted)]">{t('about.version')}</span>
             <span className="text-[12px] text-[var(--color-text)]">v{version}</span>
           </div>
           <div className="flex justify-between border-b border-[var(--color-border)] py-2">
-            <span className="text-[12px] text-[var(--color-text-muted)]">仓库</span>
+            <span className="text-[12px] text-[var(--color-text-muted)]">{t('about.repo')}</span>
             <a
               href={repo}
               target="_blank"

@@ -1,5 +1,6 @@
 import React, { useEffect, useCallback, useMemo, useState, useRef } from 'react'
 import { createPortal } from 'react-dom'
+import { useTranslation } from 'react-i18next'
 import {
   Settings, Plus, X, Folder, Check, AlertCircle, ChevronLeft, ChevronRight,
   PanelLeftClose, PanelLeftOpen, Sun, Moon, Pin, GripVertical,
@@ -34,6 +35,7 @@ function reorderArray(arr: string[], dragId: string, targetId: string, pos: 'bef
 }
 
 export function Sidebar(): React.JSX.Element {
+  const { t } = useTranslation()
   const activePage = useUiStore((s) => s.activePage)
   const setActivePage = useUiStore((s) => s.setActivePage)
   const theme = useUiStore((s) => s.theme)
@@ -367,7 +369,7 @@ export function Sidebar(): React.JSX.Element {
                 e.stopPropagation()
                 setConfirmDelete({ type: 'project', encodedPath: project.encodedPath })
               }}
-              title="删除项目历史"
+              title={t('sidebar.deleteProjectHistory')}
             >
               <X size={10} />
             </button>
@@ -418,7 +420,7 @@ export function Sidebar(): React.JSX.Element {
                         sessionId: session.sessionId,
                       })
                     }}
-                    title="删除会话"
+                    title={t('sidebar.deleteSession')}
                   >
                     <X size={10} />
                   </button>
@@ -469,7 +471,7 @@ export function Sidebar(): React.JSX.Element {
                 <>
                   <button
                     onClick={() => setActivePage('chat')}
-                    title="返回聊天"
+                    title={t('sidebar.backToChat')}
                     className="flex h-[26px] w-[26px] items-center justify-center rounded-[var(--radius-sm)] bg-transparent text-[var(--color-text-muted)] hover:text-[var(--color-text)]"
                     style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}
                   >
@@ -479,7 +481,7 @@ export function Sidebar(): React.JSX.Element {
                     className="flex-1 text-left text-[14px] font-bold leading-none tracking-[-0.01em] text-[var(--color-text)]"
                     style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}
                   >
-                    设置
+                    {t('sidebar.settings')}
                   </span>
                 </>
               ) : (
@@ -518,7 +520,7 @@ export function Sidebar(): React.JSX.Element {
             <>
               <button className="sbl-new-chat-btn" onClick={openDialog}>
                 <Plus size={13} />
-                新对话
+                {t('sidebar.newChat')}
               </button>
 
               <div className="sbl-search">
@@ -527,7 +529,7 @@ export function Sidebar(): React.JSX.Element {
                   className="sbl-search-input"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="搜索会话…  ⌘K"
+                  placeholder={t('sidebar.searchPlaceholder')}
                 />
                 {searchQuery && (
                   <button className="sbl-search-clear" onClick={() => setSearchQuery('')} aria-label="Clear">
@@ -696,17 +698,17 @@ export function Sidebar(): React.JSX.Element {
           <div className="ncd-dialog" onClick={(e) => e.stopPropagation()}>
             <div className="ncd-header">
               <span className="ncd-title">
-                {confirmDelete.type === 'project' ? '删除项目历史？' : '删除会话？'}
+                {confirmDelete.type === 'project' ? t('sidebar.deleteProjectHistory') : t('sidebar.deleteSession')}
               </span>
               <button className="ncd-close" onClick={() => setConfirmDelete(null)}><X size={13} /></button>
             </div>
             <div className="ncd-body text-[12px] leading-[1.5] text-[var(--color-text-muted)]">
               {confirmDelete.type === 'project'
-                ? '该项目的所有会话将被永久删除。'
-                : '该会话将被永久删除。'}
+                ? t('sidebar.deleteProjectWarn')
+                : t('sidebar.deleteSessionWarn')}
             </div>
             <div className="ncd-footer">
-              <button className="ncd-cancel" onClick={() => setConfirmDelete(null)}>取消</button>
+              <button className="ncd-cancel" onClick={() => setConfirmDelete(null)}>{t('sidebar.cancel')}</button>
               <button
                 className="ncd-confirm danger"
                 onClick={() => {
@@ -717,7 +719,7 @@ export function Sidebar(): React.JSX.Element {
                   }
                 }}
               >
-                删除
+                {t('sidebar.delete')}
               </button>
             </div>
           </div>
@@ -730,11 +732,11 @@ export function Sidebar(): React.JSX.Element {
         <div className="ncd-overlay" onClick={closeDialog}>
           <div className="ncd-dialog" onClick={(e) => e.stopPropagation()} onKeyDown={handleDialogKey}>
             <div className="ncd-header">
-              <span className="ncd-title">新建对话</span>
+              <span className="ncd-title">{t('sidebar.newChatTitle')}</span>
               <button className="ncd-close" onClick={closeDialog}><X size={13} /></button>
             </div>
             <div className="ncd-body">
-              <label className="ncd-label">项目目录</label>
+              <label className="ncd-label">{t('sidebar.projectDir')}</label>
               <div className="ncd-dir-row">
                 <input
                   ref={dirInputRef}
@@ -744,15 +746,15 @@ export function Sidebar(): React.JSX.Element {
                   placeholder="/path/to/project"
                   spellCheck={false}
                 />
-                <button className="ncd-pick-btn" onClick={handlePickFolder} title="选择目录">
+                <button className="ncd-pick-btn" onClick={handlePickFolder} title={t('sidebar.selectDirectory')}>
                   <Folder size={14} />
                 </button>
               </div>
             </div>
             <div className="ncd-footer">
-              <button className="ncd-cancel" onClick={closeDialog}>取消</button>
+              <button className="ncd-cancel" onClick={closeDialog}>{t('sidebar.cancel')}</button>
               <button className="ncd-confirm" onClick={handleConfirm} disabled={!dialogDir.trim()}>
-                创建
+                {t('sidebar.create')}
               </button>
             </div>
           </div>

@@ -1,4 +1,5 @@
 import React, { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { AlertTriangle, ChevronRight } from 'lucide-react'
 import type { HookType, ClaudeHookRule } from '../../../electron/shared/types'
 import { HookTestSandbox } from './HookTestSandbox'
@@ -12,21 +13,23 @@ const ALL_HOOK_TYPES: HookType[] = [
   'Notification', 'PreCompact',
 ]
 
-const HOOK_DESCRIPTIONS: Record<HookType, string> = {
-  PreToolUse:         '工具执行前。exit 2 可阻止执行并向 Claude 注入反馈',
-  PostToolUse:        '工具成功执行后',
-  PostToolUseFailure: '工具执行失败后',
-  UserPromptSubmit:   '用户发送消息后、Claude 处理前',
-  Stop:               'Claude 准备停止时。exit 2 重新激活（⚠ 可能死循环）',
-  SubagentStart:      'Subagent 启动时',
-  SubagentStop:       'Subagent 结束时',
-  SessionStart:       '会话开始时',
-  SessionEnd:         '会话结束时',
-  Notification:       'Claude 发出通知时',
-  PreCompact:         '上下文压缩前',
-}
-
 const inputCls = 'w-full px-2.5 py-[7px] bg-[var(--color-surface-2)] border border-[var(--color-border)] rounded-[var(--radius-md)] text-[var(--color-text)] text-[12px] font-mono'
+
+function getHookDescriptions(t: ReturnType<typeof useTranslation>['t']): Record<HookType, string> {
+  return {
+    PreToolUse:         t('hooks.hookDesc.PreToolUse'),
+    PostToolUse:        t('hooks.hookDesc.PostToolUse'),
+    PostToolUseFailure: t('hooks.hookDesc.PostToolUseFailure'),
+    UserPromptSubmit:   t('hooks.hookDesc.UserPromptSubmit'),
+    Stop:               t('hooks.hookDesc.Stop'),
+    SubagentStart:      t('hooks.hookDesc.SubagentStart'),
+    SubagentStop:       t('hooks.hookDesc.SubagentStop'),
+    SessionStart:       t('hooks.hookDesc.SessionStart'),
+    SessionEnd:         t('hooks.hookDesc.SessionEnd'),
+    Notification:       t('hooks.hookDesc.Notification'),
+    PreCompact:         t('hooks.hookDesc.PreCompact'),
+  }
+}
 
 interface HookRuleWizardProps {
   onSave: (hookType: HookType, rule: ClaudeHookRule) => void
@@ -34,6 +37,8 @@ interface HookRuleWizardProps {
 }
 
 export function HookRuleWizard({ onSave, onCancel }: HookRuleWizardProps): React.JSX.Element {
+  const { t } = useTranslation()
+  const hookDescs = getHookDescriptions(t)
   const [step, setStep] = useState<0 | 1 | 2>(0)
   const [selectedType, setSelectedType] = useState<HookType | null>(null)
   const [matcher, setMatcher] = useState('')
@@ -53,7 +58,7 @@ export function HookRuleWizard({ onSave, onCancel }: HookRuleWizardProps): React
     onSave(selectedType, rule)
   }
 
-  const stepTitles = ['选择触发事件', '设置匹配条件', '配置命令']
+  const stepTitles = [t('hooks.selectEvent'), t('hooks.setMatcher'), t('hooks.configureCmd')]
 
   return (
     <div className="flex flex-col gap-3">
@@ -95,7 +100,7 @@ export function HookRuleWizard({ onSave, onCancel }: HookRuleWizardProps): React
               )}
             >
               <span className="text-[12px] font-medium text-[var(--color-text)]">{type}</span>
-              <span className="text-[10px] text-[var(--color-text-muted)]">{HOOK_DESCRIPTIONS[type]}</span>
+              <span className="text-[10px] text-[var(--color-text-muted)]">{hookDescs[type]}</span>
             </button>
           ))}
 
@@ -104,9 +109,9 @@ export function HookRuleWizard({ onSave, onCancel }: HookRuleWizardProps): React
               <div className="flex gap-1.5 items-start">
                 <AlertTriangle size={13} className="flex-shrink-0 mt-px text-[var(--color-warning)]" />
                 <div>
-                  <div className="text-[11px] font-semibold text-[var(--color-warning)]">Stop Hook 警告</div>
+                  <div className="text-[11px] font-semibold text-[var(--color-warning)]">{t('hooks.stopWarning')}</div>
                   <div className="text-[11px] text-[var(--color-text-muted)] mt-0.5">
-                    exit 2 会让 Claude 继续运行，可能导致无限循环。确保命令有明确的终止条件。
+                    {t('hooks.stopWarningDesc')}
                   </div>
                   <label className="flex items-center gap-1.5 mt-1.5 cursor-pointer">
                     <input
@@ -114,7 +119,7 @@ export function HookRuleWizard({ onSave, onCancel }: HookRuleWizardProps): React
                       checked={stopConfirmed}
                       onChange={(e) => setStopConfirmed(e.target.checked)}
                     />
-                    <span className="text-[11px] text-[var(--color-text)]">我已了解风险</span>
+                    <span className="text-[11px] text-[var(--color-text)]">{t('hooks.understandRisk')}</span>
                   </label>
                 </div>
               </div>
@@ -127,12 +132,12 @@ export function HookRuleWizard({ onSave, onCancel }: HookRuleWizardProps): React
       {step === 1 && (
         <div className="flex flex-col gap-2">
           <div className="text-[12px] text-[var(--color-text-muted)]">
-            设置工具名匹配模式（留空 = 匹配所有工具）
+            {t('hooks.matcherHint')}
           </div>
           <input
             value={matcher}
             onChange={(e) => setMatcher(e.target.value)}
-            placeholder="例：Bash  /  Edit  /  留空表示全部"
+            placeholder={t('hooks.matcherPlaceholder')}
             className={inputCls}
           />
         </div>
@@ -142,11 +147,11 @@ export function HookRuleWizard({ onSave, onCancel }: HookRuleWizardProps): React
       {step === 2 && (
         <div className="flex flex-col gap-2.5">
           <div>
-            <div className="text-[11px] text-[var(--color-text-muted)] mb-1">Shell 命令</div>
+            <div className="text-[11px] text-[var(--color-text-muted)] mb-1">{t('hooks.shellCmd')}</div>
             <input
               value={command}
               onChange={(e) => setCommand(e.target.value)}
-              placeholder="例：/home/user/.claude/hooks/my-hook.sh"
+              placeholder={t('hooks.commandPlaceholder')}
               className={inputCls}
             />
           </div>
@@ -163,7 +168,7 @@ export function HookRuleWizard({ onSave, onCancel }: HookRuleWizardProps): React
           onClick={onCancel}
           className="px-3.5 py-1.5 bg-[var(--color-surface-2)] border border-[var(--color-border)] rounded-[var(--radius-md)] text-[var(--color-text-muted)] text-[12px] cursor-pointer"
         >
-          取消
+          {t('hooks.cancel')}
         </button>
 
         {step > 0 && (
@@ -171,7 +176,7 @@ export function HookRuleWizard({ onSave, onCancel }: HookRuleWizardProps): React
             onClick={() => setStep((s) => (s - 1) as 0 | 1 | 2)}
             className="px-3.5 py-1.5 bg-[var(--color-surface-2)] border border-[var(--color-border)] rounded-[var(--radius-md)] text-[var(--color-text)] text-[12px] cursor-pointer"
           >
-            上一步
+            {t('hooks.prevStep')}
           </button>
         )}
 
@@ -186,7 +191,7 @@ export function HookRuleWizard({ onSave, onCancel }: HookRuleWizardProps): React
                 : 'bg-[var(--color-accent)] text-white cursor-pointer',
             )}
           >
-            下一步
+            {t('hooks.nextStep')}
           </button>
         ) : (
           <button
@@ -199,7 +204,7 @@ export function HookRuleWizard({ onSave, onCancel }: HookRuleWizardProps): React
                 : 'bg-[var(--color-accent)] text-white cursor-pointer',
             )}
           >
-            保存规则
+            {t('hooks.saveRule')}
           </button>
         )}
       </div>

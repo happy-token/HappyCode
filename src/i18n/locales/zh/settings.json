@@ -148,12 +148,20 @@
     "title": "Agent 管理",
     "emptyText": "未找到 Agent 定义。<br />在 <code>~/.claude/agents/</code> 目录中添加 <code>.md</code> 文件来创建自定义 Agent。",
     "summary": "共",
+    "countLabel": "个",
     "sources": "个来源",
     "description": "描述",
     "model": "模型",
     "tools": "工具",
     "systemPrompt": "系统提示词",
-    "truncated": "... (已截断)"
+    "truncated": "... (已截断)",
+    "sourceUser": "用户自定义 (~/.claude/agents)",
+    "sourceProject": "项目 (.claude/agents)",
+    "sourceLocal": "本地",
+    "sourcePolicy": "策略",
+    "sourcePlugin": "插件",
+    "sourceFlag": "标志",
+    "sourceBuiltin": "内置"
   },
   "skills": {
     "title": "技能",
@@ -171,7 +179,11 @@
     "enable": "启用",
     "delete": "删除",
     "loading": "加载中...",
-    "noSkillMd": "未找到 SKILL.md 文件"
+    "noSkillMd": "未找到 SKILL.md 文件",
+    "sourcePlugin": "插件技能",
+    "sourceUser": "用户技能",
+    "sourcePluginSubtitle": "来自插件安装目录",
+    "countPrefix": "共"
   },
   "plugins": {
     "title": "插件管理",
@@ -205,14 +217,54 @@
     "project": "项目",
     "local": "本地",
     "managed": "托管",
-    "builtin": "内置"
+    "builtin": "内置",
+    "enabledLabel": "已启用",
+    "disabledLabel": "已禁用",
+    "skillsCount": "技能",
+    "agentsCount": "Agent"
   },
   "hooks": {
     "addRule": "添加规则",
     "bridgeConnected": "Bridge 已连接",
     "notConnected": "未连接",
     "enable": "启用",
-    "clear": "清空"
+    "clear": "清空",
+    "events": "事件",
+    "config": "配置",
+    "noRules": "暂无规则",
+    "deleteRule": "删除规则",
+    "noHookEvents": "暂无 Hook 事件",
+    "hookEventsDesc": "配置 Claude Code Hooks 以 POST 到本地 Hook 服务器",
+    "selectEvent": "选择触发事件",
+    "setMatcher": "设置匹配条件",
+    "configureCmd": "配置命令",
+    "stopWarning": "Stop Hook 警告",
+    "stopWarningDesc": "exit 2 会让 Claude 继续运行，可能导致无限循环。确保命令有明确的终止条件。",
+    "understandRisk": "我已了解风险",
+    "matcherHint": "设置工具名匹配模式（留空 = 匹配所有工具）",
+    "matcherPlaceholder": "例：Bash / Edit / 留空表示全部",
+    "shellCmd": "Shell 命令",
+    "commandPlaceholder": "例：/home/user/.claude/hooks/my-hook.sh",
+    "mockPayload": "Mock Payload（可编辑）",
+    "runTest": "运行测试",
+    "running": "运行中…",
+    "cancel": "取消",
+    "prevStep": "上一步",
+    "nextStep": "下一步",
+    "saveRule": "保存规则",
+    "hookDesc": {
+      "PreToolUse": "工具执行前。exit 2 可阻止执行并向 Claude 注入反馈",
+      "PostToolUse": "工具成功执行后",
+      "PostToolUseFailure": "工具执行失败后",
+      "UserPromptSubmit": "用户发送消息后、Claude 处理前",
+      "Stop": "Claude 准备停止时。exit 2 重新激活（ 可能死循环）",
+      "SubagentStart": "Subagent 启动时",
+      "SubagentStop": "Subagent 结束时",
+      "SessionStart": "会话开始时",
+      "SessionEnd": "会话结束时",
+      "Notification": "Claude 发出通知时",
+      "PreCompact": "上下文压缩前"
+    }
   },
   "computerUse": {
     "description": "配置 AI 控制计算机的权限和行为",
@@ -270,6 +322,8 @@
     }
   },
   "claudeCode": {
+    "title": "Claude Code",
+    "description": "查看 CLI 状态并管理 ~/.claude/settings.json 配置",
     "statusTab": "Claude Code 状态",
     "configTab": "Claude Code 配置",
     "checking": "正在检测...",
@@ -315,6 +369,7 @@
     "format": "格式化",
     "saved": "已保存",
     "confirmSave": "确认保存",
+    "confirmSaveDesc": "即将修改 <code>~/.claude/settings.json</code>，此操作会影响所有 Claude Code 会话。",
     "cancel": "取消",
     "confirmSaveBtn": "确认保存"
   },
@@ -374,10 +429,39 @@
     "taskComplete": "任务完成",
     "taskError": "任务出错",
     "needsPermission": "需要权限审批",
-    "needsDecision": "需要你做决策"
+    "needsDecision": "需要你做决策",
+    "tool": "工具",
+    "searchMessages": "搜索消息…",
+    "slashCommandsHeader": "斜杠命令",
+    "skillLabel": "技能"
+  },
+  "chatEmpty": {
+    "sessionLoaded": "会话已加载",
+    "continueSession": "输入消息继续会话",
+    "startConversation": "开始对话",
+    "workingIn": "工作目录",
+    "typeOrPick": "输入消息或选择快捷命令",
+    "claudeReady": "Claude Code 已就绪",
+    "pickFolder": "选择项目文件夹开始",
+    "chooseFolder": "选择文件夹",
+    "resumeLastSession": "恢复上次会话",
+    "quickCommands": "快捷命令",
+    "quickInit": "为该项目生成 CLAUDE.md",
+    "quickReview": "审查最近的更改",
+    "quickCompact": "压缩对话上下文",
+    "quickHelp": "显示可用命令"
   },
   "promptInput": {
     "addFileOrImage": "添加文件或图片",
-    "slashCommands": "斜杠命令"
+    "slashCommands": "斜杠命令",
+    "dropFiles": "拖放文件到此处…",
+    "claudeWorking": "Claude 正在工作中…",
+    "typeCommands": "输入 / 查看命令",
+    "addFilesCommands": "添加文件或命令",
+    "sendStop": "发送 (Enter)",
+    "stopEsc": "停止 (Esc)",
+    "remove": "移除",
+    "dropFilesAttach": "拖放文件附加",
+    "navigateHint": "导航 · Tab/Enter 选择 · Esc 关闭"
   }
 }

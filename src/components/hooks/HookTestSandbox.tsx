@@ -1,4 +1,5 @@
 import React, { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Play, CheckCircle, XCircle } from 'lucide-react'
 import type { HookTestResult } from '../../../electron/shared/types'
 import { cn } from '@renderer/lib/utils'
@@ -23,6 +24,7 @@ interface HookTestSandboxProps {
 }
 
 export function HookTestSandbox({ command, eventName }: HookTestSandboxProps): React.JSX.Element {
+  const { t } = useTranslation()
   const defaultPayload = MOCK_PAYLOADS[eventName] ?? { session_id: 'mock-123' }
   const [payloadText, setPayloadText] = useState(JSON.stringify(defaultPayload, null, 2))
   const [result, setResult] = useState<HookTestResult | null>(null)
@@ -46,7 +48,7 @@ export function HookTestSandbox({ command, eventName }: HookTestSandboxProps): R
   return (
     <div className="flex flex-col gap-2.5">
       <div>
-        <div className="text-[11px] text-[var(--color-text-muted)] mb-1">Mock Payload（可编辑）</div>
+        <div className="text-[11px] text-[var(--color-text-muted)] mb-1">{t('hooks.mockPayload')}</div>
         <textarea
           value={payloadText}
           onChange={(e) => setPayloadText(e.target.value)}
@@ -65,7 +67,7 @@ export function HookTestSandbox({ command, eventName }: HookTestSandboxProps): R
         )}
       >
         <Play size={12} />
-        {running ? '运行中…' : '运行测试'}
+        {running ? t('hooks.running') : t('hooks.runTest')}
       </button>
 
       {result !== null && (

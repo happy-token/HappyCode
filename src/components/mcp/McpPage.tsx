@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useMemo, useCallback } from 'react'
+import { useTranslation } from 'react-i18next'
 import { X, Server, CheckCircle2, AlertTriangle, ChevronLeft } from 'lucide-react'
 import type { McpServerRecord, McpServerConfig } from '../../../electron/shared/types'
 import { useTabStore } from '../../store/tab-store'
@@ -13,11 +14,14 @@ type GroupKey = 'user' | 'project' | 'local' | 'plugin'
 
 const GROUP_ORDER: GroupKey[] = ['plugin', 'user', 'project', 'local']
 
-const GROUP_LABELS: Record<GroupKey, string> = {
-  user: '用户',
-  project: '项目',
-  local: '本地',
-  plugin: '插件',
+function groupLabel(key: GroupKey, t: (key: string) => string): string {
+  const map: Record<GroupKey, string> = {
+    user: t('mcp.scopeUser'),
+    project: t('mcp.scopeProject'),
+    local: t('mcp.scopeLocal'),
+    plugin: t('mcp.scopePlugin'),
+  }
+  return map[key]
 }
 
 function statusToneClass(s: ServerStatus): string {
@@ -161,6 +165,7 @@ const labelCls = 'mb-1 block text-[11px] font-semibold uppercase tracking-[0.05e
 // ── Component ───────────────────────────────────────────────────
 
 export function McpSettings(): React.JSX.Element | null {
+  const { t } = useTranslation()
   const [servers, setServers] = useState<McpServerRecord[]>([])
   const [view, setView] = useState<'list' | 'create' | 'edit' | 'details'>('list')
   const [draft, setDraft] = useState<Draft>(emptyDraft)
@@ -238,7 +243,7 @@ export function McpSettings(): React.JSX.Element | null {
         scope: 'user',
         enabled: true,
         status: 'checking',
-        statusLabel: '连接中...',
+        statusLabel: t('mcp.connecting'),
         summary: summaryForConfig(config),
         canToggle: true,
         canEdit: true,
@@ -253,7 +258,7 @@ export function McpSettings(): React.JSX.Element | null {
         setServers((prev) =>
           prev.map((s) =>
             s.name === record.name
-              ? { ...s, status: 'connected' as const, statusLabel: '已连接' }
+              ? { ...s, status: 'connected' as const, statusLabel: t('mcp.connectedLabel') }
               : s,
           ),
         )
@@ -291,25 +296,25 @@ export function McpSettings(): React.JSX.Element | null {
       <div className="max-w-[640px]">
         <div className="mb-4 flex items-center justify-between">
           <div>
-            <div className="text-[16px] font-bold text-[var(--color-text)]">MCP Servers</div>
+            <div className="text-[16px] font-bold text-[var(--color-text)]">{t('mcp.title')}</div>
             <div className="mt-0.5 text-[12px] text-[var(--color-text-muted)]">
-              配置 MCP 服务器以扩展工具能力
+              {t('mcp.description')}
             </div>
           </div>
           <button
             onClick={beginCreate}
             className="inline-flex items-center gap-1 cursor-pointer rounded-[var(--radius-sm)] border border-[var(--color-accent)] bg-[var(--color-accent)] px-[14px] py-[6px] text-[12px] font-semibold text-white"
           >
-            <X size={11} className="rotate-45" />添加服务器
+            <X size={11} className="rotate-45" />{t('mcp.addServer')}
           </button>
         </div>
 
         {/* Stats */}
         <div className="mb-5 grid grid-cols-3 gap-2">
           {([
-            { label: '总计', value: stats.total, icon: <Server size={11} /> },
-            { label: '已连接', value: stats.connected, icon: <CheckCircle2 size={11} className="text-[var(--color-success)]" /> },
-            { label: '需关注', value: stats.attention, icon: <AlertTriangle size={11} className="text-[var(--color-warning)]" /> },
+            { label: t('mcp.total'), value: stats.total, icon: <Server size={11} /> },
+            { label: t('mcp.connected'), value: stats.connected, icon: <CheckCircle2 size={11} className="text-[var(--color-success)]" /> },
+            { label: t('mcp.attention'), value: stats.attention, icon: <AlertTriangle size={11} className="text-[var(--color-warning)]" /> },
           ] as { label: string; value: number; icon: React.ReactNode }[]).map((s) => (
             <div key={s.label} className="rounded-[8px] border border-[var(--color-border)] bg-[var(--color-surface-2)] p-3">
               <div className="mb-1 flex items-center gap-1 text-[10px] uppercase tracking-[0.1em] text-[var(--color-text-muted)]">
@@ -323,8 +328,8 @@ export function McpSettings(): React.JSX.Element | null {
         {servers.length === 0 ? (
           <div className="py-12 text-center text-[var(--color-text-muted)]">
             <div className="mb-2 flex justify-center"><Server size={28} className="text-[var(--color-text-faint)]" /></div>
-            <div className="mb-1 text-[13px] font-semibold text-[var(--color-text)]">暂无 MCP 服务器</div>
-            <div className="text-[12px]">添加服务器以扩展 Claude 的工具能力</div>
+            <div className="mb-1 text-[13px] font-semibold text-[var(--color-text)]">{t('mcp.emptyTitle')}</div>
+            <div className="text-[12px]">{t('mcp.emptyDesc')}</div>
           </div>
         ) : (
           GROUP_ORDER.map((group) => {
@@ -333,7 +338,7 @@ export function McpSettings(): React.JSX.Element | null {
             return (
               <div key={group} className="mb-4">
                 <div className="mb-2 text-[11px] font-bold uppercase tracking-[0.05em] text-[var(--color-text-muted)]">
-                  {GROUP_LABELS[group]} ({groupServers.length})
+                  {groupLabel(group, t)} ({groupServers.length})
                 </div>
                 {groupServers.map((server) => (
                   <ServerRow
@@ -404,6 +409,7 @@ function ServerRow({
   onView: () => void
   onToggle: () => void
 }) {
+  const { t } = useTranslation()
   const isPlugin = server.name.startsWith('plugin:')
   return (
     <div
@@ -421,7 +427,7 @@ function ServerRow({
             <span
               className="rounded-[4px] px-1.5 py-px text-[9px] font-semibold border border-[rgba(139,92,246,0.3)] bg-[rgba(139,92,246,0.1)] text-[#a78bfa]"
             >
-              插件
+              {t('mcp.plugin')}
             </span>
           )}
           <span
@@ -445,7 +451,7 @@ function ServerRow({
           onClick={onOpen}
           className="cursor-pointer rounded-[var(--radius-sm)] border border-[var(--color-border)] bg-transparent px-2 py-[3px] text-[11px] text-[var(--color-text-muted)]"
         >
-          编辑
+          {t('mcp.edit')}
         </button>
       )}
     </div>
@@ -481,6 +487,7 @@ function ServerDetails({
   onBack: () => void
   onEdit: () => void
 }) {
+  const { t } = useTranslation()
   const isPlugin = server.name.startsWith('plugin:')
   return (
     <div className="max-w-[640px]">
@@ -498,7 +505,7 @@ function ServerDetails({
               <span
                 className="rounded-[4px] px-2 py-px text-[10px] font-semibold border border-[rgba(139,92,246,0.3)] bg-[rgba(139,92,246,0.1)] text-[#a78bfa]"
               >
-                插件
+                {t('mcp.plugin')}
               </span>
             )}
           </div>
@@ -509,17 +516,17 @@ function ServerDetails({
             onClick={onEdit}
             className="cursor-pointer rounded-[var(--radius-sm)] border border-[var(--color-accent)] bg-transparent px-3 py-1 text-[11px] text-[var(--color-accent)]"
           >
-            编辑
+            {t('mcp.edit')}
           </button>
         )}
       </div>
 
       <div className="mb-3 grid grid-cols-2 gap-2">
         {[
-          { label: '传输', value: TRANSPORT_LABELS[server.transport] },
-          { label: '范围', value: GROUP_LABELS[server.scope as GroupKey] },
-          { label: '状态', value: server.statusLabel },
-          { label: '位置', value: server.configLocation },
+          { label: t('mcp.transport'), value: TRANSPORT_LABELS[server.transport] },
+          { label: t('mcp.scope'), value: groupLabel(server.scope as GroupKey, t) },
+          { label: t('mcp.status'), value: server.statusLabel },
+          { label: t('mcp.location'), value: server.configLocation },
         ].map((item) => (
           <div key={item.label} className="rounded-[6px] bg-[var(--color-surface-2)] p-2.5">
             <div className="mb-0.5 text-[9px] font-semibold uppercase tracking-[0.1em] text-[var(--color-text-muted)]">
@@ -531,7 +538,7 @@ function ServerDetails({
       </div>
 
       <div className={sectionCls}>
-        <div className={cn(labelCls, 'mb-1.5')}>原始配置</div>
+        <div className={cn(labelCls, 'mb-1.5')}>{t('mcp.rawConfig')}</div>
         <pre className="m-0 max-h-[300px] overflow-x-auto rounded-[6px] bg-[var(--color-surface-2)] p-2.5 font-[var(--font-mono)] text-[11px] text-[var(--color-text-muted)] [white-space:pre-wrap] [word-break:break-word]">
           {JSON.stringify(server.config, null, 2)}
         </pre>
@@ -561,6 +568,7 @@ function McpForm({
   onCancel: () => void
   onDelete: () => void
 }) {
+  const { t } = useTranslation()
   const transportLocked = mode === 'edit'
   const valid = isDraftValid(draft)
 
@@ -592,10 +600,10 @@ function McpForm({
         </button>
         <div className="flex-1">
           <div className="text-[16px] font-bold text-[var(--color-text)]">
-            {mode === 'edit' ? `编辑 ${server?.name}` : '添加 MCP 服务器'}
+            {mode === 'edit' ? `${t('mcp.edit')} ${server?.name}` : t('mcp.addServerTitle')}
           </div>
           <div className="mt-0.5 text-[11px] text-[var(--color-text-muted)]">
-            {mode === 'edit' ? '修改 MCP 服务器配置' : '配置一个新的 MCP 服务器'}
+            {mode === 'edit' ? t('mcp.editServerDesc') : t('mcp.addServerDesc')}
           </div>
         </div>
         {mode === 'edit' && (
@@ -603,7 +611,7 @@ function McpForm({
             onClick={onDelete}
             className="cursor-pointer rounded-[var(--radius-sm)] border border-[var(--color-danger)] bg-transparent px-3 py-1 text-[11px] text-[var(--color-danger)]"
           >
-            删除
+            {t('mcp.delete')}
           </button>
         )}
       </div>
@@ -611,12 +619,12 @@ function McpForm({
       {/* Name */}
       <div className={sectionCls}>
         <label>
-          <div className={labelCls}>名称</div>
+          <div className={labelCls}>{t('mcp.name')}</div>
           <input
             value={draft.name}
             onChange={(e) => setDraft({ ...draft, name: e.target.value })}
             className={inputCls}
-            placeholder="例如 filesystem"
+            placeholder={t('mcp.namePlaceholder')}
             disabled={mode === 'edit'}
           />
         </label>
@@ -648,7 +656,7 @@ function McpForm({
 
       {transportLocked && (
         <div className="mb-3 text-[10px] text-[var(--color-text-muted)]">
-          编辑模式下无法修改传输类型
+          {t('mcp.transportHint')}
         </div>
       )}
 
@@ -656,19 +664,19 @@ function McpForm({
         <>
           <div className={sectionCls}>
             <label>
-              <div className={labelCls}>命令</div>
+              <div className={labelCls}>{t('mcp.command')}</div>
               <input
                 value={draft.command}
                 onChange={(e) => setDraft({ ...draft, command: e.target.value })}
                 className={inputCls}
-                placeholder="例如 npx"
+                placeholder={t('mcp.commandPlaceholder')}
               />
             </label>
           </div>
 
           {/* Args */}
           <div className={sectionCls}>
-            <div className={cn(labelCls, 'mb-2')}>参数</div>
+            <div className={cn(labelCls, 'mb-2')}>{t('mcp.args')}</div>
             {draft.args.map((row) => (
               <div key={row.id} className="mb-1.5 flex gap-1.5">
                 <input
@@ -678,7 +686,7 @@ function McpForm({
                     args: d.args.map((r) => r.id === row.id ? { ...r, value: e.target.value } : r),
                   }))}
                   className={inputCls}
-                  placeholder="参数"
+                  placeholder={t('mcp.argPlaceholder')}
                 />
                 <button
                   onClick={() => removeRow('args', row.id)}
@@ -692,13 +700,13 @@ function McpForm({
               onClick={() => addRow('args')}
               className="cursor-pointer rounded-[var(--radius-sm)] border border-dashed border-[var(--color-border)] bg-transparent px-[10px] py-1 text-[11px] text-[var(--color-text-muted)]"
             >
-              + 添加参数
+              {t('mcp.addArg')}
             </button>
           </div>
 
           {/* Env */}
           <div className={sectionCls}>
-            <div className={cn(labelCls, 'mb-2')}>环境变量</div>
+            <div className={cn(labelCls, 'mb-2')}>{t('mcp.envVars')}</div>
             {draft.env.map((row) => (
               <div key={row.id} className="mb-1.5 grid grid-cols-[1fr_1fr_auto] gap-1.5">
                 <input
@@ -731,7 +739,7 @@ function McpForm({
               onClick={() => addRow('env')}
               className="cursor-pointer rounded-[var(--radius-sm)] border border-dashed border-[var(--color-border)] bg-transparent px-[10px] py-1 text-[11px] text-[var(--color-text-muted)]"
             >
-              + 添加环境变量
+              {t('mcp.addEnvVar')}
             </button>
           </div>
         </>
@@ -752,7 +760,7 @@ function McpForm({
 
           {/* Headers */}
           <div className={sectionCls}>
-            <div className={cn(labelCls, 'mb-2')}>请求头</div>
+            <div className={cn(labelCls, 'mb-2')}>{t('mcp.headers')}</div>
             {draft.headers.map((row) => (
               <div key={row.id} className="mb-1.5 grid grid-cols-[1fr_1fr_auto] gap-1.5">
                 <input
@@ -785,7 +793,7 @@ function McpForm({
               onClick={() => addRow('headers')}
               className="cursor-pointer rounded-[var(--radius-sm)] border border-dashed border-[var(--color-border)] bg-transparent px-[10px] py-1 text-[11px] text-[var(--color-text-muted)]"
             >
-              + 添加请求头
+              {t('mcp.addHeader')}
             </button>
           </div>
 
@@ -798,7 +806,7 @@ function McpForm({
                   value={draft.oauthClientId}
                   onChange={(e) => setDraft({ ...draft, oauthClientId: e.target.value })}
                   className={inputCls}
-                  placeholder="可选"
+                  placeholder={t('mcp.urlPlaceholder')}
                 />
               </label>
               <label>
@@ -807,7 +815,7 @@ function McpForm({
                   value={draft.oauthCallbackPort}
                   onChange={(e) => setDraft({ ...draft, oauthCallbackPort: e.target.value })}
                   className={inputCls}
-                  placeholder="可选"
+                  placeholder={t('mcp.tokenPlaceholder')}
                 />
               </label>
             </div>
@@ -821,7 +829,7 @@ function McpForm({
           onClick={onCancel}
           className="cursor-pointer rounded-[var(--radius-sm)] border border-[var(--color-border)] bg-transparent px-4 py-[6px] text-[12px] text-[var(--color-text-muted)]"
         >
-          取消
+          {t('mcp.cancel')}
         </button>
         <button
           onClick={onSave}
@@ -831,7 +839,7 @@ function McpForm({
             valid && !isSaving ? 'cursor-pointer' : 'cursor-not-allowed opacity-50',
           )}
         >
-          保存
+          {t('mcp.save')}
         </button>
       </div>
     </div>
@@ -851,22 +859,22 @@ function DeleteConfirm({
 }) {
   return (
     <div className="max-w-[400px]">
-      <div className="mb-2 text-[16px] font-bold text-[var(--color-text)]">删除 MCP 服务器</div>
+      <div className="mb-2 text-[16px] font-bold text-[var(--color-text)]">{t('mcp.confirmDeleteTitle')}</div>
       <div className="mb-5 text-[12px] leading-[1.5] text-[var(--color-text-muted)]">
-        确定要删除 <strong>{server.name}</strong> 吗？此操作无法撤销。
+        {t('mcp.confirmDeleteDesc')} <strong>{server.name}</strong> {t('mcp.confirmDeleteWarn')}
       </div>
       <div className="flex justify-end gap-2">
         <button
           onClick={onCancel}
           className="cursor-pointer rounded-[var(--radius-sm)] border border-[var(--color-border)] bg-transparent px-4 py-[6px] text-[12px] text-[var(--color-text-muted)]"
         >
-          取消
+          {t('mcp.cancel')}
         </button>
         <button
           onClick={onConfirm}
           className="cursor-pointer rounded-[var(--radius-sm)] border border-[var(--color-danger)] bg-[var(--color-danger)] px-4 py-[6px] text-[12px] text-white"
         >
-          删除
+          {t('mcp.deleteBtn')}
         </button>
       </div>
     </div>

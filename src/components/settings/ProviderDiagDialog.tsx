@@ -1,15 +1,8 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Check, AlertTriangle, X, ChevronDown, ChevronRight, Loader2, Activity } from 'lucide-react'
 import { cn } from '@renderer/lib/utils'
 import type { DiagResult, DiagProbe, DiagSeverity } from '../../../electron/shared/types'
-
-// ── Status helpers ───────────────────────────────────────────────
-
-const SEVERITY_LABEL: Record<DiagSeverity, string> = {
-  pass: '正常',
-  warn: '警告',
-  error: '错误',
-}
 
 function severityTextClass(s: DiagSeverity): string {
   if (s === 'pass') return 'text-[var(--color-success)]'
@@ -42,14 +35,14 @@ function StatusDot({ status }: { status: DiagSeverity }) {
 }
 
 function StatusBadge({ status }: { status: DiagSeverity }) {
+  const { t } = useTranslation()
+  const key = status === 'pass' ? 'diagDialog.severityPass' : status === 'warn' ? 'diagDialog.severityWarn' : 'diagDialog.severityError'
   return (
     <span className={cn('rounded-[4px] border px-1.5 py-px text-[10px] font-bold uppercase tracking-[0.04em]', severityBgClass(status), severityBorderClass(status), severityTextClass(status))}>
-      {SEVERITY_LABEL[status]}
+      {t(key)}
     </span>
   )
 }
-
-// ── Finding icon ─────────────────────────────────────────────────
 
 function FindingIcon({ severity }: { severity: DiagSeverity }) {
   const icon = severity === 'pass'
@@ -63,8 +56,6 @@ function FindingIcon({ severity }: { severity: DiagSeverity }) {
     </span>
   )
 }
-
-// ── Probe Row ────────────────────────────────────────────────────
 
 function ProbeRow({ probe, defaultExpanded }: { probe: DiagProbe; defaultExpanded: boolean }) {
   const [expanded, setExpanded] = useState(defaultExpanded)
@@ -109,8 +100,6 @@ function ProbeRow({ probe, defaultExpanded }: { probe: DiagProbe; defaultExpande
   )
 }
 
-// ── Main Dialog ──────────────────────────────────────────────────
-
 interface Props {
   open: boolean
   onClose: () => void
@@ -119,6 +108,7 @@ interface Props {
 }
 
 export function ProviderDiagDialog({ open, onClose, providerId, providerName }: Props) {
+  const { t } = useTranslation()
   const [loading, setLoading] = useState(false)
   const [result, setResult] = useState<DiagResult | null>(null)
   const [error, setError] = useState<string | null>(null)
@@ -135,11 +125,11 @@ export function ProviderDiagDialog({ open, onClose, providerId, providerName }: 
       setResult(res)
     } catch (err) {
       if (runId !== runIdRef.current) return
-      setError(err instanceof Error ? err.message : '诊断失败')
+      setError(err instanceof Error ? err.message : t('diagDialog.failed'))
     } finally {
       if (runId === runIdRef.current) setLoading(false)
     }
-  }, [providerId])
+  }, [providerId, t])
 
   useEffect(() => {
     if (open) void runDiagnosis()
@@ -169,11 +159,10 @@ export function ProviderDiagDialog({ open, onClose, providerId, providerName }: 
       <div
         className="w-full max-w-[520px] max-h-[80vh] overflow-y-auto rounded-[14px] bg-[var(--color-surface)] p-6 shadow-[0_20px_60px_rgba(0,0,0,0.3)]"
       >
-        {/* Header */}
         <div className="mb-4 flex items-start gap-2.5">
           <Activity size={18} className="flex-shrink-0 text-[var(--color-text-muted)]" />
           <div className="flex-1">
-            <div className="text-[14px] font-bold text-[var(--color-text)]">连接诊断</div>
+            <div className="text-[14px] font-bold text-[var(--color-text)]">{t('diagDialog.title')}</div>
             <div className="mt-0.5 text-[12px] text-[var(--color-text-muted)]">{providerName}</div>
           </div>
           <button
@@ -184,15 +173,13 @@ export function ProviderDiagDialog({ open, onClose, providerId, providerName }: 
           </button>
         </div>
 
-        {/* Loading */}
         {loading && (
           <div className="flex items-center justify-center gap-2 py-6 text-[var(--color-text-muted)]">
             <Loader2 size={16} className="animate-spin" />
-            <span className="text-[13px]">正在诊断...</span>
+            <span className="text-[13px]">{t('diagDialog.checking')}</span>
           </div>
         )}
 
-        {/* Error */}
         {error && !loading && (
           <div
             className="rounded-[8px] px-3 py-2.5 text-[12px] text-[var(--color-danger)] bg-[rgba(239,68,68,0.08)] border border-[rgba(239,68,68,0.25)]"
@@ -201,15 +188,13 @@ export function ProviderDiagDialog({ open, onClose, providerId, providerName }: 
           </div>
         )}
 
-        {/* Results */}
         {result && !loading && (
           <div className="flex flex-col gap-3">
-            {/* Overall summary */}
             <div className={cn('flex items-center gap-2.5 rounded-[10px] border p-[10px_14px]', severityBgClass(result.overall), severityBorderClass(result.overall))}>
               <StatusDot status={result.overall} />
               <div className="flex-1">
                 <span className={cn('text-[13px] font-semibold', severityTextClass(result.overall))}>
-                  {result.overall === 'pass' ? '全部检测通过' : result.overall === 'warn' ? '存在警告，请关注' : '发现错误，需要修复'}
+                  {result.overall === 'pass' ? t('diagDialog.allPass') : result.overall === 'warn' ? t('diagDialog.hasWarn') : t('diagDialog.hasError')}
                 </span>
                 <span className="ml-2 text-[11px] text-[var(--color-text-muted)]">
                   {result.durationMs}ms
@@ -218,7 +203,6 @@ export function ProviderDiagDialog({ open, onClose, providerId, providerName }: 
               <StatusBadge status={result.overall} />
             </div>
 
-            {/* Probes */}
             <div className="flex flex-col gap-1.5">
               {result.probes.map((probe, i) => (
                 <ProbeRow
@@ -231,7 +215,6 @@ export function ProviderDiagDialog({ open, onClose, providerId, providerName }: 
           </div>
         )}
 
-        {/* Footer */}
         <div className="mt-5 flex justify-end gap-2">
           <button
             onClick={() => void runDiagnosis()}
@@ -241,7 +224,7 @@ export function ProviderDiagDialog({ open, onClose, providerId, providerName }: 
               loading ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'
             )}
           >
-            重新检测
+            {t('diagDialog.recheck')}
           </button>
           <button
             onClick={handleExport}
@@ -251,13 +234,13 @@ export function ProviderDiagDialog({ open, onClose, providerId, providerName }: 
               !result || loading ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'
             )}
           >
-            导出日志
+            {t('diagDialog.exportLog')}
           </button>
           <button
             onClick={onClose}
             className="cursor-pointer rounded-[var(--radius-sm)] border border-[var(--color-border)] bg-[var(--color-surface-2)] px-3.5 py-1.5 text-[12px] text-[var(--color-text)]"
           >
-            关闭
+            {t('diagDialog.close')}
           </button>
         </div>
       </div>

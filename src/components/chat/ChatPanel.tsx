@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState, useCallback, useMemo } from 'react'
+import { useTranslation } from 'react-i18next'
 import type { UIMessage, Attachment } from '../../../electron/shared/types'
 import { useTabStore, selectActiveTab } from '../../store/tab-store'
 import type { PermissionMode } from '../../store/tab-store'
@@ -16,6 +17,7 @@ import { X, Database, ArrowUp, ArrowDown, Brain } from 'lucide-react'
 import { cn } from '@renderer/lib/utils'
 
 export function ChatPanel(): React.JSX.Element {
+  const { t } = useTranslation()
   const messages = useTabStore((s) => selectActiveTab(s)?.messages ?? [])
   const status = useTabStore((s) => selectActiveTab(s)?.status ?? 'idle')
   const sessionId = useTabStore((s) => selectActiveTab(s)?.sessionId ?? null)
@@ -125,26 +127,26 @@ export function ChatPanel(): React.JSX.Element {
     const totalTokens = totalInputTokens + totalOutputTokens
     if (status === 'done') {
       const body = runningCostUsd > 0
-        ? `完成 · $${runningCostUsd.toFixed(4)}`
+        ? `${t('chat.taskComplete')} · $${runningCostUsd.toFixed(4)}`
         : totalTokens > 0
-          ? `完成 · ${totalTokens.toLocaleString()} tok`
-          : '任务完成'
+          ? `${t('chat.taskComplete')} · ${totalTokens.toLocaleString()} tok`
+          : t('chat.taskComplete')
       notify(projectName, body)
     } else if (status === 'error') {
-      notify(projectName, '任务出错')
+      notify(projectName, t('chat.taskError'))
     }
   }, [status, notify, projectName, runningCostUsd, totalInputTokens, totalOutputTokens])
 
   useEffect(() => {
     if (!pendingPermission) return
-    notify('需要权限审批', `工具：${pendingPermission.toolName}`)
+    notify(t('chat.needsPermission'), `${t('chat.tool')}: ${pendingPermission.toolName}`)
   }, [pendingPermission, notify])
 
   useEffect(() => {
     const lastAsk = [...messages].reverse().find((m) => m.type === 'ask' && !m.answered)
     if (!lastAsk || lastAsk.id === lastAskIdRef.current) return
     lastAskIdRef.current = lastAsk.id
-    notify(projectName, '需要你做决策')
+    notify(projectName, t('chat.needsDecision'))
   }, [messages, notify, projectName])
 
   useEffect(() => {
@@ -208,7 +210,7 @@ export function ChatPanel(): React.JSX.Element {
             onKeyDown={(e) => {
               if (e.key === 'Escape') { setShowSearch(false); setSearchQuery('') }
             }}
-            placeholder="Search messages…"
+            placeholder={t('chat.searchMessages')}
             className="flex-1 rounded-[var(--radius-sm)] border border-[var(--color-border)] bg-[var(--color-surface-2)] px-[10px] py-1 font-mono text-[12px] text-[var(--color-text)] outline-none"
           />
           {searchQuery && (

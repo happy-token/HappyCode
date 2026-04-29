@@ -146,14 +146,22 @@
   },
   "agents": {
     "title": "Agent Management",
-    "emptyText": "No Agent definitions found.<br/>Add <code>.md</code> files in <code>~/.claude/agents/</code> to create custom Agents.",
-    "summary": "total",
+    "emptyText": "No Agent definitions found.<br />Add <code>.md</code> files in <code>~/.claude/agents/</code> to create custom Agents.",
+    "summary": "Total",
+    "countLabel": "total",
     "sources": "sources",
     "description": "Description",
     "model": "Model",
     "tools": "Tools",
     "systemPrompt": "System Prompt",
-    "truncated": "... (truncated)"
+    "truncated": "... (truncated)",
+    "sourceUser": "User-defined (~/.claude/agents)",
+    "sourceProject": "Project (.claude/agents)",
+    "sourceLocal": "Local",
+    "sourcePolicy": "Policy",
+    "sourcePlugin": "Plugin",
+    "sourceFlag": "Flag",
+    "sourceBuiltin": "Built-in"
   },
   "skills": {
     "title": "Skills",
@@ -171,7 +179,11 @@
     "enable": "Enable",
     "delete": "Delete",
     "loading": "Loading...",
-    "noSkillMd": "No SKILL.md file found"
+    "noSkillMd": "No SKILL.md file found",
+    "sourcePlugin": "Plugin Skills",
+    "sourceUser": "User Skills",
+    "sourcePluginSubtitle": "From plugin installation directory",
+    "countPrefix": "Total"
   },
   "plugins": {
     "title": "Plugin Management",
@@ -205,14 +217,54 @@
     "project": "Project",
     "local": "Local",
     "managed": "Managed",
-    "builtin": "Built-in"
+    "builtin": "Built-in",
+    "enabledLabel": "Enabled",
+    "disabledLabel": "Disabled",
+    "skills": "skills",
+    "agentsCount": "Agents"
   },
   "hooks": {
     "addRule": "Add Rule",
     "bridgeConnected": "Bridge connected",
     "notConnected": "Not connected",
     "enable": "Enable",
-    "clear": "Clear"
+    "clear": "Clear",
+    "events": "Events",
+    "config": "Config",
+    "noRules": "No rules",
+    "deleteRule": "Delete rule",
+    "noHookEvents": "No hook events yet",
+    "hookEventsDesc": "Configure Claude Code hooks to POST to the local hook server",
+    "selectEvent": "Select trigger event",
+    "setMatcher": "Set match conditions",
+    "configureCmd": "Configure command",
+    "stopWarning": "Stop Hook Warning",
+    "stopWarningDesc": "exit 2 will make Claude continue running, which may cause infinite loops. Ensure the command has a clear termination condition.",
+    "understandRisk": "I understand the risks",
+    "matcherHint": "Set tool name matching pattern (leave empty = match all tools)",
+    "matcherPlaceholder": "e.g.: Bash / Edit / leave empty for all",
+    "shellCmd": "Shell command",
+    "commandPlaceholder": "e.g.: /home/user/.claude/hooks/my-hook.sh",
+    "mockPayload": "Mock Payload (editable)",
+    "runTest": "Run test",
+    "running": "Running…",
+    "cancel": "Cancel",
+    "prevStep": "Previous",
+    "nextStep": "Next",
+    "saveRule": "Save Rule",
+    "hookDesc": {
+      "PreToolUse": "Before tool execution. exit 2 blocks and injects feedback",
+      "PostToolUse": "After successful tool execution",
+      "PostToolUseFailure": "After tool execution fails",
+      "UserPromptSubmit": "After user sends message, before Claude processes",
+      "Stop": "When Claude is about to stop. exit 2 re-activates (may loop)",
+      "SubagentStart": "When a subagent starts",
+      "SubagentStop": "When a subagent ends",
+      "SessionStart": "When a session begins",
+      "SessionEnd": "When a session ends",
+      "Notification": "When Claude emits a notification",
+      "PreCompact": "Before context compaction"
+    }
   },
   "computerUse": {
     "description": "Configure AI control of computer permissions and behavior",
@@ -270,8 +322,8 @@
     }
   },
   "claudeCode": {
-    "statusTab": "Claude Code Status",
-    "configTab": "Claude Code Config",
+    "title": "Claude Code",
+    "description": "View CLI status and manage ~/.claude/settings.json configuration",
     "checking": "Checking...",
     "checkFailed": "Check failed, please retry",
     "cliInstall": "CLI Installation",
@@ -315,6 +367,7 @@
     "format": "Format",
     "saved": "Saved",
     "confirmSave": "Confirm Save",
+    "confirmSaveDesc": "Modifying <code>~/.claude/settings.json</code> — this affects all Claude Code sessions.",
     "cancel": "Cancel",
     "confirmSaveBtn": "Confirm Save"
   },
@@ -374,10 +427,39 @@
     "taskComplete": "Task complete",
     "taskError": "Task error",
     "needsPermission": "Permission needed",
-    "needsDecision": "Decision needed"
+    "needsDecision": "Decision needed",
+    "tool": "Tool",
+    "searchMessages": "Search messages…",
+    "slashCommandsHeader": "Slash Commands",
+    "skillLabel": "skill"
+  },
+  "chatEmpty": {
+    "sessionLoaded": "Session loaded",
+    "continueSession": "Type a message to continue this session",
+    "startConversation": "Start a conversation",
+    "workingIn": "Working in",
+    "typeOrPick": "Type a message or pick a quick command",
+    "claudeReady": "Claude Code is ready",
+    "pickFolder": "Pick a project folder to get started",
+    "chooseFolder": "Choose folder",
+    "resumeLastSession": "Resume last session",
+    "quickCommands": "Quick commands",
+    "quickInit": "Generate CLAUDE.md for this project",
+    "quickReview": "Review recent changes",
+    "quickCompact": "Compress conversation context",
+    "quickHelp": "Show available commands"
   },
   "promptInput": {
     "addFileOrImage": "Add files or images",
-    "slashCommands": "Slash commands"
+    "slashCommands": "Slash commands",
+    "dropFiles": "Drop files here…",
+    "claudeWorking": "Claude is working…",
+    "typeCommands": "Type / for commands",
+    "addFilesCommands": "Add files or commands",
+    "sendStop": "Send (Enter)",
+    "stopEsc": "Stop (Esc)",
+    "remove": "Remove",
+    "dropFilesAttach": "Drop files to attach",
+    "navigateHint": "navigate · Tab/Enter select · Esc dismiss"
   }
 }

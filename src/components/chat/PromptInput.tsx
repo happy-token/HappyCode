@@ -1,4 +1,5 @@
 import React, { useRef, useState, useCallback, useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
 import { createPortal } from 'react-dom'
 import { motion, AnimatePresence } from 'motion/react'
 import { Plus, CornerDownLeft, Square, Paperclip, FileText, Terminal, X, ArrowUp, ArrowDown } from 'lucide-react'
@@ -83,6 +84,7 @@ function readFileAsBase64(file: File): Promise<AttachmentDraft> {
 }
 
 export function PromptInput({ onSend, onStop, disabled, running }: Props): React.JSX.Element {
+  const { t } = useTranslation()
   const [value, setValue] = useState('')
   const [attachments, setAttachments] = useState<AttachmentDraft[]>([])
   const [textFiles, setTextFiles] = useState<TextFileDraft[]>([])
@@ -285,10 +287,10 @@ export function PromptInput({ onSend, onStop, disabled, running }: Props): React
         >
           <div className="flex items-center justify-between border-b border-[var(--color-border)] px-[10px] py-1">
             <span className="text-[9px] font-bold uppercase tracking-[0.06em] text-[var(--color-text-muted)]">
-              Slash Commands
+              {t('chat.slashCommandsHeader')}
             </span>
             <span className="text-[9px] text-[var(--color-text-muted)]">
-              <ArrowUp size={9} className="inline" /><ArrowDown size={9} className="inline" /> navigate · Tab/Enter select · Esc dismiss
+              <ArrowUp size={9} className="inline" /><ArrowDown size={9} className="inline" /> {t('promptInput.navigateHint')}
             </span>
           </div>
           {filteredCmds.map((cmd, i) => (
@@ -307,7 +309,7 @@ export function PromptInput({ onSend, onStop, disabled, running }: Props): React
               </span>
               {cmd.isSkill && (
                 <span className="flex-shrink-0 rounded-[3px] border border-[var(--color-success)] bg-[rgba(52,211,153,0.12)] px-1 text-[9px] font-bold leading-4 text-[var(--color-success)]">
-                  skill
+                  {t('chat.skillLabel')}
                 </span>
               )}
               <span className="min-w-0 flex-1 overflow-hidden text-ellipsis whitespace-nowrap text-[11px] text-[var(--color-text-muted)]">
@@ -322,7 +324,7 @@ export function PromptInput({ onSend, onStop, disabled, running }: Props): React
       {/* Drag overlay */}
       {dragging && (
         <div className="pointer-events-none absolute inset-0 z-10 flex items-center justify-center rounded-[var(--radius-md)] border-2 border-dashed border-[var(--color-accent)] bg-[var(--color-accent-dim)]">
-          <span className="text-[13px] font-semibold text-[var(--color-accent)]">Drop files to attach</span>
+          <span className="text-[13px] font-semibold text-[var(--color-accent)]">{t('promptInput.dropFilesAttach')}</span>
         </div>
       )}
 
@@ -364,7 +366,7 @@ export function PromptInput({ onSend, onStop, disabled, running }: Props): React
               />
               <button
                 onClick={() => removeAttachment(idx)}
-                title="Remove"
+                title={t('promptInput.remove')}
                 className="absolute -right-[6px] -top-[6px] flex h-[18px] w-[18px] cursor-pointer items-center justify-center rounded-full bg-[var(--color-danger)] p-0 text-white"
               >
                 <X size={10} />
@@ -393,7 +395,7 @@ export function PromptInput({ onSend, onStop, disabled, running }: Props): React
           <button
             onClick={() => setPlusMenuOpen((v) => !v)}
             disabled={disabled && !running}
-            title="Add files or commands"
+            title={t('promptInput.addFilesCommands')}
             className={cn(
               'flex h-[26px] w-[26px] cursor-pointer items-center justify-center rounded-[6px] transition-colors duration-100 text-[var(--color-text-faint)]',
               plusMenuOpen
@@ -419,7 +421,7 @@ export function PromptInput({ onSend, onStop, disabled, running }: Props): React
                   className="flex w-full cursor-pointer items-center gap-[10px] border-0 bg-transparent px-[14px] py-[10px] text-left transition-colors hover:bg-[var(--color-surface-2)]"
                 >
                   <Paperclip size={14} className="flex-shrink-0 text-[var(--color-text-muted)]" />
-                  <span className="text-[13px] text-[var(--color-text)]">添加文件或图片</span>
+                  <span className="text-[13px] text-[var(--color-text)]">{t('promptInput.addFileOrImage')}</span>
                 </button>
                 <button
                   onClick={() => {
@@ -430,7 +432,7 @@ export function PromptInput({ onSend, onStop, disabled, running }: Props): React
                   className="flex w-full cursor-pointer items-center gap-[10px] border-0 bg-transparent px-[14px] py-[10px] text-left transition-colors hover:bg-[var(--color-surface-2)]"
                 >
                   <Terminal size={14} className="flex-shrink-0 text-[var(--color-text-muted)]" />
-                  <span className="text-[13px] text-[var(--color-text)]">斜杠命令</span>
+                  <span className="text-[13px] text-[var(--color-text)]">{t('promptInput.slashCommands')}</span>
                 </button>
               </motion.div>
             )}
@@ -450,7 +452,7 @@ export function PromptInput({ onSend, onStop, disabled, running }: Props): React
           onPaste={(e) => void handlePaste(e)}
           onFocus={() => setIsFocused(true)}
           onBlur={() => setIsFocused(false)}
-          placeholder={dragging ? 'Drop files here…' : running ? 'Claude is working…' : 'Type / for commands'}
+          placeholder={dragging ? t('promptInput.dropFiles') : running ? t('promptInput.claudeWorking') : t('promptInput.typeCommands')}
           disabled={disabled && !running}
           rows={1}
           className="flex-1 resize-none border-0 bg-transparent py-2 pl-10 pr-10 font-sans text-[13px] leading-[1.55] text-[var(--color-text)] outline-none overflow-hidden min-h-[36px]"
@@ -460,7 +462,7 @@ export function PromptInput({ onSend, onStop, disabled, running }: Props): React
         {running ? (
           <button
             onClick={onStop}
-            title="Stop (Esc)"
+            title={t('promptInput.stopEsc')}
             className="absolute bottom-[6px] right-[6px] flex h-[26px] w-[26px] flex-shrink-0 cursor-pointer items-center justify-center rounded-[6px] bg-[var(--color-danger)] text-white transition-opacity hover:opacity-80"
           >
             <Square size={10} fill="currentColor" />
@@ -469,7 +471,7 @@ export function PromptInput({ onSend, onStop, disabled, running }: Props): React
           <button
             onClick={submit}
             disabled={!canSend}
-            title="Send (Enter)"
+            title={t('promptInput.sendStop')}
             className={cn(
               'absolute bottom-[6px] right-[6px] flex h-[26px] w-[26px] flex-shrink-0 items-center justify-center rounded-[6px] transition-colors duration-150',
               canSend

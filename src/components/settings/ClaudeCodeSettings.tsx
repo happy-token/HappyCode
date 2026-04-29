@@ -1,38 +1,36 @@
 import React, { useState, useEffect, useCallback } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Loader2 } from 'lucide-react'
 import { cn } from '@renderer/lib/utils'
 import type { ClaudeCliStatus, ClaudeSettings } from '../../../electron/shared/types'
 
-// ── Tab bar ──────────────────────────────────────────────────────
-
 type SubTab = 'status' | 'config'
 
 function SubTabBar({ active, onChange }: { active: SubTab; onChange: (t: SubTab) => void }) {
-  const tabs: Array<{ id: SubTab; label: string }> = [
-    { id: 'status', label: 'Claude Code 状态' },
-    { id: 'config', label: 'Claude Code 配置' },
+  const { t } = useTranslation()
+  const tabs: Array<{ id: SubTab; labelKey: string }> = [
+    { id: 'status', labelKey: 'claudeCode.statusTab' },
+    { id: 'config', labelKey: 'claudeCode.configTab' },
   ]
   return (
     <div className="mb-5 flex gap-0.5 border-b border-[var(--color-border)]">
-      {tabs.map((t) => (
+      {tabs.map((tab) => (
         <button
-          key={t.id}
-          onClick={() => onChange(t.id)}
+          key={tab.id}
+          onClick={() => onChange(tab.id)}
           className={cn(
             '-mb-px cursor-pointer rounded-none border-none [background:none] px-4 py-1.5 text-[13px]',
-            active === t.id
+            active === tab.id
               ? 'border-b-2 border-[var(--color-accent)] font-semibold text-[var(--color-accent)]'
               : 'border-b-2 border-transparent font-normal text-[var(--color-text-muted)]'
           )}
         >
-          {t.label}
+          {t(tab.labelKey)}
         </button>
       ))}
     </div>
   )
 }
-
-// ── Status helpers ───────────────────────────────────────────────
 
 function StatusRow({ label, value, ok, detail }: { label: string; value: string; ok: boolean | null; detail?: string }) {
   return (
@@ -49,9 +47,8 @@ function StatusRow({ label, value, ok, detail }: { label: string; value: string;
   )
 }
 
-// ── Status Tab ───────────────────────────────────────────────────
-
 function StatusTab() {
+  const { t } = useTranslation()
   const [status, setStatus] = useState<ClaudeCliStatus | null>(null)
   const [loading, setLoading] = useState(true)
 
@@ -73,71 +70,68 @@ function StatusTab() {
     return (
       <div className="flex items-center gap-2 py-8 text-[var(--color-text-muted)]">
         <Loader2 size={16} className="animate-spin" />
-        <span className="text-[13px]">正在检测...</span>
+        <span className="text-[13px]">{t('claudeCode.checking')}</span>
       </div>
     )
   }
 
   if (!status) {
     return (
-      <div className="py-4 text-[12px] text-[var(--color-danger)]">检测失败，请重试</div>
+      <div className="py-4 text-[12px] text-[var(--color-danger)]">{t('claudeCode.checkFailed')}</div>
     )
   }
 
   const authMethods = [
-    status.auth.oauthToken && '浏览器 OAuth',
-    status.auth.apiKeyEnv && '环境变量 API Key',
-    status.auth.apiKeyFile && '配置文件 API Key',
+    status.auth.oauthToken && 'Browser OAuth',
+    status.auth.apiKeyEnv && 'Env API Key',
+    status.auth.apiKeyFile && 'Config file API Key',
   ].filter(Boolean)
 
   return (
     <div className="flex max-w-[560px] flex-col gap-4">
-      {/* CLI 安装状态 */}
       <div className="rounded-[10px] border border-[var(--color-border)] bg-transparent p-[12px_14px]">
-        <div className="mb-2.5 text-[13px] font-bold text-[var(--color-text)]">CLI 安装</div>
+        <div className="mb-2.5 text-[13px] font-bold text-[var(--color-text)]">{t('claudeCode.cliInstall')}</div>
         <StatusRow
-          label="安装状态"
-          value={status.found ? '已安装' : '未找到'}
+          label={t('claudeCode.installStatus')}
+          value={status.found ? t('claudeCode.installed') : t('claudeCode.notFound')}
           ok={status.found}
-          detail={!status.found ? '请运行 npm install -g @anthropic-ai/claude-code 安装' : undefined}
+          detail={!status.found ? t('claudeCode.notFoundHint') : undefined}
         />
         {status.found && (
           <>
-            <StatusRow label="二进制路径" value={status.binaryPath ?? '—'} ok={null} />
+            <StatusRow label={t('claudeCode.binaryPath')} value={status.binaryPath ?? '—'} ok={null} />
             <StatusRow
-              label="版本"
-              value={status.version ?? '获取失败'}
+              label={t('claudeCode.version')}
+              value={status.version ?? t('claudeCode.versionFailed')}
               ok={!!status.version}
-              detail={!status.version ? '可能需要在终端中手动执行 claude --version 确认' : undefined}
+              detail={!status.version ? t('claudeCode.versionHint') : undefined}
             />
           </>
         )}
       </div>
 
-      {/* 认证状态 */}
       <div className="rounded-[10px] border border-[var(--color-border)] bg-transparent p-[12px_14px]">
-        <div className="mb-2.5 text-[13px] font-bold text-[var(--color-text)]">认证</div>
+        <div className="mb-2.5 text-[13px] font-bold text-[var(--color-text)]">{t('claudeCode.auth')}</div>
         <StatusRow
-          label="认证方式"
-          value={authMethods.length > 0 ? authMethods.join(' · ') : '未配置'}
+          label={t('claudeCode.authMethod')}
+          value={authMethods.length > 0 ? authMethods.join(' · ') : t('claudeCode.notConfigured')}
           ok={authMethods.length > 0}
-          detail={authMethods.length === 0 ? '请运行 claude 并登录，或设置 ANTHROPIC_API_KEY 环境变量' : undefined}
+          detail={authMethods.length === 0 ? t('claudeCode.authHint') : undefined}
         />
         {status.auth.oauthToken && status.auth.credentialsPath && (
-          <StatusRow label="凭证文件" value={status.auth.credentialsPath} ok={null} />
+          <StatusRow label={t('claudeCode.credentialsFile')} value={status.auth.credentialsPath} ok={null} />
         )}
         {status.auth.apiKeyEnv && (
-          <StatusRow label="环境变量" value="ANTHROPIC_API_KEY / ANTHROPIC_AUTH_TOKEN" ok={null} />
+          <StatusRow label={t('claudeCode.envVar')} value="ANTHROPIC_API_KEY / ANTHROPIC_AUTH_TOKEN" ok={null} />
         )}
       </div>
 
-      {/* 配置目录 */}
       <div className="rounded-[10px] border border-[var(--color-border)] bg-transparent p-[12px_14px]">
-        <div className="mb-2.5 text-[13px] font-bold text-[var(--color-text)]">配置目录</div>
-        <StatusRow label="配置目录" value={status.configDir} ok={null} />
+        <div className="mb-2.5 text-[13px] font-bold text-[var(--color-text)]">{t('claudeCode.configDirSection')}</div>
+        <StatusRow label={t('claudeCode.configDir')} value={status.configDir} ok={null} />
         <StatusRow
-          label="settings.json"
-          value={status.settingsExists ? status.settingsPath : '不存在（将使用默认值）'}
+          label={t('claudeCode.settingsFile')}
+          value={status.settingsExists ? status.settingsPath : t('claudeCode.settingsNotExist')}
           ok={null}
         />
       </div>
@@ -146,18 +140,16 @@ function StatusTab() {
         onClick={() => void refresh()}
         className="self-start cursor-pointer rounded-[var(--radius-sm)] border border-[var(--color-border)] bg-transparent px-4 py-1.5 text-[12px] text-[var(--color-text-muted)]"
       >
-        刷新
+        {t('claudeCode.refresh')}
       </button>
     </div>
   )
 }
 
-// ── Config Tab ───────────────────────────────────────────────────
-
-const KNOWN_FIELDS: Array<{ key: string; label: string; desc: string; type: 'boolean' | 'object' | 'string' }> = [
-  { key: 'permissions', label: '权限 (permissions)', desc: '工具调用的允许/禁止规则列表', type: 'object' },
-  { key: 'env', label: '环境变量 (env)', desc: '传递给 Claude Code 进程的环境变量', type: 'object' },
-  { key: 'hooks', label: 'Hooks', desc: 'PreToolUse / PostToolUse / Stop 钩子配置', type: 'object' },
+const KNOWN_FIELDS_KEY = [
+  { key: 'permissions', labelKey: 'claudeCode.sections.permissions', descKey: 'claudeCode.sections.permissionsDesc', type: 'object' as const },
+  { key: 'env', labelKey: 'claudeCode.sections.env', descKey: 'claudeCode.sections.envDesc', type: 'object' as const },
+  { key: 'hooks', labelKey: 'claudeCode.sections.hooks', descKey: 'claudeCode.sections.hooksDesc', type: 'object' as const },
 ]
 
 type ViewMode = 'form' | 'json'
@@ -165,6 +157,7 @@ type ViewMode = 'form' | 'json'
 const inputCls = 'box-border w-full rounded-[var(--radius-sm)] border border-[var(--color-border)] bg-[var(--color-surface-2)] px-[10px] py-[6px] text-[12px] text-[var(--color-text)]'
 
 function ConfigTab() {
+  const { t } = useTranslation()
   const [settings, setSettings] = useState<ClaudeSettings | null>(null)
   const [original, setOriginal] = useState<ClaudeSettings | null>(null)
   const [jsonText, setJsonText] = useState('')
@@ -203,7 +196,7 @@ function ConfigTab() {
         data = JSON.parse(jsonText) as ClaudeSettings
         setJsonError('')
       } catch {
-        setJsonError('JSON 格式无效')
+        setJsonError(t('claudeCode.invalidJson'))
         return
       }
     } else {
@@ -245,7 +238,7 @@ function ConfigTab() {
       setJsonText(JSON.stringify(parsed, null, 2))
       setJsonError('')
     } catch {
-      setJsonError('JSON 格式无效，无法格式化')
+      setJsonError(t('claudeCode.invalidJsonFormat'))
     }
   }
 
@@ -253,19 +246,18 @@ function ConfigTab() {
     return (
       <div className="flex items-center gap-2 py-8 text-[var(--color-text-muted)]">
         <Loader2 size={16} className="animate-spin" />
-        <span className="text-[13px]">加载中...</span>
+        <span className="text-[13px]">{t('claudeCode.loading')}</span>
       </div>
     )
   }
 
   const s = settings ?? {}
 
-  const knownKeys = new Set(KNOWN_FIELDS.map((f) => f.key))
+  const knownKeys = new Set(KNOWN_FIELDS_KEY.map((f) => f.key))
   const extraEntries = Object.entries(s).filter(([k]) => !knownKeys.has(k))
 
   return (
     <div className="max-w-[600px]">
-      {/* View toggle */}
       <div className="mb-4 flex gap-1">
         {(['form', 'json'] as ViewMode[]).map((v) => (
           <button
@@ -278,17 +270,17 @@ function ConfigTab() {
                 : 'border border-[var(--color-border)] bg-transparent text-[var(--color-text-muted)]'
             )}
           >
-            {v === 'form' ? '表单' : 'JSON'}
+            {v === 'form' ? t('claudeCode.form') : t('claudeCode.json')}
           </button>
         ))}
       </div>
 
       {view === 'form' && (
         <div className="flex flex-col gap-3">
-          {KNOWN_FIELDS.map((field) => (
+          {KNOWN_FIELDS_KEY.map((field) => (
             <div key={field.key} className="flex flex-col gap-1.5 rounded-[10px] border border-[var(--color-border)] bg-transparent p-[12px_14px]">
-              <label className="mb-1 block text-[12px] font-semibold text-[var(--color-text)]">{field.label}</label>
-              <div className="mb-1 text-[11px] text-[var(--color-text-muted)]">{field.desc}</div>
+              <label className="mb-1 block text-[12px] font-semibold text-[var(--color-text)]">{t(field.labelKey)}</label>
+              <div className="mb-1 text-[11px] text-[var(--color-text-muted)]">{t(field.descKey)}</div>
               <textarea
                 value={
                   typeof s[field.key] === 'object'
@@ -316,7 +308,7 @@ function ConfigTab() {
                     onChange={(e) => updateField(key, e.target.checked)}
                     className="h-3.5 w-3.5"
                   />
-                  <span className="text-[12px] text-[var(--color-text-muted)]">{value ? '启用' : '禁用'}</span>
+                  <span className="text-[12px] text-[var(--color-text-muted)]">{value ? t('claudeCode.enabled') : t('claudeCode.disabled')}</span>
                 </label>
               ) : typeof value === 'string' ? (
                 <input
@@ -344,16 +336,16 @@ function ConfigTab() {
               disabled={!hasChanges || saving}
               className={cn('cursor-pointer rounded-[var(--radius-sm)] border border-[var(--color-accent)] bg-[var(--color-accent)] px-4 py-1.5 text-[12px] text-white', (!hasChanges || saving) && 'opacity-50')}
             >
-              {saving ? '保存中...' : '保存'}
+              {saving ? t('claudeCode.saving') : t('claudeCode.save')}
             </button>
             <button
               onClick={handleReset}
               disabled={!hasChanges}
               className={cn('cursor-pointer rounded-[var(--radius-sm)] border border-[var(--color-border)] bg-transparent px-4 py-1.5 text-[12px] text-[var(--color-text-muted)]', !hasChanges && 'opacity-50')}
             >
-              重置
+              {t('claudeCode.reset')}
             </button>
-            {saved && <span className="text-[12px] text-[var(--color-success)]">已保存</span>}
+            {saved && <span className="text-[12px] text-[var(--color-success)]">{t('claudeCode.saved')}</span>}
           </div>
         </div>
       )}
@@ -373,36 +365,33 @@ function ConfigTab() {
               disabled={saving}
               className={cn('cursor-pointer rounded-[var(--radius-sm)] border border-[var(--color-accent)] bg-[var(--color-accent)] px-4 py-1.5 text-[12px] text-white', saving && 'opacity-50')}
             >
-              {saving ? '保存中...' : '保存'}
+              {saving ? t('claudeCode.saving') : t('claudeCode.save')}
             </button>
             <button
               onClick={formatJson}
               className="cursor-pointer rounded-[var(--radius-sm)] border border-[var(--color-border)] bg-transparent px-4 py-1.5 text-[12px] text-[var(--color-text-muted)]"
             >
-              格式化
+              {t('claudeCode.format')}
             </button>
             <button
               onClick={handleReset}
               className="cursor-pointer rounded-[var(--radius-sm)] border border-[var(--color-border)] bg-transparent px-4 py-1.5 text-[12px] text-[var(--color-text-muted)]"
             >
-              重置
+              {t('claudeCode.reset')}
             </button>
-            {saved && <span className="text-[12px] text-[var(--color-success)]">已保存</span>}
+            {saved && <span className="text-[12px] text-[var(--color-success)]">{t('claudeCode.saved')}</span>}
           </div>
         </div>
       )}
 
-      {/* Save confirmation dialog */}
       {showConfirm && (
         <div className="fixed inset-0 z-[1200] flex items-center justify-center bg-black/50">
           <div className="w-full max-w-[380px] rounded-[12px] bg-[var(--color-surface)] p-6">
-            <div className="mb-2 text-[14px] font-bold text-[var(--color-text)]">确认保存</div>
-            <div className="mb-4 text-[12px] text-[var(--color-text-muted)]">
-              即将修改 <code className="rounded-[3px] bg-[var(--color-surface-2)] px-[5px] py-px text-[11px]">~/.claude/settings.json</code>，此操作会影响所有 Claude Code 会话。
-            </div>
+            <div className="mb-2 text-[14px] font-bold text-[var(--color-text)]">{t('claudeCode.confirmSave')}</div>
+            <div className="mb-4 text-[12px] text-[var(--color-text-muted)]" dangerouslySetInnerHTML={{ __html: t('claudeCode.confirmSaveDesc') }} />
             <div className="flex justify-end gap-2">
-              <button onClick={() => { setShowConfirm(false); setPendingSource(null) }} className="cursor-pointer rounded-[var(--radius-sm)] border border-[var(--color-border)] bg-transparent px-4 py-1.5 text-[12px] text-[var(--color-text-muted)]">取消</button>
-              <button onClick={() => pendingSource && void doSave(pendingSource)} className="cursor-pointer rounded-[var(--radius-sm)] border border-[var(--color-accent)] bg-[var(--color-accent)] px-4 py-1.5 text-[12px] text-white">确认保存</button>
+              <button onClick={() => { setShowConfirm(false); setPendingSource(null) }} className="cursor-pointer rounded-[var(--radius-sm)] border border-[var(--color-border)] bg-transparent px-4 py-1.5 text-[12px] text-[var(--color-text-muted)]">{t('claudeCode.cancel')}</button>
+              <button onClick={() => pendingSource && void doSave(pendingSource)} className="cursor-pointer rounded-[var(--radius-sm)] border border-[var(--color-accent)] bg-[var(--color-accent)] px-4 py-1.5 text-[12px] text-white">{t('claudeCode.confirmSaveBtn')}</button>
             </div>
           </div>
         </div>
@@ -411,16 +400,15 @@ function ConfigTab() {
   )
 }
 
-// ── Root export ──────────────────────────────────────────────────
-
 export function ClaudeCodeSettings(): React.JSX.Element {
+  const { t } = useTranslation()
   const [tab, setTab] = useState<SubTab>('status')
 
   return (
     <div className="max-w-[640px]">
       <div className="mb-4">
         <div className="text-[16px] font-bold text-[var(--color-text)]">Claude Code</div>
-        <div className="mt-0.5 text-[12px] text-[var(--color-text-muted)]">查看 CLI 状态并管理 ~/.claude/settings.json 配置</div>
+        <div className="mt-0.5 text-[12px] text-[var(--color-text-muted)]">{t('claudeCode.description')}</div>
       </div>
       <SubTabBar active={tab} onChange={setTab} />
       {tab === 'status' && <StatusTab />}

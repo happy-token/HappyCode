@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Check, X, AlertTriangle } from 'lucide-react'
 import { cn } from '@renderer/lib/utils'
 import type {
@@ -13,13 +14,8 @@ import type {
 
 // ── Permission modes ──
 
-const PERMISSION_MODES: { value: ComputerUsePermissionMode; label: string; desc: string; symbol: string }[] = [
-  { value: 'default', label: '默认', desc: '安全操作自动允许，危险操作需确认', symbol: '' },
-  { value: 'plan', label: '仅规划', desc: '仅制定计划，不执行任何操作', symbol: '⏸' },
-  { value: 'acceptEdits', label: '接受更改', desc: '自动接受 AI 的文件修改', symbol: '⏵⏵' },
-  { value: 'dontAsk', label: '不询问', desc: '所有操作自动执行', symbol: '⏵⏵' },
-  { value: 'auto', label: '自动模式', desc: 'AI 分类器自动判断风险等级', symbol: '⏵⏵' },
-]
+const PERMISSION_MODE_KEYS = ['default', 'plan', 'acceptEdits', 'dontAsk', 'auto'] as ComputerUsePermissionMode[]
+const TIER_KEYS = ['read', 'click', 'full'] as ComputerUseAppPermissionTier[]
 
 // ── Sentinel apps ──
 
@@ -35,9 +31,9 @@ const FILESYSTEM_ACCESS_IDS = new Set(['com.apple.finder'])
 const SYSTEM_SETTINGS_IDS = new Set(['com.apple.systempreferences', 'com.apple.SystemSettings'])
 
 const SENTINEL_WARNINGS: Record<string, string> = {
-  shell: '⚠ 相当于 Shell 访问，可执行任意命令',
-  filesystem: '⚠ 可读取和修改任意文件',
-  systemSettings: '⚠ 可更改系统设置',
+  shell: 'computerUse.warnings.shell',
+  filesystem: 'computerUse.warnings.filesystem',
+  systemSettings: 'computerUse.warnings.systemSettings',
 }
 
 function getSentinelWarning(bundleId: string): string | null {
@@ -47,13 +43,12 @@ function getSentinelWarning(bundleId: string): string | null {
   return null
 }
 
-// ── Tier options ──
+function getSentinelWarningText(bundleId: string, t: (key: string) => string): string | null {
+  const key = getSentinelWarning(bundleId)
+  return key ? t(key) : null
+}
 
-const TIER_OPTIONS: { value: ComputerUseAppPermissionTier; label: string }[] = [
-  { value: 'read', label: '仅查看' },
-  { value: 'click', label: '点击' },
-  { value: 'full', label: '完全控制' },
-]
+// ── Tier options ──
 
 const DEFAULT_GRANT_FLAGS: ComputerUseGrantFlags = {
   clipboardRead: true,
@@ -70,6 +65,7 @@ const DEFAULT_CONFIG: ComputerUseConfig = {
 }
 
 export function ComputerUseSettings(): React.JSX.Element {
+  const { t } = useTranslation()
   const [config, setConfig] = useState<ComputerUseConfig>(DEFAULT_CONFIG)
   const [saved, setSaved] = useState(true)
   const [tccState, setTccState] = useState<ComputerUseTccState>({ accessibility: true, screenRecording: true })
@@ -175,40 +171,38 @@ export function ComputerUseSettings(): React.JSX.Element {
     <div className="max-w-[640px]">
       <div className="mb-4">
         <div className="text-[16px] font-bold text-[var(--color-text)]">Computer Use</div>
-        <div className="mt-0.5 text-[12px] text-[var(--color-text-muted)]">配置 AI 控制计算机的权限和行为</div>
+        <div className="mt-0.5 text-[12px] text-[var(--color-text-muted)]">{t('computerUse.description')}</div>
       </div>
 
       <div className="flex flex-col gap-6">
-        {/* macOS TCC Warning */}
         {needsTcc && (
           <TccPanel
             tccState={tccState}
             onOpen={openSystemSettings}
             onRetry={checkTcc}
+            t={t}
           />
         )}
 
-        {/* Section 1: Master Toggle */}
-        <Section title="启用 Computer Use">
+        <Section title={t('computerUse.enableSection')}>
           <ToggleGroup
             options={[
-              { value: true, label: '开启' },
-              { value: false, label: '关闭' },
+              { value: true, label: t('computerUse.on') },
+              { value: false, label: t('computerUse.off') },
             ]}
             value={config.enabled}
             onChange={(v) => updateConfig({ enabled: v })}
           />
         </Section>
 
-        {/* Section 2: Permission Mode */}
-        <Section title="默认权限模式">
+        <Section title={t('computerUse.defaultModeSection')}>
           <div className="flex flex-col gap-2">
-            {PERMISSION_MODES.map((mode) => (
+            {PERMISSION_MODE_KEYS.map((mode) => (
               <label
-                key={mode.value}
+                key={mode}
                 className={cn(
                   'flex cursor-pointer items-start gap-3 rounded-[8px] p-3 transition-all',
-                  config.permissionMode === mode.value
+                  config.permissionMode === mode
                     ? 'border-[1.5px] border-[var(--color-accent)] bg-[var(--color-accent-dim)]'
                     : 'border border-[var(--color-border)] bg-transparent'
                 )}
@@ -216,17 +210,14 @@ export function ComputerUseSettings(): React.JSX.Element {
                 <input
                   type="radio"
                   name="permissionMode"
-                  checked={config.permissionMode === mode.value}
-                  onChange={() => updateConfig({ permissionMode: mode.value })}
+                  checked={config.permissionMode === mode}
+                  onChange={() => updateConfig({ permissionMode: mode })}
                   className="mt-0.5 flex-shrink-0 [accent-color:var(--color-accent)]"
                 />
                 <div className="flex flex-1 items-center gap-2">
-                  {mode.symbol && (
-                    <span className="font-mono text-[12px] text-[var(--color-accent)]">{mode.symbol}</span>
-                  )}
                   <div>
-                    <div className="text-[12px] font-semibold text-[var(--color-text)]">{mode.label}</div>
-                    <div className="mt-0.5 text-[11px] text-[var(--color-text-muted)]">{mode.desc}</div>
+                    <div className="text-[12px] font-semibold text-[var(--color-text)]">{t(`computerUse.modes.${mode}`)}</div>
+                    <div className="mt-0.5 text-[11px] text-[var(--color-text-muted)]">{t(`computerUse.modes.${mode}Desc`)}</div>
                   </div>
                 </div>
               </label>
@@ -235,24 +226,22 @@ export function ComputerUseSettings(): React.JSX.Element {
         </Section>
 
         {/* Section 3: Authorized Apps */}
-        <Section title="已授权应用">
-          {/* App search */}
+        <Section title={t('computerUse.authorizedAppsSection')}>
           <input
             value={appSearch}
             onChange={(e) => setAppSearch(e.target.value)}
-            placeholder="搜索应用…"
+            placeholder={t('computerUse.searchPlaceholder')}
             className="box-border mb-2 w-full rounded-[var(--radius-sm)] border border-[var(--color-border)] bg-[var(--color-surface-2)] px-[10px] py-[6px] text-[12px] text-[var(--color-text)]"
           />
 
-          {/* Already authorized apps */}
           {config.authorizedApps.length > 0 && (
             <div className="mb-3">
               <div className="mb-2 text-[11px] font-semibold text-[var(--color-text)]">
-                已授权 ({config.authorizedApps.length})
+                {t('computerUse.authorized')} ({config.authorizedApps.length})
               </div>
               <div className="flex flex-col gap-1">
                 {config.authorizedApps.map((app) => {
-                  const warning = getSentinelWarning(app.bundleId)
+                  const warning = getSentinelWarningText(app.bundleId, t)
                   return (
                     <div
                       key={app.bundleId}
@@ -276,15 +265,15 @@ export function ComputerUseSettings(): React.JSX.Element {
                         onChange={(e) => updateAppTier(app.bundleId, e.target.value as ComputerUseAppPermissionTier)}
                         className="flex-shrink-0 cursor-pointer rounded-[4px] border border-[var(--color-border)] bg-[var(--color-surface)] px-1.5 py-0.5 text-[11px] text-[var(--color-text-muted)]"
                       >
-                        {TIER_OPTIONS.map((t) => (
-                          <option key={t.value} value={t.value}>{t.label}</option>
+                        {TIER_KEYS.map((key) => (
+                          <option key={key} value={key}>{t(`computerUse.accessLevels.${key}`)}</option>
                         ))}
                       </select>
                       <button
                         onClick={() => removeAuthorizedApp(app.bundleId)}
                         className="flex-shrink-0 cursor-pointer rounded-[4px] border border-[var(--color-border)] bg-transparent px-2 py-0.5 text-[11px] text-[var(--color-text-muted)]"
                       >
-                        移除
+                        {t('computerUse.remove')}
                       </button>
                     </div>
                   )
@@ -295,14 +284,14 @@ export function ComputerUseSettings(): React.JSX.Element {
 
           {/* Available installed apps */}
           <div className="mb-2 text-[11px] font-semibold text-[var(--color-text)]">
-            {installedAppsLoading ? '加载应用中…' : `选择要控制的应用 (${filteredInstalled.length}/${installedApps.length})`}
+            {installedAppsLoading ? t('computerUse.scanning') : `${t('computerUse.selectApp')} (${filteredInstalled.length}/${installedApps.length})`}
           </div>
           {installedAppsLoading && (
-            <div className="py-2 text-[11px] text-[var(--color-text-muted)]">扫描系统中已安装的应用…</div>
+            <div className="py-2 text-[11px] text-[var(--color-text-muted)]">{t('computerUse.scanning')}</div>
           )}
           {!installedAppsLoading && filteredInstalled.length === 0 && (
             <div className="py-2 text-[11px] text-[var(--color-text-muted)]">
-              {installedApps.length === 0 ? '未找到可用的应用' : '没有匹配的应用'}
+              {installedApps.length === 0 ? t('computerUse.noAvailableApps') : t('computerUse.noAppsFound')}
             </div>
           )}
           {!installedAppsLoading && (
@@ -343,23 +332,23 @@ export function ComputerUseSettings(): React.JSX.Element {
         </Section>
 
         {/* Section 4: Grant Flags */}
-        <Section title="权限选项">
+        <Section title={t('computerUse.permissionsSection')}>
           <div className="flex flex-col gap-2.5">
             <ToggleRow
-              label="允许读取剪贴板"
-              desc="AI 可以读取当前剪贴板内容"
+              label={t('computerUse.allowReadClipboard')}
+              desc={t('computerUse.allowReadClipboardDesc')}
               checked={config.grantFlags.clipboardRead}
               onChange={(v) => updateGrantFlags({ clipboardRead: v })}
             />
             <ToggleRow
-              label="允许写入剪贴板"
-              desc="AI 可以修改剪贴板内容"
+              label={t('computerUse.allowWriteClipboard')}
+              desc={t('computerUse.allowWriteClipboardDesc')}
               checked={config.grantFlags.clipboardWrite}
               onChange={(v) => updateGrantFlags({ clipboardWrite: v })}
             />
             <ToggleRow
-              label="允许系统快捷键"
-              desc="允许发送 Cmd+Q、Cmd+Tab 等系统级快捷键"
+              label={t('computerUse.allowSystemShortcuts')}
+              desc={t('computerUse.allowSystemShortcutsDesc')}
               checked={config.grantFlags.systemKeyCombos}
               onChange={(v) => updateGrantFlags({ systemKeyCombos: v })}
             />
@@ -367,11 +356,11 @@ export function ComputerUseSettings(): React.JSX.Element {
         </Section>
 
         {/* Section 5: Screenshot Tool */}
-        <Section title="截图工具">
+        <Section title={t('computerUse.screenshotToolSection')}>
           <input
             value={config.screenshotTool || ''}
             onChange={(e) => updateConfig({ screenshotTool: e.target.value })}
-            placeholder="默认截图工具（如 screencapture）"
+            placeholder={t('computerUse.screenshotToolPlaceholder')}
             className="box-border w-full rounded-[var(--radius-sm)] border border-[var(--color-border)] bg-[var(--color-surface-2)] px-[10px] py-[6px] text-[12px] text-[var(--color-text)]"
           />
         </Section>
@@ -388,14 +377,14 @@ export function ComputerUseSettings(): React.JSX.Element {
                 : 'cursor-pointer bg-[var(--color-accent)] text-white'
             )}
           >
-            {saved ? '已保存' : '保存'}
+            {saved ? t('computerUse.saved') : t('computerUse.save')}
           </button>
         </div>
 
         {/* Security Warning */}
         <div className="rounded-[8px] border border-[var(--color-border)] bg-[var(--color-surface-2)] p-3">
           <div className="text-[11px] leading-[1.6] text-[var(--color-text-muted)]">
-            Computer Use 允许 AI 查看屏幕、移动鼠标、点击和输入。请谨慎启用此功能，并仅在有需要的会话中授权。
+            {t('computerUse.infoText')}
           </div>
         </div>
       </div>
@@ -405,30 +394,31 @@ export function ComputerUseSettings(): React.JSX.Element {
 
 // ── TCC Panel ──
 
-function TccPanel({ tccState, onOpen, onRetry }: {
+function TccPanel({ tccState, onOpen, onRetry, t }: {
   tccState: ComputerUseTccState
   onOpen: (type: 'accessibility' | 'screenRecording') => void
   onRetry: () => void
+  t: (key: string) => string
 }) {
   return (
     <div
       className="rounded-[8px] p-3 border border-[var(--color-danger)] bg-[rgba(239,68,68,0.05)]"
     >
       <div className="mb-2 text-[12px] font-bold text-[var(--color-text)]">
-        Computer Use 需要 macOS 权限
+        {t('computerUse.needsPermissions')}
       </div>
       <div className="mb-2.5 flex flex-col gap-1.5">
         <div className="flex items-center gap-1.5 text-[11px] text-[var(--color-text-muted)]">
           {tccState.accessibility
             ? <Check size={12} className="flex-shrink-0 text-[var(--color-success)]" />
             : <X size={12} className="flex-shrink-0 text-[var(--color-danger)]" />}
-          辅助功能（Accessibility）
+          {t('computerUse.accessibility')}
         </div>
         <div className="flex items-center gap-1.5 text-[11px] text-[var(--color-text-muted)]">
           {tccState.screenRecording
             ? <Check size={12} className="flex-shrink-0 text-[var(--color-success)]" />
             : <X size={12} className="flex-shrink-0 text-[var(--color-danger)]" />}
-          屏幕录制（Screen Recording）
+          {t('computerUse.screenRecording')}
         </div>
       </div>
       <div className="flex gap-2">
@@ -437,7 +427,7 @@ function TccPanel({ tccState, onOpen, onRetry }: {
             onClick={() => onOpen('accessibility')}
             className="cursor-pointer rounded-[4px] border border-[var(--color-accent)] bg-transparent px-3 py-1 text-[11px] text-[var(--color-accent)]"
           >
-            打开辅助功能设置
+            {t('computerUse.openAccessibilitySettings')}
           </button>
         )}
         {!tccState.screenRecording && (
@@ -445,14 +435,14 @@ function TccPanel({ tccState, onOpen, onRetry }: {
             onClick={() => onOpen('screenRecording')}
             className="cursor-pointer rounded-[4px] border border-[var(--color-accent)] bg-transparent px-3 py-1 text-[11px] text-[var(--color-accent)]"
           >
-            打开屏幕录制设置
+            {t('computerUse.openScreenRecordingSettings')}
           </button>
         )}
         <button
           onClick={onRetry}
           className="cursor-pointer rounded-[4px] border border-[var(--color-border)] bg-transparent px-3 py-1 text-[11px] text-[var(--color-text-muted)]"
         >
-          重新检查
+          {t('computerUse.recheck')}
         </button>
       </div>
     </div>

@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Plus } from 'lucide-react'
 import { cn } from '@renderer/lib/utils'
 import { useProviderStore } from '../../store/provider-store'
@@ -10,6 +11,7 @@ import { MagicCard } from '@renderer/components/ui/magic-card'
 type TestState = { status: 'idle' } | { status: 'testing' } | { status: 'done'; result: ProviderTestResult }
 
 export function ProviderSettings(): React.JSX.Element {
+  const { t } = useTranslation()
   const {
     providers, activeId, presets,
     fetchProviders, fetchPresets, deleteProvider,
@@ -63,7 +65,7 @@ export function ProviderSettings(): React.JSX.Element {
     } catch {
       setTestStates((prev) => ({
         ...prev,
-        [id]: { status: 'done', result: { connectivity: { success: false, latencyMs: 0, error: '请求失败' } } },
+        [id]: { status: 'done', result: { connectivity: { success: false, latencyMs: 0, error: t('providers.requestFailed') } } },
       }))
     }
   }
@@ -74,14 +76,14 @@ export function ProviderSettings(): React.JSX.Element {
     <div className="max-w-[640px]">
       <div className="mb-4 flex items-center justify-between">
         <div>
-          <div className="text-[16px] font-bold text-[var(--color-text)]">服务商管理</div>
-          <div className="mt-0.5 text-[12px] text-[var(--color-text-muted)]">配置和管理 API 服务商</div>
+          <div className="text-[16px] font-bold text-[var(--color-text)]">{t('providers.title')}</div>
+          <div className="mt-0.5 text-[12px] text-[var(--color-text-muted)]">{t('providers.description')}</div>
         </div>
         <button
           onClick={() => setShowCreateModal(true)}
           className="inline-flex cursor-pointer items-center gap-1 rounded-[var(--radius-sm)] border border-[var(--color-accent)] bg-[var(--color-accent)] px-3.5 py-1.5 text-[12px] text-white"
         >
-          <Plus size={11} />添加服务商
+          <Plus size={11} />{t('providers.add')}
         </button>
       </div>
 
@@ -105,19 +107,19 @@ export function ProviderSettings(): React.JSX.Element {
           />
           <div className="flex-1">
             <div className="text-[13px] font-bold text-[var(--color-text)]">
-              Anthropic 官方
+              {t('providers.anthropicLabel')}
               {isOfficialActive && (
-                <span className="ml-1.5 rounded-[4px] border border-[var(--color-accent)] bg-[var(--color-accent-dim)] px-1.5 py-0.5 text-[9px] font-bold text-[var(--color-accent)]">默认</span>
+                <span className="ml-1.5 rounded-[4px] border border-[var(--color-accent)] bg-[var(--color-accent-dim)] px-1.5 py-0.5 text-[9px] font-bold text-[var(--color-accent)]">{t('providers.setDefault')}</span>
               )}
             </div>
-            <div className="mt-0.5 text-[11px] text-[var(--color-text-muted)]">api.anthropic.com · 使用 Claude 官方 API</div>
+            <div className="mt-0.5 text-[11px] text-[var(--color-text-muted)]">{t('providers.anthropicDesc')}</div>
           </div>
           {!isOfficialActive && (
             <button
               onClick={(e) => { e.stopPropagation(); void handleActivateOfficial() }}
               className="cursor-pointer rounded-[var(--radius-sm)] border border-[var(--color-accent)] bg-transparent px-[10px] py-1 text-[11px] text-[var(--color-accent)]"
             >
-              设为默认
+              {t('providers.setDefault')}
             </button>
           )}
         </div>
@@ -150,7 +152,7 @@ export function ProviderSettings(): React.JSX.Element {
                       <span className="rounded-[4px] bg-[var(--color-surface-2)] px-1.5 py-px text-[9px] text-[var(--color-text-muted)]">{preset.name}</span>
                     )}
                     {isActive && (
-                      <span className="rounded-[4px] border border-[var(--color-accent)] bg-[var(--color-accent-dim)] px-1.5 py-px text-[9px] font-bold text-[var(--color-accent)]">默认</span>
+                      <span className="rounded-[4px] border border-[var(--color-accent)] bg-[var(--color-accent-dim)] px-1.5 py-px text-[9px] font-bold text-[var(--color-accent)]">{t('providers.setDefault')}</span>
                     )}
                   </div>
                   <div className="mt-0.5 overflow-hidden text-ellipsis whitespace-nowrap text-[11px] text-[var(--color-text-muted)]">
@@ -160,7 +162,7 @@ export function ProviderSettings(): React.JSX.Element {
                 <div className="flex flex-shrink-0 gap-1">
                   {!isActive && (
                     <button onClick={() => void handleActivate(provider.id)} className="cursor-pointer rounded-[var(--radius-sm)] border border-[var(--color-border)] bg-transparent px-2 py-[3px] text-[11px] text-[var(--color-text-muted)]">
-                      设为默认
+                      {t('providers.setDefault')}
                     </button>
                   )}
                   <button
@@ -171,20 +173,20 @@ export function ProviderSettings(): React.JSX.Element {
                       testState.status === 'testing' ? 'cursor-not-allowed opacity-60' : 'cursor-pointer'
                     )}
                   >
-                    {testState.status === 'testing' ? '测试中…' : '测试'}
+                    {testState.status === 'testing' ? t('providers.testing') : t('providers.test')}
                   </button>
                   <button
                     onClick={() => setDiagProvider({ id: provider.id, name: provider.name })}
                     className="cursor-pointer rounded-[var(--radius-sm)] border border-[var(--color-border)] bg-transparent px-2 py-[3px] text-[11px] text-[var(--color-text-muted)]"
                   >
-                    诊断
+                    {t('providers.diagnose')}
                   </button>
                   <button onClick={() => setEditingProvider(provider)} className="cursor-pointer rounded-[var(--radius-sm)] border border-[var(--color-border)] bg-transparent px-2 py-[3px] text-[11px] text-[var(--color-text-muted)]">
-                    编辑
+                    {t('providers.edit')}
                   </button>
                   {!isActive && (
                     <button onClick={() => handleDelete(provider.id)} className="cursor-pointer rounded-[var(--radius-sm)] border border-[var(--color-danger)] bg-transparent px-2 py-[3px] text-[11px] text-[var(--color-danger)]">
-                      删除
+                      {t('providers.delete')}
                     </button>
                   )}
                 </div>
@@ -227,11 +229,11 @@ export function ProviderSettings(): React.JSX.Element {
       {pendingDelete && (
         <div className="fixed inset-0 z-[1000] flex items-center justify-center bg-black/50">
           <div className="w-full max-w-[360px] rounded-[12px] bg-[var(--color-surface)] p-6">
-            <div className="mb-2 text-[14px] font-bold text-[var(--color-text)]">确认删除</div>
-            <div className="mb-4 text-[12px] text-[var(--color-text-muted)]">确定要删除此服务商吗？此操作不可恢复。</div>
+            <div className="mb-2 text-[14px] font-bold text-[var(--color-text)]">{t('providers.confirmDeleteTitle')}</div>
+            <div className="mb-4 text-[12px] text-[var(--color-text-muted)]">{t('providers.confirmDeleteDesc')}</div>
             <div className="flex justify-end gap-2">
-              <button onClick={() => setPendingDelete(null)} className="cursor-pointer rounded-[var(--radius-sm)] border border-[var(--color-border)] bg-transparent px-4 py-1.5 text-[12px] text-[var(--color-text-muted)]">取消</button>
-              <button onClick={() => void confirmDelete()} className="cursor-pointer rounded-[var(--radius-sm)] border border-[var(--color-danger)] bg-[var(--color-danger)] px-4 py-1.5 text-[12px] text-white">删除</button>
+              <button onClick={() => setPendingDelete(null)} className="cursor-pointer rounded-[var(--radius-sm)] border border-[var(--color-border)] bg-transparent px-4 py-1.5 text-[12px] text-[var(--color-text-muted)]">{t('providers.cancel')}</button>
+              <button onClick={() => void confirmDelete()} className="cursor-pointer rounded-[var(--radius-sm)] border border-[var(--color-danger)] bg-[var(--color-danger)] px-4 py-1.5 text-[12px] text-white">{t('providers.deleteBtn')}</button>
             </div>
           </div>
         </div>
@@ -261,6 +263,7 @@ function TestResultBar({
   isActive: boolean
   onClose: () => void
 }) {
+  const { t } = useTranslation()
   const { success, latencyMs, error } = result.connectivity
   return (
     <div
@@ -271,7 +274,7 @@ function TestResultBar({
       )}
     >
       <span className={cn('text-[12px] font-semibold', success ? 'text-[var(--color-success)]' : 'text-[var(--color-danger)]')}>
-        {success ? '连接成功' : '连接失败'}
+        {success ? t('providers.connectionSuccess') : t('providers.connectionFailed')}
       </span>
       {success && (
         <span className="text-[11px] text-[var(--color-text-muted)]">{latencyMs}ms</span>
@@ -283,7 +286,7 @@ function TestResultBar({
         onClick={onClose}
         className="ml-auto cursor-pointer rounded-[var(--radius-sm)] border border-[var(--color-border)] bg-transparent px-2 py-px text-[11px] text-[var(--color-text-muted)]"
       >
-        关闭
+        {t('providers.close')}
       </button>
     </div>
   )
@@ -305,6 +308,7 @@ function ProviderFormModal({
 }) {
   const { createProvider, updateProvider, testProviderConfig } = useProviderStore()
   const fetchSettings = useApiConfigStore((s) => s.load)
+  const { t } = useTranslation()
 
   const customPreset: ProviderPreset = {
     id: 'custom',
@@ -375,7 +379,7 @@ function ProviderFormModal({
       })
       setTestState({ status: 'done', result })
     } catch {
-      setTestState({ status: 'done', result: { connectivity: { success: false, latencyMs: 0, error: '请求失败' } } })
+      setTestState({ status: 'done', result: { connectivity: { success: false, latencyMs: 0, error: t('providers.requestFailed') } } })
     }
   }
 
@@ -387,14 +391,14 @@ function ProviderFormModal({
     <div className="fixed inset-0 z-[1000] flex items-center justify-center bg-black/50">
       <div className="w-full max-w-[560px] max-h-[80vh] overflow-y-auto rounded-[12px] bg-[var(--color-surface)] p-6">
         <div className="mb-4 text-[14px] font-bold text-[var(--color-text)]">
-          {mode === 'create' ? '添加服务商' : '编辑服务商'}
+          {mode === 'create' ? t('providers.createTitle') : t('providers.editTitle')}
         </div>
 
         <div className="flex flex-col gap-3">
           {/* Preset chips */}
           {mode === 'create' && (
             <div>
-              <div className={labelCls}>预设</div>
+              <div className={labelCls}>{t('providers.preset')}</div>
               <div className="flex flex-wrap gap-1.5">
                 {presets.map((preset) => (
                   <button
@@ -421,7 +425,7 @@ function ProviderFormModal({
           )}
 
           <label>
-            <div className={labelCls}>名称</div>
+            <div className={labelCls}>{t('providers.name')}</div>
             <input value={name} onChange={(e) => setName(e.target.value)} className={inputCls} placeholder="My Provider" />
           </label>
 
@@ -440,29 +444,29 @@ function ProviderFormModal({
           </label>
 
           <label>
-            <div className={labelCls}>{mode === 'edit' ? 'API Key (留空不修改)' : 'API Key'}</div>
+            <div className={labelCls}>{t('providers.apiKey')}{mode === 'edit' && ` (${t('providers.apiKeyEditPlaceholder')})`}</div>
             <input type="password" value={apiKey} onChange={(e) => setApiKey(e.target.value)} className={inputCls} placeholder={mode === 'edit' ? '••••••••' : 'sk-...'} />
           </label>
 
           {/* Model Mapping */}
           <div>
-            <div className={labelCls}>模型映射</div>
+            <div className={labelCls}>{t('providers.modelMapping')}</div>
             <div className="grid grid-cols-2 gap-2">
               <label>
                 <div className="mb-1 block text-[11px] font-semibold text-[var(--color-text)]">Main <span className="text-[var(--color-danger)]">*</span></div>
-                <input value={models.main} onChange={(e) => setModels({ ...models, main: e.target.value })} className={inputCls} placeholder="默认模型 ID" />
+                <input value={models.main} onChange={(e) => setModels({ ...models, main: e.target.value })} className={inputCls} placeholder={t('providers.mainModelPlaceholder')} />
               </label>
               <label>
                 <div className="mb-1 block text-[11px] font-semibold text-[var(--color-text)]">Haiku</div>
-                <input value={models.haiku} onChange={(e) => setModels({ ...models, haiku: e.target.value })} className={inputCls} placeholder="可选" />
+                <input value={models.haiku} onChange={(e) => setModels({ ...models, haiku: e.target.value })} className={inputCls} placeholder={t('providers.haikuModelPlaceholder')} />
               </label>
               <label>
                 <div className="mb-1 block text-[11px] font-semibold text-[var(--color-text)]">Sonnet</div>
-                <input value={models.sonnet} onChange={(e) => setModels({ ...models, sonnet: e.target.value })} className={inputCls} placeholder="可选" />
+                <input value={models.sonnet} onChange={(e) => setModels({ ...models, sonnet: e.target.value })} className={inputCls} placeholder={t('providers.sonnetModelPlaceholder')} />
               </label>
               <label>
                 <div className="mb-1 block text-[11px] font-semibold text-[var(--color-text)]">Opus</div>
-                <input value={models.opus} onChange={(e) => setModels({ ...models, opus: e.target.value })} className={inputCls} placeholder="可选" />
+                <input value={models.opus} onChange={(e) => setModels({ ...models, opus: e.target.value })} className={inputCls} placeholder={t('providers.opusModelPlaceholder')} />
               </label>
             </div>
           </div>
@@ -478,7 +482,7 @@ function ProviderFormModal({
               )}
             >
               <span className={cn('text-[12px] font-semibold', testState.result.connectivity.success ? 'text-[var(--color-success)]' : 'text-[var(--color-danger)]')}>
-                {testState.result.connectivity.success ? '连接成功' : '连接失败'}
+                {testState.result.connectivity.success ? t('providers.connectionSuccess') : t('providers.connectionFailed')}
               </span>
               {testState.result.connectivity.success && (
                 <span className="text-[11px] text-[var(--color-text-muted)]">{testState.result.connectivity.latencyMs}ms</span>
@@ -491,7 +495,7 @@ function ProviderFormModal({
         </div>
 
         <div className="mt-5 flex justify-end gap-2">
-          <button onClick={onClose} className="cursor-pointer rounded-[var(--radius-sm)] border border-[var(--color-border)] bg-transparent px-4 py-1.5 text-[12px] text-[var(--color-text-muted)]">取消</button>
+          <button onClick={onClose} className="cursor-pointer rounded-[var(--radius-sm)] border border-[var(--color-border)] bg-transparent px-4 py-1.5 text-[12px] text-[var(--color-text-muted)]">{t('providers.cancel')}</button>
           <button
             onClick={() => void handleTest()}
             disabled={!canTest || testState.status === 'testing'}
@@ -500,14 +504,14 @@ function ProviderFormModal({
               !canTest || testState.status === 'testing' ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'
             )}
           >
-            {testState.status === 'testing' ? '测试中…' : '测试连接'}
+            {testState.status === 'testing' ? t('providers.testing') : t('providers.testConnection')}
           </button>
           <button
             onClick={() => void handleSubmit()}
             disabled={!canSubmit || isSubmitting}
             className={cn('cursor-pointer rounded-[var(--radius-sm)] border border-[var(--color-accent)] bg-[var(--color-accent)] px-4 py-1.5 text-[12px] text-white', (!canSubmit || isSubmitting) && 'opacity-50')}
           >
-            {mode === 'create' ? '添加' : '保存'}
+            {mode === 'create' ? t('providers.addBtn') : t('providers.saveBtn')}
           </button>
         </div>
       </div>

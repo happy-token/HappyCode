@@ -1,22 +1,24 @@
 import React, { useEffect, useMemo, useState } from 'react'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
+import { useTranslation } from 'react-i18next'
 import type { SkillInfo, SkillSource } from '../../../electron/shared/types'
 import { cn } from '@renderer/lib/utils'
 
 const SOURCE_ORDER: SkillSource[] = ['plugin', 'userSettings']
 
 const SOURCE_LABELS: Record<SkillSource, string> = {
-  plugin: '插件技能',
-  userSettings: '用户技能',
+  plugin: 'skills.sourcePlugin',
+  userSettings: 'skills.sourceUser',
 }
 
 const SOURCE_SUBTITLES: Record<SkillSource, string> = {
-  plugin: '来自插件安装目录',
+  plugin: 'skills.sourcePluginSubtitle',
   userSettings: '~/.claude/skills',
 }
 
 export function SkillSettings(): React.JSX.Element {
+  const { t } = useTranslation('settings')
   const [skills, setSkills] = useState<SkillInfo[]>([])
   const [isLoading, setIsLoading] = useState(false)
   const [showInstallModal, setShowInstallModal] = useState(false)
@@ -120,14 +122,14 @@ export function SkillSettings(): React.JSX.Element {
         {/* Header */}
         <div className="flex flex-shrink-0 items-center justify-between border-b border-[var(--color-border)] px-4 pb-3 pt-4">
           <div>
-            <div className="text-[13px] font-bold text-[var(--color-text)]">技能</div>
-            <div className="mt-px text-[11px] text-[var(--color-text-muted)]">共 {skills.length} 个</div>
+            <div className="text-[13px] font-bold text-[var(--color-text)]">{t('skills.title')}</div>
+            <div className="mt-px text-[11px] text-[var(--color-text-muted)]">{t('skills.countPrefix')} {skills.length} {t('skills.count')}</div>
           </div>
           <button
             onClick={() => setShowInstallModal(true)}
             className="cursor-pointer rounded-[var(--radius-sm)] border border-[var(--color-accent)] bg-[var(--color-accent)] px-[10px] py-1 text-[11px] text-white"
           >
-            + 安装
+            + {t('skills.install')}
           </button>
         </div>
 
@@ -135,7 +137,7 @@ export function SkillSettings(): React.JSX.Element {
         <div className="flex-1 overflow-y-auto py-2">
           {skills.length === 0 && (
             <div className="px-4 py-6 text-center text-[12px] text-[var(--color-text-muted)]">
-              暂无已安装的技能
+              {t('skills.empty')}
             </div>
           )}
 
@@ -146,11 +148,11 @@ export function SkillSettings(): React.JSX.Element {
               ? [...new Set(items.map((s) => s.plugin).filter(Boolean))]
               : []
             const title = isPlugin && pluginNames.length === 1
-              ? `插件: ${pluginNames[0]}`
-              : SOURCE_LABELS[source]
+              ? `${t('plugins.plugin')}: ${pluginNames[0]}`
+              : t(SOURCE_LABELS[source] as string)
             const subtitle = isPlugin && pluginNames.length === 1
               ? undefined
-              : SOURCE_SUBTITLES[source]
+              : t(SOURCE_SUBTITLES[source] as string)
 
             return (
               <div key={source} className="mb-1">
@@ -212,7 +214,7 @@ export function SkillSettings(): React.JSX.Element {
           />
         ) : (
           <div className="flex flex-1 items-center justify-center text-[13px] text-[var(--color-text-muted)]">
-            从左侧选择一个技能以查看详情
+            {t('skills.selectToView')}
           </div>
         )}
       </div>
@@ -221,9 +223,9 @@ export function SkillSettings(): React.JSX.Element {
       {showInstallModal && (
         <div className="fixed inset-0 z-[1000] flex items-center justify-center bg-black/50">
           <div className="w-full max-w-[480px] rounded-[12px] border border-[var(--color-border)] bg-[var(--color-surface)] p-6">
-            <div className="mb-4 text-[14px] font-bold text-[var(--color-text)]">安装技能</div>
+            <div className="mb-4 text-[14px] font-bold text-[var(--color-text)]">{t('skills.installTitle')}</div>
             <div className="mb-4">
-              <div className="mb-1 text-[12px] font-semibold text-[var(--color-text)]">Git 仓库地址</div>
+              <div className="mb-1 text-[12px] font-semibold text-[var(--color-text)]">{t('skills.gitUrlLabel')}</div>
               <input
                 value={installUrl}
                 onChange={(e) => setInstallUrl(e.target.value)}
@@ -238,14 +240,14 @@ export function SkillSettings(): React.JSX.Element {
                 onClick={() => { setShowInstallModal(false); setInstallUrl('') }}
                 className="cursor-pointer rounded-[var(--radius-sm)] border border-[var(--color-border)] bg-transparent px-4 py-1.5 text-[12px] text-[var(--color-text-muted)]"
               >
-                取消
+                {t('skills.cancel')}
               </button>
               <button
                 onClick={() => void handleInstall()}
                 disabled={!installUrl.trim() || isInstalling}
                 className={cn('cursor-pointer rounded-[var(--radius-sm)] border border-[var(--color-accent)] bg-[var(--color-accent)] px-4 py-1.5 text-[12px] text-white', (!installUrl.trim() || isInstalling) && 'opacity-50')}
               >
-                {isInstalling ? '安装中...' : '安装'}
+                {isInstalling ? t('skills.installing') : t('skills.installBtn')}
               </button>
             </div>
           </div>
@@ -270,6 +272,7 @@ function SkillDetail({
   onToggle: () => void
   onDelete: () => void
 }) {
+  const { t } = useTranslation('settings')
   const isPlugin = skill.source === 'plugin'
 
   return (
@@ -301,13 +304,13 @@ function SkillDetail({
                   : 'border-[var(--color-border)] text-[var(--color-text-muted)] bg-transparent'
               )}
             >
-              {skill.enabled ? '禁用' : '启用'}
+              {skill.enabled ? t('skills.disable') : t('skills.enable')}
             </button>
             <button
               onClick={onDelete}
               className="cursor-pointer rounded-[var(--radius-sm)] border border-[var(--color-danger)] bg-transparent px-3 py-1 text-[11px] text-[var(--color-danger)]"
             >
-              删除
+              {t('skills.delete')}
             </button>
           </div>
         )}
@@ -318,7 +321,7 @@ function SkillDetail({
 
       {/* Markdown preview */}
       {contentLoading && (
-        <div className="text-[12px] text-[var(--color-text-muted)]">加载中...</div>
+        <div className="text-[12px] text-[var(--color-text-muted)]">{t('skills.loading')}</div>
       )}
 
       {!contentLoading && content && (
@@ -391,7 +394,7 @@ function SkillDetail({
 
       {!contentLoading && !content && (
         <div className="text-[12px] text-[var(--color-text-muted)]">
-          未找到 SKILL.md 文件
+          {t('skills.noSkillMd')}
         </div>
       )}
     </div>

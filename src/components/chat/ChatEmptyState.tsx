@@ -1,4 +1,5 @@
 import React, { useRef } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Sparkles, History, Zap, CornerDownLeft } from 'lucide-react'
 import { motion } from 'motion/react'
 import { cn } from '@renderer/lib/utils'
@@ -8,13 +9,6 @@ import { BlurFade } from '@renderer/components/ui/blur-fade'
 import { ShimmerButton } from '@renderer/components/ui/shimmer-button'
 import { Particles } from '@renderer/components/ui/particles'
 import { AnimatedBeam } from '@renderer/components/ui/animated-beam'
-
-const QUICK_COMMANDS = [
-  { label: '/init', desc: 'Generate CLAUDE.md for this project' },
-  { label: '/review', desc: 'Review recent changes' },
-  { label: '/compact', desc: 'Compress conversation context' },
-  { label: '/help', desc: 'Show available commands' },
-]
 
 interface ChatEmptyStateProps {
   cwd: string
@@ -55,9 +49,17 @@ export function ChatEmptyState({
   onPickFolder,
   onSendPrompt,
 }: ChatEmptyStateProps): React.JSX.Element {
+  const { t } = useTranslation()
   const containerRef = useRef<HTMLDivElement>(null)
   const iconRef = useRef<HTMLDivElement>(null)
   const commandsRef = useRef<HTMLDivElement>(null)
+
+  const quickCommands = [
+    { label: '/init', desc: t('chatEmpty.quickInit') },
+    { label: '/review', desc: t('chatEmpty.quickReview') },
+    { label: '/compact', desc: t('chatEmpty.quickCompact') },
+    { label: '/help', desc: t('chatEmpty.quickHelp') },
+  ]
 
   if (sessionId) {
     return (
@@ -65,8 +67,8 @@ export function ChatEmptyState({
         <AuroraBackground />
         <div className="relative z-10 flex flex-col items-center gap-2">
           <CornerDownLeft size={28} className="text-[var(--color-text-muted)]" />
-          <div className="text-[14px] font-semibold text-[var(--color-text)]">Session loaded</div>
-          <div className="text-[12px]">Type a message to continue this session</div>
+          <div className="text-[14px] font-semibold text-[var(--color-text)]">{t('chatEmpty.sessionLoaded')}</div>
+          <div className="text-[12px]">{t('chatEmpty.continueSession')}</div>
           <div className="mt-1 font-mono text-[10px] text-[var(--color-text-faint)]">{sessionId}</div>
         </div>
       </div>
@@ -107,7 +109,7 @@ export function ChatEmptyState({
 
         {/* Headline */}
         <div className="mb-2 text-[18px] font-bold text-[var(--color-text)]">
-          <TypingAnimation text="Start a conversation" duration={50} />
+          <TypingAnimation text={t('chatEmpty.startConversation')} duration={50} />
         </div>
 
         {/* Sub */}
@@ -115,14 +117,14 @@ export function ChatEmptyState({
           {cwd ? (
             <WordRotate
               words={[
-                `Working in ${cwd.split('/').pop() ?? cwd}`,
-                'Type a message or pick a quick command',
-                'Claude Code is ready',
+                `${t('chatEmpty.workingIn')} ${cwd.split('/').pop() ?? cwd}`,
+                t('chatEmpty.typeOrPick'),
+                t('chatEmpty.claudeReady'),
               ]}
               duration={3000}
             />
           ) : (
-            'Pick a project folder to get started'
+            t('chatEmpty.pickFolder')
           )}
         </div>
 
@@ -135,7 +137,7 @@ export function ChatEmptyState({
             borderRadius="6px"
             className="mb-6 px-5 py-2 text-[12px] font-semibold"
           >
-            Choose folder
+            {t('chatEmpty.chooseFolder')}
           </ShimmerButton>
         )}
 
@@ -146,7 +148,7 @@ export function ChatEmptyState({
             className="mb-7 flex cursor-pointer items-center gap-[7px] rounded-[var(--radius-sm)] border border-[var(--color-accent)] bg-[var(--color-accent-dim)] px-[18px] py-[6px] text-[12px] text-[var(--color-accent)] transition-colors duration-150 hover:bg-[var(--color-accent)] hover:text-white"
           >
             <History size={13} />
-            Resume last session
+            {t('chatEmpty.resumeLastSession')}
           </button>
         )}
 
@@ -155,10 +157,10 @@ export function ChatEmptyState({
           <div ref={commandsRef} className="w-full max-w-[360px]">
             <div className="mb-2 flex items-center gap-[5px] text-[10px] font-bold uppercase tracking-[0.07em] text-[var(--color-text-faint)]">
               <Zap size={10} />
-              Quick commands
+              {t('chatEmpty.quickCommands')}
             </div>
             <div className="grid grid-cols-2 gap-[6px]">
-              {QUICK_COMMANDS.map((cmd) => (
+              {quickCommands.map((cmd) => (
                 <button
                   key={cmd.label}
                   onClick={() => onSendPrompt(cmd.label)}

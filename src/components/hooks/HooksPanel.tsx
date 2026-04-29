@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useCallback } from 'react'
+import { useTranslation } from 'react-i18next'
 import { ChevronDown, ChevronUp, X, Check, Plus, Zap } from 'lucide-react'
 import type { HookEvent, ClaudeSettings, ClaudeHookRule, HookType, HookBridgeStatus } from '../../../electron/shared/types'
 import { HookRuleWizard } from './HookRuleWizard'
@@ -265,7 +266,7 @@ function ConfigTab(): React.JSX.Element {
             onClick={() => setShowWizard(true)}
             className="text-[11px] px-4 py-1.5 border border-[var(--color-accent)] rounded-[var(--radius-md)] bg-[var(--color-accent-dim)] text-[var(--color-accent)] cursor-pointer font-semibold"
           >
-          <Plus size={12} className="inline mr-0.5" />添加规则
+          <Plus size={12} className="inline mr-0.5" />{t('hooks.addRule')}
           </button>
         )}
       </div>
@@ -289,6 +290,7 @@ function ConfigTab(): React.JSX.Element {
 }
 
 export function HooksPanel(): React.JSX.Element {
+  const { t } = useTranslation()
   const [activeTab, setActiveTab] = useState<'events' | 'config'>('events')
   const [events, setEvents] = useState<HookEvent[]>([])
   const [loading, setLoading] = useState(true)
@@ -372,14 +374,14 @@ export function HooksPanel(): React.JSX.Element {
                     bridgeStatus.injected ? 'text-[var(--color-success,var(--color-success))]' : 'text-[var(--color-text-faint,#888)]',
                   )}
                 >
-                  {bridgeStatus.injected ? 'Bridge 已连接' : '未连接'}
+                  {bridgeStatus.injected ? t('hooks.bridgeConnected') : t('hooks.notConnected')}
                 </span>
                 {!bridgeStatus.injected && (
                   <button
                     onClick={() => void handleEnableBridge()}
                     className="text-[10px] text-[var(--color-accent)] bg-transparent border border-[var(--color-accent)] rounded-[var(--radius-sm)] px-1.5 py-px cursor-pointer"
                   >
-                    启用
+                    {t('hooks.enable')}
                   </button>
                 )}
               </div>
@@ -389,7 +391,7 @@ export function HooksPanel(): React.JSX.Element {
               onClick={() => void handleClear()}
               className="text-[11px] text-[var(--color-text-muted)] px-2.5 py-[3px] border border-[var(--color-border)] rounded-[var(--radius-sm)] cursor-pointer"
             >
-              清空
+              {t('hooks.clear')}
             </button>
             <button
               onClick={() => void load()}
