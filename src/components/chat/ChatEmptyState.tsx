@@ -1,4 +1,4 @@
-import React, { useRef } from 'react'
+import { useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Sparkles, History, Zap, CornerDownLeft } from 'lucide-react'
 import { motion } from 'motion/react'
@@ -7,7 +7,7 @@ import { TypingAnimation } from '@renderer/components/ui/typing-animation'
 import { WordRotate } from '@renderer/components/ui/word-rotate'
 import { BlurFade } from '@renderer/components/ui/blur-fade'
 import { ShimmerButton } from '@renderer/components/ui/shimmer-button'
-import { Particles } from '@renderer/components/ui/particles'
+import { SpotlightBg } from '@renderer/components/ui/spotlight-bg'
 import { AnimatedBeam } from '@renderer/components/ui/animated-beam'
 
 interface ChatEmptyStateProps {
@@ -78,13 +78,7 @@ export function ChatEmptyState({
   return (
     <div ref={containerRef} className="relative flex min-h-[60vh] flex-col items-center justify-center overflow-hidden px-6 py-8">
       <AuroraBackground />
-      <Particles
-        className="absolute inset-0"
-        quantity={35}
-        color="#a0866a"
-        size={0.35}
-        staticity={60}
-      />
+      <SpotlightBg className="z-0" />
 
       {cwd && (
         <AnimatedBeam
