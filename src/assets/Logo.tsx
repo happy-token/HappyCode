@@ -13,8 +13,8 @@ const gradients: Record<NonNullable<LogoProps['variant']>, { bg: [string, string
     shine: ['rgba(255,255,255,0.18)', 'rgba(255,255,255,0)'],
   },
   'amber-gold': {
-    bg: ['#f5d78e', '#8c7055'],
-    shine: ['rgba(255,248,220,0.22)', 'rgba(255,255,255,0)'],
+    bg: ['#f5c842', '#c27a0e'],
+    shine: ['rgba(255,248,220,0.28)', 'rgba(255,255,255,0)'],
   },
   green: {
     bg: ['#6dd6a0', '#1a8a5e'],
@@ -26,7 +26,7 @@ const gradients: Record<NonNullable<LogoProps['variant']>, { bg: [string, string
   },
 }
 
-export function Logo({ className, variant = 'green' }: LogoProps): React.JSX.Element {
+export function Logo({ className, variant = 'amber-gold' }: LogoProps): React.JSX.Element {
   const g = gradients[variant]
   const id = `logo-bg-${variant}`
   const shineId = `logo-shine-${variant}`

@@ -58,7 +58,7 @@
   --card-foreground: #111827;
   --popover: #ffffff;
   --popover-foreground: #111827;
-  --primary: #a0866a;
+  --primary: #c27a0e;
   --primary-foreground: #ffffff;
   --secondary: #f3f4f6;
   --secondary-foreground: #111827;
@@ -70,7 +70,7 @@
   --destructive-foreground: #ffffff;
   --tw-border: #e5e7eb;
   --tw-input: #e5e7eb;
-  --ring: #a0866a;
+  --ring: #c27a0e;
   --sidebar: #f9fafb;
   --sidebar-foreground: #111827;
 }
@@ -82,7 +82,7 @@
   --card-foreground: #e8e8ec;
   --popover: #1a1a1f;
   --popover-foreground: #e8e8ec;
-  --primary: #c9a882;
+  --primary: #f0b429;
   --primary-foreground: #0f0f11;
   --secondary: #242429;
   --secondary-foreground: #e8e8ec;
@@ -92,9 +92,9 @@
   --accent-ui-foreground: #e8e8ec;
   --destructive: #f87171;
   --destructive-foreground: #0f0f11;
-  --tw-border: #2e2a26;
-  --tw-input: #2e2a26;
-  --ring: #c9a882;
+  --tw-border: #2e2b1a;
+  --tw-input: #2e2b1a;
+  --ring: #f0b429;
   --sidebar: #0f0f11;
   --sidebar-foreground: #e8e8ec;
 }
@@ -108,17 +108,17 @@
 
   /* Borders */
   --color-border:       #e5e7eb;
-  --color-border-focus: #a0866a;
+  --color-border-focus: #c27a0e;
 
   /* Text */
   --color-text:       #111827;
   --color-text-muted: #6b7280;
   --color-text-faint: #9ca3af;
 
-  /* Accent — warm brown */
-  --color-accent:       #a0866a;
-  --color-accent-dim:   rgba(160, 134, 106, 0.12);
-  --color-accent-hover: #8c7055;
+  /* Accent — amber gold */
+  --color-accent:       #c27a0e;
+  --color-accent-dim:   rgba(194, 122, 14, 0.12);
+  --color-accent-hover: #a3680b;
 
   /* Status */
   --color-success: #16a34a;
@@ -149,16 +149,16 @@
   --color-surface-2: #242429;
   --color-surface-3: #2e2e35;
 
-  --color-border:       #2e2a26;
-  --color-border-focus: #a0866a;
+  --color-border:       #2e2b1a;
+  --color-border-focus: #f0b429;
 
   --color-text:       #e8e8ec;
   --color-text-muted: #8b8b9e;
   --color-text-faint: #5a5a6e;
 
-  --color-accent:       #c9a882;
-  --color-accent-dim:   rgba(201, 168, 130, 0.12);
-  --color-accent-hover: #b8946e;
+  --color-accent:       #f0b429;
+  --color-accent-dim:   rgba(240, 180, 41, 0.12);
+  --color-accent-hover: #d99e22;
 
   --color-success: #3dd68c;
   --color-warning: #f59e0b;
