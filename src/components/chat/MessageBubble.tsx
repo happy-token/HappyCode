@@ -393,7 +393,7 @@ function AssistantTextBubble({ msg, doneInfo }: { msg: Extract<UIMessage, { type
           ))}
         </div>
       )}
-      <div className="whitespace-pre-wrap text-[13px] leading-[1.65] text-[var(--color-text)]">
+      <div className="md-body text-[13px] leading-[1.65] text-[var(--color-text)]">
         {cleanContent && (
           <ReactMarkdown remarkPlugins={[remarkGfm]} components={mdComponents}>
             {cleanContent}
