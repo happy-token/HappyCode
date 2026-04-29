@@ -1,10 +1,11 @@
 import { useTranslation } from 'react-i18next'
-import { Sparkles, History, Zap, CornerDownLeft } from 'lucide-react'
+import { History, Zap, CornerDownLeft } from 'lucide-react'
 import { cn } from '@renderer/lib/utils'
 import { TypingAnimation } from '@renderer/components/ui/typing-animation'
 import { WordRotate } from '@renderer/components/ui/word-rotate'
 import { BlurFade } from '@renderer/components/ui/blur-fade'
 import { ShimmerButton } from '@renderer/components/ui/shimmer-button'
+import { Logo } from '@renderer/assets/Logo'
 
 interface ChatEmptyStateProps {
   cwd: string
@@ -34,9 +35,8 @@ export function ChatEmptyState({
 
   if (sessionId) {
     return (
-      <div className="relative flex h-full w-full flex-col items-center justify-center gap-2 overflow-hidden p-8 text-[var(--color-text-muted)]">
-        <AuroraBackground />
-        <div className="relative z-10 flex flex-col items-center gap-2">
+      <div className="flex h-full w-full flex-col items-center justify-center gap-2 p-8 text-[var(--color-text-muted)]">
+        <div className="flex flex-col items-center gap-2">
           <CornerDownLeft size={28} className="text-[var(--color-text-muted)]" />
           <div className="text-[14px] font-semibold text-[var(--color-text)]">{t('chatEmpty.sessionLoaded')}</div>
           <div className="text-[12px]">{t('chatEmpty.continueSession')}</div>
@@ -50,9 +50,9 @@ export function ChatEmptyState({
     <div className="flex h-full w-full flex-col items-center justify-center">
 
       <BlurFade delay={0.1} className="flex flex-col items-center">
-        {/* Icon */}
-        <div className="mb-4 flex h-[52px] w-[52px] items-center justify-center rounded-full bg-[var(--color-accent-dim)]">
-          <Sparkles size={24} color="var(--color-accent)" />
+        {/* Logo */}
+        <div className="mb-4">
+          <Logo className="h-[52px] w-[52px]" />
         </div>
 
         {/* Headline */}
