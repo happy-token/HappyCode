@@ -20,5 +20,8 @@ out
 # Playwright MCP test artifacts
 .playwright-mcp/
 
+# Superpowers brainstorm artifacts
+.superpowers/
+
 # Local preview files
 logo-preview.html
