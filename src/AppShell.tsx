@@ -1,8 +1,9 @@
 import React, { useEffect, useState, useMemo, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
-import { FolderOpen, GitBranch, Files, Search, Plus } from 'lucide-react'
+import { GitBranch, Files, Search, Plus } from 'lucide-react'
 import { Sidebar } from './components/nav/Sidebar'
 import { PanelZone } from './components/nav/PanelZone'
+import { TopBar } from './components/nav/TopBar'
 import { ChatPanel } from './components/chat/ChatPanel'
 import { HooksPanel } from './components/hooks/HooksPanel'
 import { SkillsPanel } from './components/skills/SkillsPanel'
@@ -136,41 +137,14 @@ export function AppShell(): React.JSX.Element {
       <Sidebar />
 
       <div className="flex flex-1 flex-col overflow-hidden bg-[var(--color-surface)]">
-        {/* Content header */}
-        <div
-          className="relative z-[100] flex h-[38px] flex-shrink-0 items-center overflow-visible border-b border-[var(--color-border)] px-4"
-          style={{ WebkitAppRegion: 'drag' } as React.CSSProperties}
-        >
-          {activePage === 'chat' ? (
-            <>
-              {cwd ? (
-                <div
-                  className="flex min-w-0 flex-1 items-center gap-[6px] overflow-hidden"
-                  style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}
-                >
-                  <FolderOpen size={13} className="flex-shrink-0 text-[var(--color-text-faint)]" />
-                  <span className="flex-shrink-0 text-[13px] font-semibold text-[var(--color-text)]">
-                    {projectName}
-                  </span>
-                  <span className="mx-[1px] flex-shrink-0 text-[13px] text-[var(--color-text-faint)]">/</span>
-                  <span className="min-w-0 overflow-hidden text-ellipsis whitespace-nowrap text-[13px] text-[var(--color-text-muted)]">
-                    {sessionTitle}
-                  </span>
-                </div>
-              ) : (
-                <span
-                  className="flex-1 text-[13px] font-semibold text-[var(--color-text-muted)]"
-                  style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}
-                >
-                  HappyCode
-                </span>
-              )}
-
-              {/* Right-side icon buttons */}
-              <div
-                className="ml-auto flex flex-shrink-0 items-center gap-[3px]"
-                style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}
-              >
+        {/* Content header — TopBar for chat, simple header for other pages */}
+        {activePage === 'chat' ? (
+          <TopBar
+            projectName={projectName}
+            sessionTitle={sessionTitle}
+            sessionStatus={sessionStatus}
+            rightButtons={
+              <>
                 {(sessionStatus === 'done' || sessionStatus === 'error') && (
                   <button
                     onClick={resetSession}
@@ -222,9 +196,14 @@ export function AppShell(): React.JSX.Element {
                 >
                   <Files size={13} />
                 </button>
-              </div>
-            </>
-          ) : (
+              </>
+            }
+          />
+        ) : (
+          <div
+            className="relative z-[100] flex h-[38px] flex-shrink-0 items-center overflow-visible border-b border-[var(--color-border)] px-4"
+            style={{ WebkitAppRegion: 'drag' } as React.CSSProperties}
+          >
             <span
               className="flex-1 text-[13px] font-semibold text-[var(--color-text-muted)]"
               style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}
@@ -236,8 +215,8 @@ export function AppShell(): React.JSX.Element {
                activePage === 'skills' ? t('header.skills') :
                'HappyCode'}
             </span>
-          )}
-        </div>
+          </div>
+        )}
 
         {/* All pages mounted; inactive hidden via display:none to preserve scroll + drafts */}
         <div className="flex flex-1 overflow-hidden">

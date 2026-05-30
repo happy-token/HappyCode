@@ -240,7 +240,13 @@ export function ChatPanel(): React.JSX.Element {
                 onSendPrompt={(prompt) => handleSend(prompt)}
               />
             ) : (
-              <div className="flex flex-col gap-1" style={{ width: '100%', maxWidth: 720, marginLeft: 'auto', marginRight: 'auto', paddingLeft: 32, paddingRight: 32 }}>
+              <div
+                role="log"
+                aria-live="polite"
+                aria-label="Chat messages"
+                className="flex flex-col gap-1"
+                style={{ width: '100%', maxWidth: 720, marginLeft: 'auto', marginRight: 'auto', paddingLeft: 32, paddingRight: 32 }}
+              >
                 {filteredMessages.map((msg, idx) => {
                 let doneInfo: { inputTokens: number; outputTokens: number; costUsd: number; cacheReadTokens?: number } | undefined
                 if (msg.type === 'text') {

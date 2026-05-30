@@ -2,6 +2,7 @@ import * as fs from 'fs'
 import * as path from 'path'
 import { app } from 'electron'
 import type { ProviderConfig, ProviderPreset, ApiFormat, ProviderTestResult } from '../shared/types'
+import { saveApiConfig } from './api-config-store'
 
 export const PROVIDER_PRESETS: ProviderPreset[] = [
   {
@@ -162,10 +163,17 @@ export async function activateProvider(
   overrideDir?: string,
 ): Promise<void> {
   fs.writeFileSync(activePath(overrideDir), JSON.stringify({ id }), 'utf-8')
+  // Sync provider config to api-config.json so chat sessions use the right endpoint
+  const providers = readProviders(overrideDir)
+  const provider = providers.find((p) => p.id === id)
+  if (provider) {
+    saveApiConfig({ baseUrl: provider.baseUrl, authToken: provider.apiKey })
+  }
 }
 
 export async function activateOfficial(overrideDir?: string): Promise<void> {
   fs.writeFileSync(activePath(overrideDir), JSON.stringify({ id: null }), 'utf-8')
+  saveApiConfig({ baseUrl: '', authToken: '' })
 }
 
 export async function getActiveProvider(overrideDir?: string): Promise<string | null> {
@@ -195,6 +203,13 @@ export async function testProviderById(
   })
 }
 
+function hasNonLatinChars(s: string): boolean {
+  for (let i = 0; i < s.length; i++) {
+    if (s.charCodeAt(i) > 255) return true
+  }
+  return false
+}
+
 export async function testProviderConfigFn(config: {
   baseUrl: string
   apiKey: string
@@ -204,9 +219,39 @@ export async function testProviderConfigFn(config: {
   const start = Date.now()
   try {
     const base = config.baseUrl.replace(/\/$/, '')
-    const url = config.apiFormat === 'anthropic'
-      ? `${base}/v1/models`
-      : `${base}/v1/models`
+
+    if (hasNonLatinChars(base)) {
+      return {
+        connectivity: {
+          success: false,
+          latencyMs: 0,
+          error: 'Base URL 包含无效字符，请检查是否有多余的非 ASCII 字符',
+        },
+      }
+    }
+    if (hasNonLatinChars(config.apiKey)) {
+      return {
+        connectivity: {
+          success: false,
+          latencyMs: 0,
+          error: 'API Key 包含无效字符，请检查是否有多余的非 ASCII 字符',
+        },
+      }
+    }
+
+    let url: string
+    try {
+      new URL(base)
+      url = `${base}/v1/models`
+    } catch {
+      return {
+        connectivity: {
+          success: false,
+          latencyMs: 0,
+          error: `Base URL 格式无效: ${base}`,
+        },
+      }
+    }
 
     const headers: Record<string, string> = { 'Content-Type': 'application/json' }
     if (config.apiFormat === 'anthropic') {

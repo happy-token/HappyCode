@@ -6,11 +6,9 @@ import os from 'node:os'
 import type { SessionInfo, AuditEntry, ListSessionsResult, ReadHistoryResult, HookEvent, AllHistoryResult, ProjectHistory, SessionSummary } from '../shared/types'
 import {
   encodeCwd,
-  deduplicateByUuid,
-  parseJsonlLines,
+  parseSessionFile,
   shouldSkipEntry,
   extractTimestamp,
-  checkFileSizeLimit,
 } from './session-store-utils'
 
 export interface SessionUsage {
@@ -129,29 +127,12 @@ export class SessionStore {
 
   readHistory(sessionId: string, cwd: string): ReadHistoryResult {
     const encodedCwd = encodeCwd(cwd)
-    const filePath = path.join(
-      os.homedir(),
-      '.claude',
-      'projects',
-      encodedCwd,
-      `${sessionId}.jsonl`
-    )
+    const filePath = path.join(os.homedir(), '.claude', 'projects', encodedCwd, `${sessionId}.jsonl`)
 
-    if (!fs.existsSync(filePath)) {
-      return { entries: [], skippedLines: 0 }
-    }
+    const { entries: deduplicated, skippedLines, skipped, reason, fileMtimeSec } = parseSessionFile(filePath)
 
-    const stat = fs.statSync(filePath)
-    const sizeCheck = checkFileSizeLimit(stat.size)
-    if (!sizeCheck.ok) {
-      return { entries: [], skippedLines: 0, skipped: true, reason: sizeCheck.reason }
-    }
-
-    const raw = fs.readFileSync(filePath, 'utf-8')
-    const { entries: rawEntries, skippedLines } = parseJsonlLines(raw)
-
-    const deduplicated = deduplicateByUuid(rawEntries)
-    const fileMtimeSec = stat.mtimeMs / 1000
+    if (skipped) return { entries: [], skippedLines, skipped, reason }
+    if (deduplicated.length === 0) return { entries: [], skippedLines }
 
     const entries: AuditEntry[] = []
     for (const entry of deduplicated) {
@@ -170,7 +151,6 @@ export class SessionStore {
       let outputJson: string | undefined
 
       if (entryType === 'assistant' && content) {
-        // Tool name and input are nested in message.content[].type === "tool_use"
         const toolUseBlock = content.find(
           (b): b is Record<string, unknown> =>
             typeof b === 'object' && b !== null &&
@@ -183,7 +163,6 @@ export class SessionStore {
           }
         }
       } else if (entryType === 'user' && content) {
-        // Tool output is in message.content[].type === "tool_result"
         const toolResultBlock = content.find(
           (b): b is Record<string, unknown> =>
             typeof b === 'object' && b !== null &&
@@ -200,7 +179,6 @@ export class SessionStore {
         }
       }
 
-      // Only keep entries that have tool information — skip pure text/thinking/queue rows
       if (!toolName && !inputJson && !outputJson) continue
 
       entries.push({
@@ -289,48 +267,35 @@ export class SessionStore {
         let lastUserSuffix: string | undefined
         let firstUserText: string | undefined
         let lastUserText: string | undefined
-        try {
-          const MAX_READ = 512 * 1024 // only read 512KB max for perf
-          const size = fileStat.size
-          const raw = size > MAX_READ
-            ? fs.readFileSync(filePath).slice(0, MAX_READ).toString('utf-8')
-            : fs.readFileSync(filePath, 'utf-8')
 
-          const allUserTexts: string[] = []
-          for (const line of raw.split('\n')) {
-            if (!line.trim()) continue
-            try {
-              const entry = JSON.parse(line) as Record<string, unknown>
-              if (entry['type'] !== 'user') continue
-              if (entry['isMeta']) continue
-              const msg = entry['message'] as Record<string, unknown> | undefined
-              const content = msg?.['content']
-              let text = ''
-              if (Array.isArray(content)) {
-                for (const block of content as Record<string, unknown>[]) {
-                  if (block['type'] === 'text' && typeof block['text'] === 'string') {
-                    text += block['text']
-                  }
-                }
-              } else if (typeof content === 'string') {
-                text = content
+        const { entries } = parseSessionFile(filePath, 512 * 1024 /* 512KB for perf */)
+
+        const allUserTexts: string[] = []
+        for (const entry of entries) {
+          if (entry['type'] !== 'user') continue
+          if (entry['isMeta']) continue
+          const msg = entry['message'] as Record<string, unknown> | undefined
+          const content = msg?.['content']
+          let text = ''
+          if (Array.isArray(content)) {
+            for (const block of content as Record<string, unknown>[]) {
+              if (block['type'] === 'text' && typeof block['text'] === 'string') {
+                text += block['text']
               }
-              if (text.trim()) allUserTexts.push(text.trim())
-            } catch {
-              // skip malformed line
             }
+          } else if (typeof content === 'string') {
+            text = content
           }
+          if (text.trim()) allUserTexts.push(text.trim())
+        }
 
-          if (allUserTexts.length > 0) {
-            const first = allUserTexts[0]
-            const last = allUserTexts[allUserTexts.length - 1]
-            firstUserPrefix = first.slice(0, 5)
-            lastUserSuffix = last.slice(-5)
-            firstUserText = first.length > 80 ? first.slice(0, 80) + '…' : first
-            lastUserText = last.length > 80 ? last.slice(0, 80) + '…' : last
-          }
-        } catch {
-          // if we can't read the file, skip content
+        if (allUserTexts.length > 0) {
+          const first = allUserTexts[0]
+          const last = allUserTexts[allUserTexts.length - 1]
+          firstUserPrefix = first.slice(0, 5)
+          lastUserSuffix = last.slice(-5)
+          firstUserText = first.length > 80 ? first.slice(0, 80) + '…' : first
+          lastUserText = last.length > 80 ? last.slice(0, 80) + '…' : last
         }
 
         sessions.push({ sessionId, cwd, lastUsed, firstUserPrefix, lastUserSuffix, firstUserText, lastUserText })
@@ -355,78 +320,63 @@ export class SessionStore {
   loadSessionMessages(encodedPath: string, sessionId: string): { messages: Array<{ role: 'user' | 'assistant'; text: string; isToolCall?: boolean; toolName?: string; fullInput?: string }>; usage: SessionUsage } {
     const filePath = path.join(os.homedir(), '.claude', 'projects', encodedPath, `${sessionId}.jsonl`)
     const emptyUsage: SessionUsage = { inputTokens: 0, outputTokens: 0, cacheReadTokens: 0, cacheCreationTokens: 0, costUsd: 0 }
-    if (!fs.existsSync(filePath)) return { messages: [], usage: emptyUsage }
 
-    const stat = fs.statSync(filePath)
-    const MAX_READ = 2 * 1024 * 1024 // 2MB
-    let raw: string
-    try {
-      raw = stat.size > MAX_READ
-        ? fs.readFileSync(filePath).slice(0, MAX_READ).toString('utf-8')
-        : fs.readFileSync(filePath, 'utf-8')
-    } catch {
-      return { messages: [], usage: emptyUsage }
-    }
+    const { entries } = parseSessionFile(filePath, 2 * 1024 * 1024 /* 2MB */)
+    if (entries.length === 0) return { messages: [], usage: emptyUsage }
 
     const messages: Array<{ role: 'user' | 'assistant'; text: string; isToolCall?: boolean; toolName?: string; fullInput?: string }> = []
     let usage: SessionUsage = { ...emptyUsage }
 
-    for (const line of raw.split('\n')) {
-      if (!line.trim()) continue
-      try {
-        const entry = JSON.parse(line) as Record<string, unknown>
-        const entryType = entry['type'] as string
+    for (const entry of entries) {
+      const entryType = entry['type'] as string
 
-        if (entryType === 'user') {
-          if (entry['isMeta']) continue
-          const msg = entry['message'] as Record<string, unknown> | undefined
-          const content = msg?.['content']
-          let text = ''
-          if (typeof content === 'string') {
-            text = content
-          } else if (Array.isArray(content)) {
-            for (const block of content as Record<string, unknown>[]) {
-              if (block['type'] === 'text' && typeof block['text'] === 'string') {
-                text += block['text']
-              }
-            }
-          }
-          if (text.trim()) messages.push({ role: 'user', text: text.trim() })
-
-        } else if (entryType === 'assistant') {
-          const msg = entry['message'] as Record<string, unknown> | undefined
-          const content = msg?.['content']
-          if (!Array.isArray(content)) continue
+      if (entryType === 'user') {
+        if (entry['isMeta']) continue
+        const msg = entry['message'] as Record<string, unknown> | undefined
+        const content = msg?.['content']
+        let text = ''
+        if (typeof content === 'string') {
+          text = content
+        } else if (Array.isArray(content)) {
           for (const block of content as Record<string, unknown>[]) {
-            if (block['type'] === 'text' && typeof block['text'] === 'string' && (block['text'] as string).trim()) {
-              messages.push({ role: 'assistant', text: (block['text'] as string).trim() })
-            } else if (block['type'] === 'tool_use') {
-              const toolName = block['name'] as string | undefined
-              const input = block['input'] as Record<string, unknown> | undefined
-              const summary = toolName === 'Edit' || toolName === 'Write' || toolName === 'MultiEdit'
-                ? (input?.['file_path'] as string ?? toolName)
-                : JSON.stringify(input ?? {}).slice(0, 80)
-              const fullInput = input ? JSON.stringify(input, null, 2) : undefined
-              messages.push({ role: 'assistant', text: summary, isToolCall: true, toolName: toolName ?? 'Tool', fullInput })
-            }
-          }
-        } else if (entryType === 'result') {
-          const subtype = entry['subtype'] as string | undefined
-          if (subtype === 'success') {
-            const u = entry['usage'] as Record<string, unknown> | undefined
-            if (u) {
-              usage = {
-                inputTokens: (u['input_tokens'] as number) ?? 0,
-                outputTokens: (u['output_tokens'] as number) ?? 0,
-                cacheReadTokens: (u['cache_read_input_tokens'] as number) ?? 0,
-                cacheCreationTokens: (u['cache_creation_input_tokens'] as number) ?? 0,
-                costUsd: (entry['cost_usd'] as number) ?? 0,
-              }
+            if (block['type'] === 'text' && typeof block['text'] === 'string') {
+              text += block['text']
             }
           }
         }
-      } catch {
-        // skip malformed line
+        if (text.trim()) messages.push({ role: 'user', text: text.trim() })
+
+      } else if (entryType === 'assistant') {
+        const msg = entry['message'] as Record<string, unknown> | undefined
+        const content = msg?.['content']
+        if (!Array.isArray(content)) continue
+        for (const block of content as Record<string, unknown>[]) {
+          if (block['type'] === 'text' && typeof block['text'] === 'string' && (block['text'] as string).trim()) {
+            messages.push({ role: 'assistant', text: (block['text'] as string).trim() })
+          } else if (block['type'] === 'tool_use') {
+            const toolName = block['name'] as string | undefined
+            const input = block['input'] as Record<string, unknown> | undefined
+            const summary = toolName === 'Edit' || toolName === 'Write' || toolName === 'MultiEdit'
+              ? (input?.['file_path'] as string ?? toolName)
+              : JSON.stringify(input ?? {}).slice(0, 80)
+            const fullInput = input ? JSON.stringify(input, null, 2) : undefined
+            messages.push({ role: 'assistant', text: summary, isToolCall: true, toolName: toolName ?? 'Tool', fullInput })
+          }
+        }
+      } else if (entryType === 'result') {
+        const subtype = entry['subtype'] as string | undefined
+        if (subtype === 'success') {
+          const u = entry['usage'] as Record<string, unknown> | undefined
+          if (u) {
+            usage = {
+              inputTokens: (u['input_tokens'] as number) ?? 0,
+              outputTokens: (u['output_tokens'] as number) ?? 0,
+              cacheReadTokens: (u['cache_read_input_tokens'] as number) ?? 0,
+              cacheCreationTokens: (u['cache_creation_input_tokens'] as number) ?? 0,
+              costUsd: (entry['cost_usd'] as number) ?? 0,
+            }
+          }
+        }
       }
     }
 

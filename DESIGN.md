@@ -13,6 +13,8 @@ HappyCode 设计系统文档。所有组件开发前先查此文件。
 **风格方向：** 深色开发者工具（Developer Tool Dark）。对标 VS Code 侧边栏 + Claude Code CLI 审美。
 密度适中，易读，chrome 极简，没有装饰性渐变或卡片阴影。
 
+> 2026-05-22 更新：主色调从 Indigo (#818cf8) 切换为 Amber Gold (#f0b429 dark / #c27a0e light)。
+
 ---
 
 ## Color Tokens
@@ -29,7 +31,7 @@ HappyCode 设计系统文档。所有组件开发前先查此文件。
 
   /* 边框 */
   --color-border:    #2e2e35;
-  --color-border-focus: #818cf8;
+  --color-border-focus: #f0b429;
 
   /* 文字 */
   --color-text:      #e8e8ec;
@@ -37,9 +39,9 @@ HappyCode 设计系统文档。所有组件开发前先查此文件。
   --color-text-faint: #5a5a6e;
 
   /* Accent — Indigo 400（替代原始通用紫 #7c6af7）*/
-  --color-accent:     #818cf8;
-  --color-accent-dim: rgba(129, 140, 248, 0.12);
-  --color-accent-hover: #6366f1;
+  --color-accent:     #f0b429;
+  --color-accent-dim:   rgba(240, 180, 41, 0.12);
+  --color-accent-hover: #d99e22;
 
   /* 状态 */
   --color-success:   #3dd68c;
@@ -58,13 +60,13 @@ HappyCode 设计系统文档。所有组件开发前先查此文件。
   --color-surface-2: #f4f4f6;
   --color-surface-3: #e8e8ec;
   --color-border:    #e2e2e8;
-  --color-border-focus: #6366f1;
+  --color-border-focus: #c27a0e;
   --color-text:      #0f0f11;
   --color-text-muted: #5a5a6e;
   --color-text-faint: #9a9aaa;
-  --color-accent:    #6366f1;
-  --color-accent-dim: rgba(99, 102, 241, 0.10);
-  --color-accent-hover: #4f46e5;
+  --color-accent:    #c27a0e;
+  --color-accent-dim: rgba(194, 122, 14, 0.10);
+  --color-accent-hover: #a3680b;
   --color-success:   #16a34a;
   --color-warning:   #d97706;
   --color-danger:    #dc2626;
@@ -227,4 +229,4 @@ NavRail 推荐图标：
 
 ---
 
-*最后更新：2026-04-23*
+*最后更新：2026-05-22*

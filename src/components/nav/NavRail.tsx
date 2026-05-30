@@ -50,6 +50,7 @@ function DockButton({ Icon, label, active, onClick, mouseY }: DockButtonProps): 
         <motion.button
           ref={ref}
           onClick={onClick}
+          aria-label={label}
           whileTap={{ scale: 0.88 }}
           className={cn(
             'relative flex h-12 w-12 flex-shrink-0 items-center justify-center cursor-pointer border-0 p-0 transition-colors',
@@ -85,6 +86,7 @@ export function NavRail(): React.JSX.Element {
   return (
     <TooltipProvider delayDuration={300}>
       <nav
+        aria-label="Main navigation"
         onMouseMove={(e) => mouseY.set(e.clientY)}
         onMouseLeave={() => mouseY.set(Infinity)}
         className="flex w-12 flex-shrink-0 flex-col border-r border-[var(--color-border)] bg-[var(--color-surface)]"

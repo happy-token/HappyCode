@@ -231,3 +231,97 @@ describe('checkFileSizeLimit', () => {
     expect(checkFileSizeLimit(MAX + 1)).toEqual({ ok: false, reason: 'file_too_large' })
   })
 })
+
+// ── 8. parseSessionFile (shared JSONL reader) ──────────────────
+const mockExistsSync = vi.fn()
+const mockStatSync = vi.fn()
+const mockReadFileSync = vi.fn()
+
+vi.mock('node:fs', () => ({
+  default: {
+    existsSync: (...args: unknown[]) => mockExistsSync(...args),
+    statSync: (...args: unknown[]) => mockStatSync(...args),
+    readFileSync: (...args: unknown[]) => mockReadFileSync(...args),
+  },
+  existsSync: (...args: unknown[]) => mockExistsSync(...args),
+  statSync: (...args: unknown[]) => mockStatSync(...args),
+  readFileSync: (...args: unknown[]) => mockReadFileSync(...args),
+}))
+
+describe('parseSessionFile', () => {
+  beforeEach(() => {
+    mockExistsSync.mockReset()
+    mockStatSync.mockReset()
+    mockReadFileSync.mockReset()
+  })
+
+  it('returns empty when file does not exist', async () => {
+    mockExistsSync.mockReturnValue(false)
+    const { parseSessionFile } = await import('../electron/main/session-store-utils')
+    const result = parseSessionFile('/fake/path.jsonl')
+    expect(result.entries).toEqual([])
+    expect(result.skippedLines).toBe(0)
+  })
+
+  it('returns skipped when file is too large', async () => {
+    mockExistsSync.mockReturnValue(true)
+    mockStatSync.mockReturnValue({ size: 20 * 1024 * 1024, mtimeMs: 1000 })
+    const { parseSessionFile } = await import('../electron/main/session-store-utils')
+    const result = parseSessionFile('/fake/large.jsonl')
+    expect(result.skipped).toBe(true)
+    expect(result.reason).toBe('file_too_large')
+  })
+
+  it('parses valid JSONL and deduplicates', async () => {
+    mockExistsSync.mockReturnValue(true)
+    mockStatSync.mockReturnValue({ size: 100, mtimeMs: 5000 })
+    const jsonl = [
+      JSON.stringify({ type: 'user', uuid: 'a', text: 'first' }),
+      JSON.stringify({ type: 'assistant', uuid: 'b', text: 'second' }),
+      JSON.stringify({ type: 'user', uuid: 'a', text: 'first-updated' }), // dup uuid → last wins
+    ].join('\n')
+    mockReadFileSync.mockReturnValue(jsonl)
+    const { parseSessionFile } = await import('../electron/main/session-store-utils')
+    const result = parseSessionFile('/fake/path.jsonl')
+    expect(result.skippedLines).toBe(0)
+    expect(result.entries).toHaveLength(2)
+    expect(result.fileMtimeSec).toBe(5)
+    // Last occurrence of uuid 'a' should be kept
+    const userEntry = result.entries.find((e) => e['uuid'] === 'a')
+    expect(userEntry?.['text']).toBe('first-updated')
+  })
+
+  it('counts malformed lines as skipped', async () => {
+    mockExistsSync.mockReturnValue(true)
+    mockStatSync.mockReturnValue({ size: 200, mtimeMs: 5000 })
+    const jsonl = [
+      JSON.stringify({ type: 'user', uuid: 'a' }),
+      'not valid json {{{',
+      JSON.stringify({ type: 'assistant', uuid: 'b' }),
+    ].join('\n')
+    mockReadFileSync.mockReturnValue(jsonl)
+    const { parseSessionFile } = await import('../electron/main/session-store-utils')
+    const result = parseSessionFile('/fake/path.jsonl')
+    expect(result.skippedLines).toBe(1)
+    expect(result.entries).toHaveLength(2)
+  })
+
+  it('handles empty file', async () => {
+    mockExistsSync.mockReturnValue(true)
+    mockStatSync.mockReturnValue({ size: 0, mtimeMs: 5000 })
+    mockReadFileSync.mockReturnValue('')
+    const { parseSessionFile } = await import('../electron/main/session-store-utils')
+    const result = parseSessionFile('/fake/empty.jsonl')
+    expect(result.entries).toEqual([])
+    expect(result.skippedLines).toBe(0)
+  })
+
+  it('respects custom maxSize parameter', async () => {
+    mockExistsSync.mockReturnValue(true)
+    mockStatSync.mockReturnValue({ size: 100 * 1024, mtimeMs: 5000 })
+    const { parseSessionFile } = await import('../electron/main/session-store-utils')
+    const result = parseSessionFile('/fake/path.jsonl', 50 * 1024 /* 50KB max */)
+    expect(result.skipped).toBe(true)
+    expect(result.reason).toBe('file_too_large')
+  })
+})

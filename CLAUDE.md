@@ -2,29 +2,30 @@
 
 ## 项目简介
 
-Claude Code GUI 桌面应用。
+**HappyCode — AI 编程桌面伴侣。**
 用 Electron + React + TypeScript 封装 `@anthropic-ai/claude-agent-sdk`，
-提供比 CLI 更好用的图形界面，完整复现所有 CLI 能力，目标商业化到企业安全合规场景。
+为 Claude Code 提供比 CLI 更好用的图形界面。
+定位：个人开发者工具，最好用的 Claude Code GUI。
+
+> 2026-05-22 战略聚焦：**B 方向 — AI 编程桌面伴侣**，停止企业合规方向探索。
+> 企业审计功能（Phase 0 CSV 导出、JSONL 解析）作为辅助功能保留，不再作为主推卖点。
 
 ---
 
 ## 执行顺序
 
-按顺序执行，每个任务完成后打 `[x]`，**不跳任务，不超出当前 phase 范围**：
+当前已实现 Phase 0（审计查看器）+ Phase 1（Chat UI）+ Phase 2（Hooks/Subagent 树）。
+按顺序执行，每个任务完成后打 `[x]`：
 
 | Phase | 内容 | 周期 | 目标 |
 |---|---|---|---|
-| 0 | 会话审计查看器（JSONL 解析 → CSV 导出） | Week 1-2 | 合规角度切入，先于所有竞品 |
-| 1 | Chat UI + 会话管理（原 Phase 0-1） | Week 3-6 | 开发者体验，社区增长 |
-| 2 | Hooks 可视化 + Subagent 树 | Week 7-14 | 高级开发者工具 |
-| 3 | 企业：SSO、集中配置、团队审计、自部署 | Week 15-24 | 商业化 |
+| ~~0~~ | ~~会话审计查看器~~ ✅ 已完成 | Week 1-2 | 合规审计（辅助功能） |
+| ~~1~~ | ~~Chat UI + 会话管理~~ ✅ 已完成 | Week 3-6 | 核心体验 |
+| ~~2~~ | ~~Hooks 可视化 + Subagent 树~~ ✅ 已完成 | Week 7-14 | 高级工具 |
+| 3 | **体验打磨**：IM 集成（微信/飞书）、性能优化、测试补全 | Week 15-20 | 留存增长 |
+| 4 | 社区增长：插件市场、开源社区运营、文档完善 | Week 21+ | 用户规模 |
 
-**当前应该执行：Phase 0 — 会话审计查看器**
-
-> Phase 0 规范见 `ARCHITECTURE.md § 0`。旧 `phase-0.md`（chat loop）已作废，不执行。
->
-> Phase 0 范围：解析 `~/.claude/projects/<encoded-cwd>/<session>.jsonl`，
-> 展示工具调用列表，导出 CSV。**不包含** Chat UI、Agent SDK 运行时、Hook Server。
+**当前应该执行：Phase 3 — 体验打磨**
 
 ---
 
@@ -52,12 +53,32 @@ Claude Code GUI 桌面应用。
 electron/
   main/
     index.ts            # 主进程入口
-    agent-manager.ts    # Agent SDK 核心封装 ← 最重要
-    agent-dag.ts        # Subagent DAG（Phase 2）
+    agent-manager.ts    # Agent SDK 核心封装
     session-store.ts    # SQLite + JSONL 读取
-    hook-server.ts      # Express localhost:37421（Phase 2）
-    config-manager.ts   # 读写 ~/.claude/ 配置文件
-    ipc-handlers.ts     # 所有 ipcMain.handle 注册
+    hook-server.ts      # Express localhost:37421
+    ipc-handlers.ts     # IPC 协调入口（委托到 ipc/）
+    ipc/                # IPC 领域模块
+      hook-handlers.ts      # hook:*
+      session-handlers.ts   # session:*, export:csv
+      agent-handlers.ts     # agent:*
+      config-handlers.ts    # config:*, settings:*
+      skills-handlers.ts    # skills:*, plugins:*
+      history-handlers.ts   # history:*
+      file-handlers.ts      # file:*, fs:*
+      misc-handlers.ts      # commands:*, system:open-url
+      system-handlers.ts    # app:*, computer-use:*, apps:*
+      git-handlers.ts       # git:*, fs:git-status
+      provider-handlers.ts  # providers:*
+      mcp-handlers.ts       # mcp:*, agents:*
+      auth-handlers.ts      # auth:*, dialog:*
+      export-handlers.ts    # export:pdf, export:markdown, preview:*
+    bridge-injector.ts  # Hook 桥接注入
+    skills-manager.ts   # Skills 管理
+    mcp-config.ts       # MCP 配置读写
+    git-service.ts      # Git 操作
+    provider-manager.ts # API Provider 管理
+    config-schemas.ts   # Zod 运行时校验 Schemas
+    logger.ts           # 结构化日志（stderr）
   preload/
     index.ts            # contextBridge 安全桥接层
   shared/
@@ -66,14 +87,20 @@ electron/
 src/
   components/
     chat/               # 对话相关组件
-    session/            # 会话列表、历史
-    agent-tree/         # Subagent 树（Phase 2）
-    hooks-panel/        # Hooks 可视化（Phase 2）
-    config/             # 配置编辑器
-  store/
-    session-store.ts    # Zustand store
+    sessions/           # 会话列表、历史
+    file-browser/       # 文件浏览
+    git/                # Git 面板
+    nav/                # NavRail, Sidebar, TabBar
+    widgets/            # Widget 渲染系统
+    skills/             # Skills 面板
+    settings/           # 设置面板
+    agent-tree/         # Subagent 树
+    hooks/              # Hooks 面板
+    ui/                 # UI 原语（shadcn + 自定义）
+  store/                # Zustand stores
   lib/
-    session-reader.ts   # JSONL 历史解析
+    event-bus.ts        # 类型安全事件总线（跨 store 通信）
+    utils.ts            # 共享工具函数
   App.tsx
 ```
 

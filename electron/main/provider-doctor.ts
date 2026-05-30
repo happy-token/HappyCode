@@ -130,6 +130,13 @@ async function runNetworkProbe(baseUrl: string): Promise<DiagProbe> {
 
 // ── API Probe ─────────────────────────────────────────────────────
 
+function hasNonLatinChars(s: string): boolean {
+  for (let i = 0; i < s.length; i++) {
+    if (s.charCodeAt(i) > 255) return true
+  }
+  return false
+}
+
 async function runApiProbe(provider: {
   baseUrl: string
   apiKey: string
@@ -145,6 +152,12 @@ async function runApiProbe(provider: {
 
   try {
     const base = provider.baseUrl.replace(/\/$/, '')
+
+    if (hasNonLatinChars(base) || hasNonLatinChars(provider.apiKey)) {
+      findings.push({ severity: 'error', message: 'API 请求失败', detail: 'Base URL 或 API Key 包含非 ASCII 字符，请检查输入' })
+      return { name: 'API 探测', status: 'error', findings, durationMs: Date.now() - start }
+    }
+
     const url = `${base}/v1/models`
     const headers: Record<string, string> = {}
 

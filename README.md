@@ -4,6 +4,8 @@ A desktop GUI for Claude Code built with Electron + React + TypeScript.
 
 Wraps the `@anthropic-ai/claude-agent-sdk` to give Claude Code a graphical interface — session audit viewer, chat UI, hooks panel, and more — targeting enterprise security and compliance use cases.
 
+> **Why HappyCode?** Codex Desktop 是闭源的。HappyCode 是目前唯一能看到源码的 AI Coding 桌面 GUI。详见 [Codex 对比分析](./docs/CODEX_COMPARISON.md)。
+
 ## Features
 
 ### Phase 0 — Session Audit Viewer (available now)

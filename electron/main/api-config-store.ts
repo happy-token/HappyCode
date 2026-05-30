@@ -3,9 +3,9 @@ import { readFileSync, writeFileSync, mkdirSync } from 'fs'
 import { join } from 'path'
 import type { ApiConfig, AgentSettings } from '../shared/types'
 
-const BELLA_SONNET_DEFAULT: ApiConfig = {
-  baseUrl: 'https://bella-openapi.ke.com',
-  authToken: 'ef2d373d-e493-4a29-8565-b8365014397b',
+const EMPTY_CONFIG: ApiConfig = {
+  baseUrl: '',
+  authToken: '',
 }
 
 interface StoredConfig {
@@ -23,13 +23,13 @@ function readStored(): StoredConfig {
     const parsed = JSON.parse(raw) as Partial<StoredConfig & ApiConfig>
     // Support old format (flat ApiConfig) and new format (nested)
     const apiConfig: ApiConfig = {
-      baseUrl: parsed.apiConfig?.baseUrl ?? (parsed as Partial<ApiConfig>).baseUrl ?? BELLA_SONNET_DEFAULT.baseUrl,
-      authToken: parsed.apiConfig?.authToken ?? (parsed as Partial<ApiConfig>).authToken ?? BELLA_SONNET_DEFAULT.authToken,
+      baseUrl: parsed.apiConfig?.baseUrl ?? (parsed as Partial<ApiConfig>).baseUrl ?? '',
+      authToken: parsed.apiConfig?.authToken ?? (parsed as Partial<ApiConfig>).authToken ?? '',
     }
     const agentSettings: AgentSettings = parsed.agentSettings ?? {}
     return { apiConfig, agentSettings }
   } catch {
-    return { apiConfig: { ...BELLA_SONNET_DEFAULT }, agentSettings: {} }
+    return { apiConfig: { ...EMPTY_CONFIG }, agentSettings: {} }
   }
 }
 
@@ -37,8 +37,8 @@ function writeStored(data: StoredConfig): void {
   try {
     mkdirSync(app.getPath('userData'), { recursive: true })
     writeFileSync(configPath(), JSON.stringify(data, null, 2), 'utf-8')
-  } catch {
-    // non-fatal
+  } catch (err: unknown) {
+    console.warn('[api-config-store] Failed to write config:', err instanceof Error ? err.message : String(err))
   }
 }
 

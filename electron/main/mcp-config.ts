@@ -2,6 +2,7 @@ import fs from 'fs'
 import path from 'path'
 import os from 'os'
 import type { McpServerConfig, McpScope } from '../shared/types'
+import { logger } from './logger'
 export type { McpScope }
 
 export interface McpServerRecord {
@@ -49,8 +50,10 @@ function readMcpServersFromFile(filePath: string): Record<string, McpServerConfi
         return mcpServers as Record<string, McpServerConfig>
       }
     }
-  } catch { /* ignore parse errors */ }
-  return null
+  } catch (err: unknown) {
+    logger.warn('mcp-config', 'Failed to parse MCP config file', err)
+    return null
+  }
 }
 
 /** Get list of enabled plugin directories from ~/.claude/settings.json */
@@ -87,7 +90,10 @@ function getEnabledPluginPaths(): Array<{ name: string; mcpJsonPath: string }> {
       }
     }
     return result
-  } catch { return [] }
+  } catch (err: unknown) {
+    logger.warn('mcp-config', 'Failed to scan enabled plugin paths', err)
+    return []
+  }
 }
 
 /** Read MCP servers from all scopes and merge them */
@@ -200,7 +206,9 @@ export function saveMcpServersToUserConfig(servers: Record<string, McpServerConf
   if (fs.existsSync(userPath)) {
     try {
       existing = JSON.parse(fs.readFileSync(userPath, 'utf-8')) as Record<string, unknown>
-    } catch { /* start fresh */ }
+    } catch (err: unknown) {
+      logger.warn('mcp-config', 'Failed to parse user config, starting fresh', err)
+    }
   }
 
   existing.mcpServers = servers
@@ -220,8 +228,9 @@ export function deleteMcpServerFromUserConfig(serverName: string): void {
       existing.mcpServers = mcpServers
       fs.writeFileSync(userPath, JSON.stringify(existing, null, 2), 'utf-8')
     }
-  } catch { /* ignore */ }
-}
+  } catch (err: unknown) {
+    logger.warn('mcp-config', 'Failed to delete MCP server from user config', err)
+  }
 
 /** Determine initial server status based on transport type */
 export async function getInitialServerStatus(servers: McpServerRecord[]): Promise<McpServerRecord[]> {

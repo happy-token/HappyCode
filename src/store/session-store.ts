@@ -11,6 +11,7 @@ import type {
 } from '../../electron/shared/types'
 import { useApiConfigStore } from './api-config-store'
 import { useTabStore, selectActiveTab } from './tab-store'
+import { bus } from '../lib/event-bus'
 
 interface ChatState {
   // Active session
@@ -371,6 +372,7 @@ export const useChatStore = create<ChatState>()(
     respondPermission: (allowed) => {
       const { sessionId, pendingPermission } = get()
       if (!sessionId || !pendingPermission) return
+      bus.emit('agent:permission-resolved', { sessionId, allowed })
       void window.electron.respondPermission({
         sessionId,
         reqId: pendingPermission.reqId,
@@ -384,6 +386,7 @@ export const useChatStore = create<ChatState>()(
     handlePermissionRequest: (req) =>
       set((s) => {
         s.pendingPermission = req
+        bus.emit('agent:permission-request', { sessionId: s.sessionId ?? '', toolName: req.toolName })
       }),
 
     handleAgentEvent: (sessionId, msg) => {
@@ -434,6 +437,15 @@ export const useChatStore = create<ChatState>()(
         s.status = 'done'
         if (isRealSessionId(s.sessionId)) {
           s.lastSessionId = s.sessionId
+          const doneMsg = [...s.messages].reverse().find((m) => m.type === 'done')
+          if (doneMsg && doneMsg.type === 'done') {
+            bus.emit('session:done', {
+              sessionId: s.sessionId,
+              inputTokens: doneMsg.inputTokens,
+              outputTokens: doneMsg.outputTokens,
+              costUsd: doneMsg.costUsd,
+            })
+          }
         }
       }),
 
@@ -441,6 +453,9 @@ export const useChatStore = create<ChatState>()(
       set((s) => {
         s.status = 'error'
         s.messages.push({ id: makeId(), type: 'error', text: error })
+        if (s.sessionId) {
+          bus.emit('session:error', { sessionId: s.sessionId, error })
+        }
       }),
   }))
 )

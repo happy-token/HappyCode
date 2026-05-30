@@ -1,5 +1,7 @@
 // 纯函数工具集，独立于 Electron/fs，方便 vitest 单元测试
 
+import fs from 'node:fs'
+
 export const MAX_JSONL_SIZE = 10 * 1024 * 1024 // 10MB
 
 // ── CWD 编码 ──────────────────────────────────────────────────
@@ -71,4 +73,39 @@ export function checkFileSizeLimit(
 ): { ok: true } | { ok: false; reason: 'file_too_large' } {
   if (sizeBytes < MAX_JSONL_SIZE) return { ok: true }
   return { ok: false, reason: 'file_too_large' }
+}
+
+// ── 统一 JSONL 文件读取/解析/去重 ──────────────────────────────
+// 消除 session-store.ts 中 readHistory / loadSessionMessages / listAllHistory 的重复代码
+export interface ParseSessionFileResult {
+  entries: Record<string, unknown>[]
+  skippedLines: number
+  skipped?: boolean
+  reason?: string
+  fileMtimeSec: number
+}
+
+export function parseSessionFile(filePath: string, maxSize?: number): ParseSessionFileResult {
+  if (!fs.existsSync(filePath)) {
+    return { entries: [], skippedLines: 0, fileMtimeSec: 0 }
+  }
+
+  const stat = fs.statSync(filePath)
+
+  const effectiveMax = maxSize ?? MAX_JSONL_SIZE
+  if (stat.size > effectiveMax) {
+    return { entries: [], skippedLines: 0, skipped: true, reason: 'file_too_large', fileMtimeSec: stat.mtimeMs / 1000 }
+  }
+
+  let raw: string
+  try {
+    raw = fs.readFileSync(filePath, 'utf-8')
+  } catch {
+    return { entries: [], skippedLines: 0, fileMtimeSec: stat.mtimeMs / 1000 }
+  }
+
+  const { entries, skippedLines } = parseJsonlLines(raw)
+  const deduplicated = deduplicateByUuid(entries)
+
+  return { entries: deduplicated, skippedLines, fileMtimeSec: stat.mtimeMs / 1000 }
 }
